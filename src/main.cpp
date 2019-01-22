@@ -1,5 +1,6 @@
-#include <iostream>
+#include "BIOS.hpp"
 
 int main() {
-    std::cout << "Pigii!!!" << std::endl;
+    BIOS bios = BIOS();
+    bios.loadBin("SCPH1001.BIN");
 }
