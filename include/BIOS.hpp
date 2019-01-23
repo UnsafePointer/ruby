@@ -11,4 +11,5 @@ public:
     ~BIOS();
 
     void loadBin(const std::string& path);
+    uint32_t readWord(uint32_t offset) const;
 };
