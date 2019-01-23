@@ -26,7 +26,9 @@
         "cinttypes": "cpp",
         "type_traits": "cpp",
         "typeinfo": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "optional": "cpp",
+        "utility": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe"
 }
