@@ -14,6 +14,10 @@ uint32_t CPU::readWord(uint32_t address) const {
     return interconnect.readWord(address);
 }
 
+void CPU::storeWord(uint32_t address, uint32_t value) const {
+    return interconnect.storeWord(address, value);
+}
+
 void CPU::executeNext() {
     uint32_t data = readWord(programCounter);
     Instruction instruction = Instruction(data);
@@ -38,6 +42,14 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationLoadUpperImmediate(instruction);
             break;
         }
+        case 0b001101: {
+            operationBitwiseOrImmediate(instruction);
+            break;
+        }
+        case 0b101011: {
+            operationStoreWord(instruction);
+            break;
+        }
     }
 }
 
@@ -57,4 +69,15 @@ void CPU::operationBitwiseOrImmediate(Instruction instruction) {
     uint32_t value = registerAtIndex(rs) | imm;
 
     setRegisterAtIndex(rt, value);
+}
+
+void CPU::operationStoreWord(Instruction instruction) const {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt();
+    uint32_t rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t value = registerAtIndex(rt);
+
+    storeWord(address, value);
 }
