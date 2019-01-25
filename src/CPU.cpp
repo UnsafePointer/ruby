@@ -48,3 +48,13 @@ void CPU::operationLoadUpperImmediate(Instruction instruction) {
     uint32_t value = imm << 16;
     setRegisterAtIndex(rt, value);
 }
+
+void CPU::operationBitwiseOrImmediate(Instruction instruction) {
+    uint32_t imm = instruction.imm();
+    uint32_t rt = instruction.rt();
+    uint32_t rs = instruction.rs();
+
+    uint32_t value = registerAtIndex(rs) | imm;
+
+    setRegisterAtIndex(rt, value);
+}
