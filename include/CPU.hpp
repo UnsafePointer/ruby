@@ -13,6 +13,7 @@ class CPU {
     void operationLoadUpperImmediate(Instruction instruction);
     void operationBitwiseOrImmediate(Instruction instruction);
     void operationStoreWord(Instruction instruction) const;
+    void operationShiftLeftLogical(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();

@@ -38,6 +38,14 @@ void CPU::setRegisterAtIndex(uint8_t index, uint32_t value) {
 
 void CPU::executeNextInstruction(Instruction instruction) {
     switch (instruction.funct()) {
+        case 0b000000: {
+            switch (instruction.subfunct()) {
+                case 0b000000: {
+                    operationShiftLeftLogical(instruction);
+                    break;
+                }
+            }
+        }
         case 0b001111: {
             operationLoadUpperImmediate(instruction);
             break;
@@ -80,4 +88,13 @@ void CPU::operationStoreWord(Instruction instruction) const {
     uint32_t value = registerAtIndex(rt);
 
     storeWord(address, value);
+}
+
+void CPU::operationShiftLeftLogical(Instruction instruction) {
+    uint32_t imm = instruction.shiftimm();
+    uint32_t rt = instruction.rt();
+    uint32_t rd = instruction.rd();
+
+    uint32_t value = registerAtIndex(rt) << imm;
+    setRegisterAtIndex(rd, value);
 }
