@@ -12,6 +12,10 @@ uint32_t Instruction::funct() const {
     return data >> 26;
 }
 
+uint32_t Instruction::subfunct() const {
+    return data & 0x3f;
+}
+
 uint32_t Instruction::rs() const {
     return (data >> 21) & 0x1f;
 }
@@ -31,4 +35,8 @@ uint32_t Instruction::imm() const {
 uint32_t Instruction::immSE() const {
     int16_t signedData = data & 0xFFFF;
     return (uint32_t)signedData;
+}
+
+uint32_t Instruction::shiftimm() const {
+    return (data >> 6) & 0x1F;
 }
