@@ -65,6 +65,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationStoreWord(instruction);
             break;
         }
+        case 0b01001: {
+            operationAddImmediateUnsigned(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.data << endl;
             exit(1);
@@ -108,4 +112,13 @@ void CPU::operationShiftLeftLogical(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rt) << imm;
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationAddImmediateUnsigned(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt();
+    uint32_t rs = instruction.rs();
+
+    uint32_t value = registerAtIndex(rs) + imm;
+    setRegisterAtIndex(rt, value);
 }
