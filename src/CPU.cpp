@@ -1,5 +1,8 @@
 #include "CPU.hpp"
 #include <algorithm>
+#include <iostream>
+
+using namespace std;
 
 CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), interconnect(interconnect) {
     std::fill_n(registers, 32, 0xDEADBEEF);
@@ -44,6 +47,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationShiftLeftLogical(instruction);
                     break;
                 }
+                default: {
+                    cout << "Unhandled instruction 0x" << hex << instruction.data << endl;
+                    exit(1);
+                }
             }
         }
         case 0b001111: {
@@ -57,6 +64,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
         case 0b101011: {
             operationStoreWord(instruction);
             break;
+        }
+        default: {
+            cout << "Unhandled instruction 0x" << hex << instruction.data << endl;
+            exit(1);
         }
     }
 }
