@@ -1,4 +1,5 @@
 #include "Instruction.hpp"
+#include "CPU.hpp"
 
 Instruction::Instruction(uint32_t data) : data(data) {
 
@@ -20,16 +21,16 @@ uint32_t Instruction::subfunct() const {
     return data & 0x3F;
 }
 
-uint32_t Instruction::rs() const {
-    return (data >> 21) & 0x1F;
+RegisterIndex Instruction::rs() const {
+    return RegisterIndex((data >> 21) & 0x1F);
 }
 
-uint32_t Instruction::rt() const {
-    return (data >> 16) & 0x1F;
+RegisterIndex Instruction::rt() const {
+    return RegisterIndex((data >> 16) & 0x1F);
 }
 
-uint32_t Instruction::rd() const {
-    return (data >> 11) & 0x1F;
+RegisterIndex Instruction::rd() const {
+    return RegisterIndex((data >> 11) & 0x1F);
 }
 
 uint32_t Instruction::imm() const {

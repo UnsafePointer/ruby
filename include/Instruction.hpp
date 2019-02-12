@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "RegisterIndex.hpp"
 
 /*
 Primary opcode field (Bit 26..31)
@@ -53,9 +54,9 @@ struct Instruction {
     uint32_t dat() const;
     uint32_t funct() const;
     uint32_t subfunct() const;
-    uint32_t rs() const;
-    uint32_t rt() const;
-    uint32_t rd() const;
+    RegisterIndex rs() const;
+    RegisterIndex rt() const;
+    RegisterIndex rd() const;
     uint32_t imm() const;
     uint32_t immSE() const;
     uint32_t shiftimm() const;

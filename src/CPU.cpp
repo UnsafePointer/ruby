@@ -29,12 +29,12 @@ void CPU::executeNextInstruction() {
     executeNextInstruction(instruction);
 }
 
-uint32_t CPU::registerAtIndex(uint8_t index) const {
-    return registers[index];
+uint32_t CPU::registerAtIndex(RegisterIndex index) const {
+    return registers[index.idx()];
 }
 
-void CPU::setRegisterAtIndex(uint8_t index, uint32_t value) {
-    registers[index] = value;
+void CPU::setRegisterAtIndex(RegisterIndex index, uint32_t value) {
+    registers[index.idx()] = value;
 
     // Make sure R0 is always 0
     registers[0] = 0;
@@ -87,7 +87,7 @@ void CPU::executeNextInstruction(Instruction instruction) {
 
 void CPU::operationLoadUpperImmediate(Instruction instruction) {
     uint32_t imm = instruction.imm();
-    uint32_t rt = instruction.rt();
+    RegisterIndex rt = instruction.rt();
 
     uint32_t value = imm << 16;
     setRegisterAtIndex(rt, value);
@@ -95,8 +95,8 @@ void CPU::operationLoadUpperImmediate(Instruction instruction) {
 
 void CPU::operationBitwiseOrImmediate(Instruction instruction) {
     uint32_t imm = instruction.imm();
-    uint32_t rt = instruction.rt();
-    uint32_t rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
 
     uint32_t value = registerAtIndex(rs) | imm;
 
@@ -105,8 +105,8 @@ void CPU::operationBitwiseOrImmediate(Instruction instruction) {
 
 void CPU::operationStoreWord(Instruction instruction) const {
     uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt();
-    uint32_t rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
     uint32_t value = registerAtIndex(rt);
@@ -116,8 +116,8 @@ void CPU::operationStoreWord(Instruction instruction) const {
 
 void CPU::operationShiftLeftLogical(Instruction instruction) {
     uint32_t imm = instruction.shiftimm();
-    uint32_t rt = instruction.rt();
-    uint32_t rd = instruction.rd();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rd = instruction.rd();
 
     uint32_t value = registerAtIndex(rt) << imm;
     setRegisterAtIndex(rd, value);
@@ -125,8 +125,8 @@ void CPU::operationShiftLeftLogical(Instruction instruction) {
 
 void CPU::operationAddImmediateUnsigned(Instruction instruction) {
     uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt();
-    uint32_t rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
 
     uint32_t value = registerAtIndex(rs) + imm;
     setRegisterAtIndex(rt, value);
@@ -138,9 +138,9 @@ void CPU::operationJump(Instruction instruction) {
 }
 
 void CPU::operationOr(Instruction instruction) {
-    uint32_t rd = instruction.rd();
-    uint32_t rs = instruction.rs();
-    uint32_t rt = instruction.rt();
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
 
     uint32_t value = registerAtIndex(rs) | registerAtIndex(rt);
     setRegisterAtIndex(rd, value);
