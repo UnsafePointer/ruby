@@ -48,10 +48,9 @@ Opcode/Parameter Encoding
 101xxx | rs   | rt   | <--immediate16bit--> | store rt,[rs+imm]
 */
 struct Instruction {
-    const uint32_t data;
-
     Instruction(uint32_t data);
     ~Instruction();
+    uint32_t dat() const;
     uint32_t funct() const;
     uint32_t subfunct() const;
     uint32_t rs() const;
@@ -60,4 +59,6 @@ struct Instruction {
     uint32_t imm() const;
     uint32_t immSE() const;
     uint32_t shiftimm() const;
+private:
+    uint32_t data;
 };

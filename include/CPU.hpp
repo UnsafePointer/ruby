@@ -4,6 +4,7 @@
 
 class CPU {
     uint32_t programCounter;
+    Instruction nextInstruction;
     uint32_t registers[32];
     const Interconnect &interconnect;
     void storeWord(uint32_t address, uint32_t value) const;
@@ -20,5 +21,5 @@ public:
     ~CPU();
 
     uint32_t readWord(uint32_t address) const;
-    void executeNext();
+    void executeNextInstruction();
 };

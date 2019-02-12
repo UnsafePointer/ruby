@@ -8,6 +8,6 @@ int main() {
     Interconnect interconnect = Interconnect(bios);
     CPU cpu = CPU(interconnect);
     while (true) {
-        cpu.executeNext();
+        cpu.executeNextInstruction();
     }
 }

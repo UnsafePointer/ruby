@@ -8,6 +8,10 @@ Instruction::~Instruction() {
 
 }
 
+uint32_t Instruction::dat() const {
+    return data;
+}
+
 uint32_t Instruction::funct() const {
     return data >> 26;
 }

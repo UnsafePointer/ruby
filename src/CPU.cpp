@@ -4,7 +4,7 @@
 
 using namespace std;
 
-CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), interconnect(interconnect) {
+CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), interconnect(interconnect) {
     std::fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
 }
@@ -21,9 +21,10 @@ void CPU::storeWord(uint32_t address, uint32_t value) const {
     return interconnect.storeWord(address, value);
 }
 
-void CPU::executeNext() {
+void CPU::executeNextInstruction() {
+    Instruction instruction = nextInstruction;
     uint32_t data = readWord(programCounter);
-    Instruction instruction = Instruction(data);
+    nextInstruction = Instruction(data);
     programCounter+=4;
     executeNextInstruction(instruction);
 }
@@ -48,7 +49,7 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     break;
                 }
                 default: {
-                    cout << "Unhandled instruction 0x" << hex << instruction.data << endl;
+                    cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
                 }
             }
@@ -70,7 +71,7 @@ void CPU::executeNextInstruction(Instruction instruction) {
             break;
         }
         default: {
-            cout << "Unhandled instruction 0x" << hex << instruction.data << endl;
+            cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
         }
     }
