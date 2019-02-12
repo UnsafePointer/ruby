@@ -48,6 +48,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationShiftLeftLogical(instruction);
                     break;
                 }
+                case 0b100101: {
+                    operationOr(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -131,4 +135,13 @@ void CPU::operationAddImmediateUnsigned(Instruction instruction) {
 void CPU::operationJump(Instruction instruction) {
     uint32_t imm = instruction.immjump();
     programCounter = (programCounter & 0xF0000000) | (imm << 2);
+}
+
+void CPU::operationOr(Instruction instruction) {
+    uint32_t rd = instruction.rd();
+    uint32_t rs = instruction.rs();
+    uint32_t rt = instruction.rt();
+
+    uint32_t value = registerAtIndex(rs) | registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
 }

@@ -17,6 +17,7 @@ class CPU {
     void operationShiftLeftLogical(Instruction instruction);
     void operationAddImmediateUnsigned(Instruction instruction);
     void operationJump(Instruction instruction);
+    void operationOr(Instruction Instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();
