@@ -44,3 +44,7 @@ uint32_t Instruction::immSE() const {
 uint32_t Instruction::shiftimm() const {
     return (data >> 6) & 0x1F;
 }
+
+uint32_t Instruction::immjump() const {
+    return data & 0x3FFFFFF;
+}

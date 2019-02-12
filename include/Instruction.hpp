@@ -59,6 +59,7 @@ struct Instruction {
     uint32_t imm() const;
     uint32_t immSE() const;
     uint32_t shiftimm() const;
+    uint32_t immjump() const;
 private:
     uint32_t data;
 };

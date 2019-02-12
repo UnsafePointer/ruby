@@ -70,6 +70,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationAddImmediateUnsigned(instruction);
             break;
         }
+        case 0b000010: {
+            operationJump(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -122,4 +126,9 @@ void CPU::operationAddImmediateUnsigned(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs) + imm;
     setRegisterAtIndex(rt, value);
+}
+
+void CPU::operationJump(Instruction instruction) {
+    uint32_t imm = instruction.immjump();
+    programCounter = (programCounter & 0xF0000000) | (imm << 2);
 }
