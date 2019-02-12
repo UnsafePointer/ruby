@@ -7,6 +7,7 @@ using namespace std;
 const Range biosRange = Range(0xbfc00000, 512 * 1024);
 const Range memoryControlRange = Range(0x1f801000, 36);
 const Range ramSizeRange = Range(0x1f801060, 4);
+const Range cacheControlRange = Range(0xfffe0130, 4);
 
 Interconnect::Interconnect(BIOS &bios) : bios(bios) {
 }
@@ -57,6 +58,11 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     offset = ramSizeRange.contains(address);
     if (offset) {
         cout << "Unhandled RAM Control write at: 0x" << hex << address << endl;
+        return;
+    }
+    offset = cacheControlRange.contains(address);
+    if (offset) {
+        cout << "Unhandled Cache Control write at: 0x" << hex << address << endl;
         return;
     }
     cout << "Unhandled write at: 0x" << hex << address << endl;
