@@ -13,6 +13,7 @@ class CPU {
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
     void executeNextInstruction(Instruction instruction);
+    void branch(uint32_t offset);
     void operationLoadUpperImmediate(Instruction instruction);
     void operationBitwiseOrImmediate(Instruction instruction);
     void operationStoreWord(Instruction instruction) const;
@@ -22,6 +23,7 @@ class CPU {
     void operationOr(Instruction Instruction);
     void operationCoprocessor0(Instruction instruction);
     void operationMoveToCoprocessor0(Instruction instruction);
+    void operationBranchIfNotEqual(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();

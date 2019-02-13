@@ -86,11 +86,24 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationCoprocessor0(instruction);
             break;
         }
+        case 0b000101: {
+            operationBranchIfNotEqual(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
         }
     }
+}
+
+void CPU::branch(uint32_t offset) {
+    // Align to 32 bits
+    offset <<= 2;
+    programCounter += offset;
+    // PC is positioned already at the next instruction
+    // we need to take in consideration that
+    programCounter -= 4;
 }
 
 void CPU::operationCoprocessor0(Instruction instruction) {
@@ -184,4 +197,14 @@ void CPU::operationOr(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs) | registerAtIndex(rt);
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationBranchIfNotEqual(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    if (registerAtIndex(rs) != registerAtIndex(rt)) {
+        branch(imm);
+    }
 }
