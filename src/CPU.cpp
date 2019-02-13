@@ -90,6 +90,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationBranchIfNotEqual(instruction);
             break;
         }
+        case 0b001000: {
+            operationAddImmediate(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -206,5 +210,20 @@ void CPU::operationBranchIfNotEqual(Instruction instruction) {
 
     if (registerAtIndex(rs) != registerAtIndex(rt)) {
         branch(imm);
+    }
+}
+
+void CPU::operationAddImmediate(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t value = registerAtIndex(rs);
+    uint32_t result = value + imm;
+    if (result < value) {
+        cout << "Unhandled ADDI overflow" << endl;
+        exit(1);
+    } else {
+        setRegisterAtIndex(rt, result);
     }
 }

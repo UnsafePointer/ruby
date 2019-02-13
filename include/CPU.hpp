@@ -24,6 +24,7 @@ class CPU {
     void operationCoprocessor0(Instruction instruction);
     void operationMoveToCoprocessor0(Instruction instruction);
     void operationBranchIfNotEqual(Instruction instruction);
+    void operationAddImmediate(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();
