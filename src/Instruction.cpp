@@ -49,3 +49,7 @@ uint32_t Instruction::shiftimm() const {
 uint32_t Instruction::immjump() const {
     return data & 0x3FFFFFF;
 }
+
+uint32_t Instruction::copcode() const {
+    return (data >> 21) & 0x1F;
+}

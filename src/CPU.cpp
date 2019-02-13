@@ -4,7 +4,7 @@
 
 using namespace std;
 
-CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), interconnect(interconnect) {
+CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), statusRegister(0), interconnect(interconnect) {
     std::fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
 }
@@ -78,8 +78,44 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationJump(instruction);
             break;
         }
+        case 0b010000: {
+            operationCoprocessor0(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
+            exit(1);
+        }
+    }
+}
+
+void CPU::operationCoprocessor0(Instruction instruction) {
+    switch (instruction.copcode()) {
+        case 0b00100: {
+            operationMoveToCoprocessor0(instruction);
+            break;
+        }
+        default: {
+            cout << "Unhandled coprocessor0 instruction 0x" << hex << instruction.dat() << endl;
+            exit(1);
+        }
+    }
+}
+
+
+void CPU::operationMoveToCoprocessor0(Instruction instruction) {
+    RegisterIndex cpuRegisterIndex = instruction.rt();
+    RegisterIndex copRegisterIndex = instruction.rd();
+
+    uint32_t value = registerAtIndex(cpuRegisterIndex);
+
+    switch (copRegisterIndex.idx()) {
+        case 12: {
+            statusRegister = value;
+            break;
+        }
+        default: {
+            cout << "Unhandled MTC coprocessor0 index " << copRegisterIndex.idx() << endl;
             exit(1);
         }
     }

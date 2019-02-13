@@ -7,6 +7,7 @@ class CPU {
     uint32_t programCounter;
     Instruction nextInstruction;
     uint32_t registers[32];
+    uint32_t statusRegister;
     const Interconnect &interconnect;
     void storeWord(uint32_t address, uint32_t value) const;
     uint32_t registerAtIndex(RegisterIndex index) const;
@@ -19,6 +20,8 @@ class CPU {
     void operationAddImmediateUnsigned(Instruction instruction);
     void operationJump(Instruction instruction);
     void operationOr(Instruction Instruction);
+    void operationCoprocessor0(Instruction instruction);
+    void operationMoveToCoprocessor0(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();

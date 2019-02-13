@@ -47,6 +47,26 @@ Opcode/Parameter Encoding
 001111 | N/A  | rt   | <--immediate16bit--> | lui-imm
 100xxx | rs   | rt   | <--immediate16bit--> | load rt,[rs+imm]
 101xxx | rs   | rt   | <--immediate16bit--> | store rt,[rs+imm]
+x1xxxx | <------coprocessor specific------> | coprocessor (see below)
+
+Coprocessor Opcode/Parameter Encoding
+31..26 |25..21|20..16|15..11|10..6 |  5..0  |
+ 6bit  | 5bit | 5bit | 5bit | 5bit |  6bit  |
+-------+------+------+------+------+--------+------------
+0100nn |0|0000| rt   | rd   | N/A  | 000000 | MFCn rt,rd_dat  ;rt = dat
+0100nn |0|0010| rt   | rd   | N/A  | 000000 | CFCn rt,rd_cnt  ;rt = cnt
+0100nn |0|0100| rt   | rd   | N/A  | 000000 | MTCn rt,rd_dat  ;dat = rt
+0100nn |0|0110| rt   | rd   | N/A  | 000000 | CTCn rt,rd_cnt  ;cnt = rt
+0100nn |0|1000|00000 | <--immediate16bit--> | BCnF target ;jump if false
+0100nn |0|1000|00001 | <--immediate16bit--> | BCnT target ;jump if true
+0100nn |1| <--------immediate25bit--------> | COPn imm25
+010000 |1|0000| N/A  | N/A  | N/A  | 000001 | COP0 01h  ;=TLBR
+010000 |1|0000| N/A  | N/A  | N/A  | 000010 | COP0 02h  ;=TLBWI
+010000 |1|0000| N/A  | N/A  | N/A  | 000110 | COP0 06h  ;=TLBWR
+010000 |1|0000| N/A  | N/A  | N/A  | 001000 | COP0 08h  ;=TLBP
+010000 |1|0000| N/A  | N/A  | N/A  | 010000 | COP0 10h  ;=RFE
+1100nn | rs   | rt   | <--immediate16bit--> | LWCn rt_dat,[rs+imm]
+1110nn | rs   | rt   | <--immediate16bit--> | SWCn rt_dat,[rs+imm]
 */
 struct Instruction {
     Instruction(uint32_t data);
@@ -61,6 +81,7 @@ struct Instruction {
     uint32_t immSE() const;
     uint32_t shiftimm() const;
     uint32_t immjump() const;
+    uint32_t copcode() const;
 private:
     uint32_t data;
 };
