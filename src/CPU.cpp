@@ -18,6 +18,10 @@ uint32_t CPU::readWord(uint32_t address) const {
 }
 
 void CPU::storeWord(uint32_t address, uint32_t value) const {
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
     return interconnect.storeWord(address, value);
 }
 
