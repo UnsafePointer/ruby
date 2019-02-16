@@ -49,6 +49,7 @@ class CPU {
     const Interconnect &interconnect;
     void storeWord(uint32_t address, uint32_t value) const;
     void storeHalfWord(uint32_t address, uint16_t value) const;
+    void storeByte(uint32_t address, uint8_t value) const;
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
     void executeNextInstruction(Instruction instruction);
@@ -70,6 +71,7 @@ class CPU {
     void operationStoreHalfWord(Instruction instruction) const;
     void operationJumpAndLink(Instruction instruction);
     void operationBitwiseAndImmediate(Instruction instruction);
+    void operationStoreByte(Instruction instruction) const;
 public:
     CPU(Interconnect &interconnect);
     ~CPU();

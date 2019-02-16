@@ -20,6 +20,7 @@ const Range memoryControlRange = Range(0x1f801000, 36);
 const Range ramSizeRange = Range(0x1f801060, 4);
 const Range cacheControlRange = Range(0xfffe0130, 4);
 const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
+const Range expansion2Range = Range(0x1f802000, 66);
 
 Interconnect::Interconnect(BIOS &bios, RAM &ram) : bios(bios), ram(ram) {
 }
@@ -110,5 +111,17 @@ void Interconnect::storeHalfWord(uint32_t address, uint16_t value) const {
         return;
     }
     cout << "Unhandled half write at: 0x" << hex << address << endl;
+    exit(1);
+}
+
+void Interconnect::storeByte(uint32_t address, uint8_t value) const {
+    uint32_t absoluteAddress = maskRegion(address);
+    optional<uint32_t> offset;
+    offset = expansion2Range.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Expansion 2 write at offset: 0x" << hex << *offset << endl;
+        return;
+    }
+    cout << "Unhandled byte write at: 0x" << hex << address << endl;
     exit(1);
 }
