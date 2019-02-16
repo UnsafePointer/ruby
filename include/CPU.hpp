@@ -60,7 +60,7 @@ class CPU {
     void operationShiftLeftLogical(Instruction instruction);
     void operationAddImmediateUnsigned(Instruction instruction);
     void operationJump(Instruction instruction);
-    void operationOr(Instruction Instruction);
+    void operationBitwiseOr(Instruction Instruction);
     void operationCoprocessor0(Instruction instruction);
     void operationMoveToCoprocessor0(Instruction instruction);
     void operationBranchIfNotEqual(Instruction instruction);

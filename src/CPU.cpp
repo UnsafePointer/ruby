@@ -83,7 +83,7 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     break;
                 }
                 case 0b100101: {
-                    operationOr(instruction);
+                    operationBitwiseOr(instruction);
                     break;
                 }
                 case 0b101011: {
@@ -287,7 +287,7 @@ void CPU::operationJump(Instruction instruction) {
     programCounter = (programCounter & 0xF0000000) | (imm << 2);
 }
 
-void CPU::operationOr(Instruction instruction) {
+void CPU::operationBitwiseOr(Instruction instruction) {
     RegisterIndex rd = instruction.rd();
     RegisterIndex rs = instruction.rs();
     RegisterIndex rt = instruction.rt();
