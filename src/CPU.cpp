@@ -90,6 +90,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationAddUnsigned(instruction);
                     break;
                 }
+                case 0b001000: {
+                    operationJumpRegister(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -376,4 +380,10 @@ void CPU::operationStoreByte(Instruction instruction) const {
 
     uint32_t value = registerAtIndex(rt);
     storeByte(address, value);
+}
+
+
+void CPU::operationJumpRegister(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+    programCounter = registerAtIndex(rs);
 }

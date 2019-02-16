@@ -72,6 +72,7 @@ class CPU {
     void operationJumpAndLink(Instruction instruction);
     void operationBitwiseAndImmediate(Instruction instruction);
     void operationStoreByte(Instruction instruction) const;
+    void operationJumpRegister(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();
