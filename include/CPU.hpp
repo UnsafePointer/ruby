@@ -7,6 +7,8 @@ class CPU {
     uint32_t programCounter;
     Instruction nextInstruction;
     uint32_t registers[32];
+    uint32_t outputRegisters[32];
+    std::pair<RegisterIndex, uint32_t> load;
     uint32_t statusRegister;
     const Interconnect &interconnect;
     void storeWord(uint32_t address, uint32_t value) const;
@@ -25,6 +27,7 @@ class CPU {
     void operationMoveToCoprocessor0(Instruction instruction);
     void operationBranchIfNotEqual(Instruction instruction);
     void operationAddImmediate(Instruction instruction);
+    void operationLoadWord(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();

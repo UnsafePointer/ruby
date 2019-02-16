@@ -1,12 +1,14 @@
 #include "CPU.hpp"
 #include <algorithm>
 #include <iostream>
+#include <tuple>
 
 using namespace std;
 
-CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), statusRegister(0), interconnect(interconnect) {
+CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), load({RegisterIndex(), 0}), statusRegister(0), interconnect(interconnect) {
     std::fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
+    copy(begin(registers), end(registers), begin(outputRegisters));
 }
 
 CPU::~CPU() {
@@ -30,7 +32,15 @@ void CPU::executeNextInstruction() {
     uint32_t data = readWord(programCounter);
     nextInstruction = Instruction(data);
     programCounter+=4;
+
+    RegisterIndex loadRegisterIndex;
+    uint32_t value;
+    tie(loadRegisterIndex, value) = load;
+    setRegisterAtIndex(loadRegisterIndex, value);
+    load = {RegisterIndex(), 0};
+
     executeNextInstruction(instruction);
+    copy(begin(outputRegisters), end(outputRegisters), begin(registers));
 }
 
 uint32_t CPU::registerAtIndex(RegisterIndex index) const {
@@ -38,10 +48,10 @@ uint32_t CPU::registerAtIndex(RegisterIndex index) const {
 }
 
 void CPU::setRegisterAtIndex(RegisterIndex index, uint32_t value) {
-    registers[index.idx()] = value;
+    outputRegisters[index.idx()] = value;
 
     // Make sure R0 is always 0
-    registers[0] = 0;
+    outputRegisters[0] = 0;
 }
 
 void CPU::executeNextInstruction(Instruction instruction) {
@@ -92,6 +102,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
         }
         case 0b001000: {
             operationAddImmediate(instruction);
+            break;
+        }
+        case 0b100011: {
+            operationLoadWord(instruction);
             break;
         }
         default: {
@@ -226,4 +240,18 @@ void CPU::operationAddImmediate(Instruction instruction) {
     } else {
         setRegisterAtIndex(rt, result);
     }
+}
+
+void CPU::operationLoadWord(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
+    uint32_t value = readWord(address);
+    load = {rt, value};
 }
