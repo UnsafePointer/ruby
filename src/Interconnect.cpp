@@ -21,6 +21,7 @@ const Range ramSizeRange = Range(0x1f801060, 4);
 const Range cacheControlRange = Range(0xfffe0130, 4);
 const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
 const Range expansion2Range = Range(0x1f802000, 66);
+const Range expansion1Range = Range(0x1f000000, 512 * 1024);
 
 Interconnect::Interconnect(BIOS &bios, RAM &ram) : bios(bios), ram(ram) {
 }
@@ -54,9 +55,15 @@ uint32_t Interconnect::readWord(uint32_t address) const {
 uint8_t Interconnect::readByte(uint32_t address) const {
     uint32_t absoluteAddress = maskRegion(address);
 
-    optional<uint32_t> offset = biosRange.contains(absoluteAddress);
+    optional<uint32_t> offset;
+    offset = biosRange.contains(absoluteAddress);
     if (offset) {
         return bios.readByte(*offset);
+    }
+    offset = expansion1Range.contains(absoluteAddress);
+    if (offset) {
+        // No expansion
+        return 0xFF;
     }
 
     cout << "Unhandled read byte at: 0x" << hex << address << endl;
