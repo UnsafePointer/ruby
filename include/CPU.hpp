@@ -69,6 +69,7 @@ class CPU {
     void operationAddUnsigned(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction) const;
     void operationJumpAndLink(Instruction instruction);
+    void operationBitwiseAndImmediate(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();

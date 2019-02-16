@@ -132,6 +132,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationJumpAndLink(instruction);
             break;
         }
+        case 0b001100: {
+            operationBitwiseAndImmediate(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -335,4 +339,14 @@ void CPU::operationJumpAndLink(Instruction instruction) {
     uint32_t returnAddress = programCounter;
     setRegisterAtIndex(RegisterIndex(31), returnAddress);
     operationJump(instruction);
+}
+
+void CPU::operationBitwiseAndImmediate(Instruction instruction) {
+    uint32_t imm = instruction.imm();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t value = registerAtIndex(rs) & imm;
+
+    setRegisterAtIndex(rt, value);
 }
