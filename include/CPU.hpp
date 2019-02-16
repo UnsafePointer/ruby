@@ -74,6 +74,7 @@ class CPU {
     void operationStoreByte(Instruction instruction) const;
     void operationJumpRegister(Instruction instruction);
     void operationLoadByte(Instruction instruction);
+    void operationBranchIfEqual(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;
