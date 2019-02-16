@@ -33,3 +33,11 @@ void RAM::storeWord(uint32_t offset, uint32_t value) {
     data[offset + 2] = b2;
     data[offset + 3] = b3;
 }
+
+uint8_t RAM::readByte(uint32_t offset) const {
+    return data[offset];
+}
+
+void RAM::storeByte(uint32_t offset, uint8_t value) {
+    data[offset] = value;
+}

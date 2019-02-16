@@ -65,6 +65,10 @@ uint8_t Interconnect::readByte(uint32_t address) const {
         // No expansion
         return 0xFF;
     }
+    offset = ramRange.contains(absoluteAddress);
+    if (offset) {
+        return ram.readByte(*offset);
+    }
 
     cout << "Unhandled read byte at: 0x" << hex << address << endl;
     exit(1);
@@ -140,6 +144,10 @@ void Interconnect::storeByte(uint32_t address, uint8_t value) const {
     if (offset) {
         cout << "Unhandled Expansion 2 write at offset: 0x" << hex << *offset << endl;
         return;
+    }
+    offset = ramRange.contains(absoluteAddress);
+    if (offset) {
+        return ram.storeByte(*offset, value);
     }
     cout << "Unhandled byte write at: 0x" << hex << address << endl;
     exit(1);
