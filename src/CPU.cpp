@@ -6,7 +6,7 @@
 using namespace std;
 
 CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), load({RegisterIndex(), 0}), statusRegister(0), interconnect(interconnect) {
-    std::fill_n(registers, 32, 0xDEADBEEF);
+    fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
     copy(begin(registers), end(registers), begin(outputRegisters));
 }
