@@ -66,6 +66,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationOr(instruction);
                     break;
                 }
+                case 0b101011: {
+                    operationSetLessThanUnsigned(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -273,4 +277,13 @@ void CPU::operationLoadWord(Instruction instruction) {
     }
     uint32_t value = readWord(address);
     load = {rt, value};
+}
+
+void CPU::operationSetLessThanUnsigned(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint32_t value = registerAtIndex(rs) < registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
 }

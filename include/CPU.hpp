@@ -64,6 +64,7 @@ class CPU {
     void operationBranchIfNotEqual(Instruction instruction);
     void operationAddImmediate(Instruction instruction);
     void operationLoadWord(Instruction instruction);
+    void operationSetLessThanUnsigned(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();
