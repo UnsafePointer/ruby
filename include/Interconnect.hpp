@@ -19,6 +19,7 @@ See IOMap.md for I/O register mapping
 class Interconnect {
     const BIOS &bios;
     RAM &ram;
+    uint32_t maskRegion(uint32_t address) const;
 public:
     Interconnect(BIOS &bios, RAM &ram);
     ~Interconnect();
