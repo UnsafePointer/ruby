@@ -65,6 +65,7 @@ class CPU {
     void operationAddImmediate(Instruction instruction);
     void operationLoadWord(Instruction instruction);
     void operationSetLessThanUnsigned(Instruction instruction);
+    void operationAddUnsigned(Instruction instruction);
 public:
     CPU(Interconnect &interconnect);
     ~CPU();
