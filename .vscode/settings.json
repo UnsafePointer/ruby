@@ -28,7 +28,15 @@
         "typeinfo": "cpp",
         "string": "cpp",
         "optional": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "array": "cpp",
+        "bitset": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "sstream": "cpp",
+        "tuple": "cpp",
+        "algorithm": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe"
 }
