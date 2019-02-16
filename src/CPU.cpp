@@ -336,6 +336,7 @@ void CPU::operationAddUnsigned(Instruction instruction) {
     uint32_t value = registerAtIndex(rs) + registerAtIndex(rt);
     setRegisterAtIndex(rd, value);
 }
+
 void CPU::operationStoreHalfWord(Instruction instruction) const {
     uint32_t imm = instruction.immSE();
     RegisterIndex rt = instruction.rt();
@@ -381,7 +382,6 @@ void CPU::operationStoreByte(Instruction instruction) const {
     uint32_t value = registerAtIndex(rt);
     storeByte(address, value);
 }
-
 
 void CPU::operationJumpRegister(Instruction instruction) {
     RegisterIndex rs = instruction.rs();

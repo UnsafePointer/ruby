@@ -73,10 +73,11 @@ class CPU {
     void operationBitwiseAndImmediate(Instruction instruction);
     void operationStoreByte(Instruction instruction) const;
     void operationJumpRegister(Instruction instruction);
+
+    uint32_t readWord(uint32_t address) const;
 public:
     CPU(Interconnect &interconnect);
     ~CPU();
 
-    uint32_t readWord(uint32_t address) const;
     void executeNextInstruction();
 };
