@@ -27,6 +27,14 @@ void CPU::storeWord(uint32_t address, uint32_t value) const {
     return interconnect.storeWord(address, value);
 }
 
+void CPU::storeHalfWord(uint32_t address, uint16_t value) const {
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
+    return interconnect.storeHalfWord(address, value);
+}
+
 void CPU::executeNextInstruction() {
     Instruction instruction = nextInstruction;
     uint32_t data = readWord(programCounter);
@@ -114,6 +122,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
         }
         case 0b100011: {
             operationLoadWord(instruction);
+            break;
+        }
+        case 0b101001: {
+            operationStoreHalfWord(instruction);
             break;
         }
         default: {
@@ -299,4 +311,18 @@ void CPU::operationAddUnsigned(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs) + registerAtIndex(rt);
     setRegisterAtIndex(rd, value);
+}
+void CPU::operationStoreHalfWord(Instruction instruction) const {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
+
+    uint32_t value = registerAtIndex(rt);
+    storeHalfWord(address, value);
 }

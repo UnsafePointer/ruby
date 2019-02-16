@@ -26,4 +26,5 @@ public:
 
     uint32_t readWord(uint32_t address) const;
     void storeWord(uint32_t address, uint32_t value) const;
+    void storeHalfWord(uint32_t address, uint16_t value) const;
 };

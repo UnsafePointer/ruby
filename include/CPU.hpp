@@ -48,6 +48,7 @@ class CPU {
     uint32_t statusRegister;
     const Interconnect &interconnect;
     void storeWord(uint32_t address, uint32_t value) const;
+    void storeHalfWord(uint32_t address, uint16_t value) const;
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
     void executeNextInstruction(Instruction instruction);
@@ -66,6 +67,7 @@ class CPU {
     void operationLoadWord(Instruction instruction);
     void operationSetLessThanUnsigned(Instruction instruction);
     void operationAddUnsigned(Instruction instruction);
+    void operationStoreHalfWord(Instruction instruction) const;
 public:
     CPU(Interconnect &interconnect);
     ~CPU();
