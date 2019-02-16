@@ -128,6 +128,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationStoreHalfWord(instruction);
             break;
         }
+        case 0b000011: {
+            operationJumpAndLink(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -325,4 +329,10 @@ void CPU::operationStoreHalfWord(Instruction instruction) const {
 
     uint32_t value = registerAtIndex(rt);
     storeHalfWord(address, value);
+}
+
+void CPU::operationJumpAndLink(Instruction instruction) {
+    uint32_t returnAddress = programCounter;
+    setRegisterAtIndex(RegisterIndex(31), returnAddress);
+    operationJump(instruction);
 }
