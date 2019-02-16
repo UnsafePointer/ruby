@@ -32,3 +32,8 @@ uint32_t BIOS::readWord(uint32_t offset) const {
     b3 <<= 24;
     return b0 | b1 | b2 | b3;
 }
+
+
+uint8_t BIOS::readByte(uint32_t offset) const {
+    return data[offset];
+}

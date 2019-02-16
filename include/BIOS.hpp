@@ -12,4 +12,5 @@ public:
 
     void loadBin(const std::string& path);
     uint32_t readWord(uint32_t offset) const;
+    uint8_t readByte(uint32_t offset) const;
 };

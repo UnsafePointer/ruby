@@ -19,6 +19,10 @@ uint32_t CPU::readWord(uint32_t address) const {
     return interconnect.readWord(address);
 }
 
+uint8_t CPU::readByte(uint32_t address) const {
+    return interconnect.readByte(address);
+}
+
 void CPU::storeWord(uint32_t address, uint32_t value) const {
     if ((statusRegister & 0x10000) != 0) {
         cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
@@ -150,6 +154,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
         }
         case 0b101000: {
             operationStoreByte(instruction);
+            break;
+        }
+        case 0b100000: {
+            operationLoadByte(instruction);
             break;
         }
         default: {
@@ -386,4 +394,14 @@ void CPU::operationStoreByte(Instruction instruction) const {
 void CPU::operationJumpRegister(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
     programCounter = registerAtIndex(rs);
+}
+
+void CPU::operationLoadByte(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t value = (int8_t)readByte(address);
+    load = {rt, value};
 }

@@ -51,6 +51,18 @@ uint32_t Interconnect::readWord(uint32_t address) const {
     exit(1);
 }
 
+uint8_t Interconnect::readByte(uint32_t address) const {
+    uint32_t absoluteAddress = maskRegion(address);
+
+    optional<uint32_t> offset = biosRange.contains(absoluteAddress);
+    if (offset) {
+        return bios.readByte(*offset);
+    }
+
+    cout << "Unhandled read byte at: 0x" << hex << address << endl;
+    exit(1);
+}
+
 void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     if (address % 4 != 0) {
         exit(1);
