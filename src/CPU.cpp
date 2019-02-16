@@ -186,6 +186,10 @@ void CPU::operationCoprocessor0(Instruction instruction) {
             operationMoveToCoprocessor0(instruction);
             break;
         }
+        case 0x00000: {
+            operationMoveFromCoprocessor0(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled coprocessor0 instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -418,4 +422,27 @@ void CPU::operationBranchIfEqual(Instruction instruction) {
     if (registerAtIndex(rs) == registerAtIndex(rt)) {
         branch(imm);
     }
+}
+
+void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
+    RegisterIndex cpuRegisterIndex = instruction.rt();
+    RegisterIndex copRegisterIndex = instruction.rd();
+
+    uint32_t value;
+    switch (copRegisterIndex.idx()) {
+        case 12: {
+            value = statusRegister;
+            break;
+        }
+        case 13: {
+            cout << "Unhandled MFC0 at CAUSE register" << endl;
+            exit(1);
+            break;
+        }
+        default: {
+            cout << "Unhandled MFC0 at index " << copRegisterIndex.idx() << endl;
+            exit(1);
+        }
+    }
+    load = {cpuRegisterIndex, value};
 }
