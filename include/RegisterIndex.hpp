@@ -2,6 +2,7 @@
 #include <cstdint>
 
 struct RegisterIndex {
+    RegisterIndex();
     RegisterIndex(uint8_t index);
     ~RegisterIndex();
     uint8_t idx();
