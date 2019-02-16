@@ -145,12 +145,31 @@ void CPU::operationMoveToCoprocessor0(Instruction instruction) {
     uint32_t value = registerAtIndex(cpuRegisterIndex);
 
     switch (copRegisterIndex.idx()) {
+        case 3:
+        case 5:
+        case 6:
+        case 7:
+        case 9:
+        case 11: {
+            if (value != 0) {
+                cout << "Unhandled MTC0 at index " << copRegisterIndex.idx() << endl;
+                exit(1);
+            }
+            break;
+        }
         case 12: {
             statusRegister = value;
             break;
         }
+        case 13: {
+            if (value != 0) {
+                cout << "Unhandled MTC0 at CAUSE register" << endl;
+                exit(1);
+            }
+            break;
+        }
         default: {
-            cout << "Unhandled MTC coprocessor0 index " << copRegisterIndex.idx() << endl;
+            cout << "Unhandled MTC0 at index " << copRegisterIndex.idx() << endl;
             exit(1);
         }
     }
