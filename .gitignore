@@ -69,3 +69,6 @@ SCPH1001.BIN
 
 # Binary
 bin/
+
+# Valgrind
+valgrind-out.txt

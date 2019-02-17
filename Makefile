@@ -1,5 +1,9 @@
 CXX		  := g++
-CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb
+CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb3
+
+PROFILE := valgrind
+PROFILE_FILE := valgrind-out.txt
+PROFILE_FLAGS := --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=$(PROFILE_FILE)
 
 BIN		:= bin
 SRC		:= src
@@ -19,5 +23,10 @@ run: clean all
 $(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
 
+profile:
+	rm -rf $(PROFILE_FILE)
+	$(PROFILE) $(PROFILE_FLAGS) ./$(BIN)/$(EXECUTABLE)
+
 clean:
-	-rm $(BIN)/*
+	rm -rf $(BIN)/*
+	rm -rf $(PROFILE_FILE)
