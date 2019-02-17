@@ -317,7 +317,7 @@ void CPU::operationAddImmediate(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs);
     uint32_t result = value + imm;
-    if (result < value) {
+    if (!((value ^ imm) & 0x80000000) && ((result ^ value) & 0x80000000)) {
         cout << "Unhandled ADDI overflow" << endl;
         exit(1);
     } else {
