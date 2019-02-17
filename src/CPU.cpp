@@ -107,6 +107,7 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     exit(1);
                 }
             }
+            break;
         }
         case 0b001111: {
             operationLoadUpperImmediate(instruction);
