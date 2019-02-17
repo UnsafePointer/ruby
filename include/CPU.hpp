@@ -77,6 +77,7 @@ class CPU {
     void operationBranchIfEqual(Instruction instruction);
     void operationMoveFromCoprocessor0(Instruction instruction);
     void operationBitwiseAnd(Instruction instruction);
+    void operationAdd(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;

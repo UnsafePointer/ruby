@@ -102,6 +102,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationBitwiseAnd(instruction);
                     break;
                 }
+                case 0b100000: {
+                    operationAdd(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -459,4 +463,21 @@ void CPU::operationBitwiseAnd(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs) & registerAtIndex(rt);
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationAdd(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    int64_t s = (int32_t)registerAtIndex(rs);
+    int64_t t = (int32_t)registerAtIndex(rt);
+
+    int64_t result = s + t;
+    if (result < INT32_MIN || result > INT32_MAX) {
+        cout << "Unhandled ADDI overflow" << endl;
+        exit(1);
+    }
+
+    setRegisterAtIndex(rd, result);
 }
