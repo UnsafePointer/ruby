@@ -110,6 +110,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationJumpAndLinkRegister(instruction);
                     break;
                 }
+                case 0b100011: {
+                    operationSubstractUnsigned(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -585,4 +589,13 @@ void CPU::operationSetIfLessThanImmediate(Instruction instruction) {
 
     uint32_t value = ((int32_t)registerAtIndex(rs)) < imm;
     setRegisterAtIndex(rt, value);
+}
+
+void CPU::operationSubstractUnsigned(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rd = instruction.rd();
+
+    uint32_t value = registerAtIndex(rs) - registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
 }
