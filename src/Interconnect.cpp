@@ -22,6 +22,7 @@ const Range cacheControlRange = Range(0xfffe0130, 4);
 const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
 const Range expansion2Range = Range(0x1f802000, 66);
 const Range expansion1Range = Range(0x1f000000, 512 * 1024);
+const Range interruptRequestControlRange = Range(0x1f801070, 8);
 
 Interconnect::Interconnect(BIOS &bios, RAM &ram) : bios(bios), ram(ram) {
 }
@@ -110,12 +111,17 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     }
     offset = cacheControlRange.contains(absoluteAddress);
     if (offset) {
-        cout << "Unhandled Cache Control write offset: 0x" << hex << *offset << endl;
+        cout << "Unhandled Cache Control write at offset: 0x" << hex << *offset << endl;
         return;
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
         ram.storeWord(*offset, value);
+        return;
+    }
+    offset = interruptRequestControlRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Interrupt Request Control write at offset: 0x" << hex << *offset << endl;
         return;
     }
     cout << "Unhandled write at: 0x" << hex << address << endl;
