@@ -177,6 +177,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationBranchIfGreaterThanZero(instruction);
             break;
         }
+        case 0b000110: {
+            operationBranchIfLessThanOrEqualToZero(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -492,6 +496,16 @@ void CPU::operationBranchIfGreaterThanZero(Instruction instruction) {
 
     int32_t value = registerAtIndex(rs);
     if (value > 0) {
+        branch(imm);
+    }
+}
+
+void CPU::operationBranchIfLessThanOrEqualToZero(Instruction instruction) {
+    uint32_t imm =  instruction.immSE();
+    RegisterIndex rs = instruction.rs();
+
+    int32_t value = registerAtIndex(rs);
+    if (value <= 0) {
         branch(imm);
     }
 }

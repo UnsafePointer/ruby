@@ -79,6 +79,7 @@ class CPU {
     void operationBitwiseAnd(Instruction instruction);
     void operationAdd(Instruction instruction);
     void operationBranchIfGreaterThanZero(Instruction instruction);
+    void operationBranchIfLessThanOrEqualToZero(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;
