@@ -114,6 +114,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationSubstractUnsigned(instruction);
                     break;
                 }
+                case 0b000011: {
+                    operationShiftRightArithmetic(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -597,5 +601,14 @@ void CPU::operationSubstractUnsigned(Instruction instruction) {
     RegisterIndex rd = instruction.rd();
 
     uint32_t value = registerAtIndex(rs) - registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationShiftRightArithmetic(Instruction instruction) {
+    uint32_t imm = instruction.shiftimm();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rd = instruction.rd();
+
+    uint32_t value = ((int32_t)registerAtIndex(rt)) >> imm;
     setRegisterAtIndex(rd, value);
 }

@@ -85,6 +85,7 @@ class CPU {
     void operationsMultipleBranchIf(Instruction instruction);
     void operationSetIfLessThanImmediate(Instruction instruction);
     void operationSubstractUnsigned(Instruction instruction);
+    void operationShiftRightArithmetic(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;
