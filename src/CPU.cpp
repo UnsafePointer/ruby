@@ -181,6 +181,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationBranchIfLessThanOrEqualToZero(instruction);
             break;
         }
+        case 0b100100: {
+            operationLoadByteUnsigned(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -508,4 +512,14 @@ void CPU::operationBranchIfLessThanOrEqualToZero(Instruction instruction) {
     if (value <= 0) {
         branch(imm);
     }
+}
+
+void CPU::operationLoadByteUnsigned(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t value = readByte(address);
+    load = {rt, value};
 }
