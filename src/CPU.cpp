@@ -193,6 +193,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationsMultipleBranchIf(instruction);
             break;
         }
+        case 0b001010: {
+            operationSetIfLessThanImmediate(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -572,4 +576,13 @@ void CPU::operationsMultipleBranchIf(Instruction instruction) {
     if (result) {
         branch(imm);
     }
+}
+
+void CPU::operationSetIfLessThanImmediate(Instruction instruction) {
+    int32_t imm = instruction.immSE();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint32_t value = ((int32_t)registerAtIndex(rs)) < imm;
+    setRegisterAtIndex(rt, value);
 }
