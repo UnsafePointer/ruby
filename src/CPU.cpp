@@ -189,6 +189,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationLoadByteUnsigned(instruction);
             break;
         }
+        case 0b000001: {
+            operationsMultipleBranchIf(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -537,4 +541,35 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
 
     setRegisterAtIndex(rd, returnAddress);
     programCounter = registerAtIndex(rs);
+}
+
+// Multipe branch-if instructions
+// 000001 | rs   | 00000| <--immediate16bit--> | bltz
+// 000001 | rs   | 00001| <--immediate16bit--> | bgez
+// 000001 | rs   | 10000| <--immediate16bit--> | bltzal
+// 000001 | rs   | 10001| <--immediate16bit--> | bgezal
+void CPU::operationsMultipleBranchIf(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t data = instruction.dat();
+    bool isGreatherThanOrEqualToZero = (data >> 16) & 1;
+    bool shouldLink = ((data >> 17) & 0xF) == 0x8;
+
+    int32_t value = registerAtIndex(rs);
+    bool result;
+    if (isGreatherThanOrEqualToZero) {
+        result = value >= 0;
+    } else {
+        result = value < 0;
+    }
+
+    if (shouldLink) {
+        uint32_t returnAddress = programCounter;
+        setRegisterAtIndex(RegisterIndex(31), returnAddress);
+    }
+
+    if (result) {
+        branch(imm);
+    }
 }
