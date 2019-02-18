@@ -106,6 +106,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationAdd(instruction);
                     break;
                 }
+                case 0b001001: {
+                    operationJumpAndLinkRegister(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -522,4 +526,15 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
     uint32_t address = registerAtIndex(rs) + imm;
     uint32_t value = readByte(address);
     load = {rt, value};
+}
+
+
+void CPU::operationJumpAndLinkRegister(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t returnAddress = programCounter;
+
+    setRegisterAtIndex(rd, returnAddress);
+    programCounter = registerAtIndex(rs);
 }
