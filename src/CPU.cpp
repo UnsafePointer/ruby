@@ -126,6 +126,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationMoveFromLowRegister(instruction);
                     break;
                 }
+                case 0b000010: {
+                    operationShiftRightLogical(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -649,4 +653,13 @@ void CPU::operationMoveFromLowRegister(Instruction instruction) {
     uint32_t low = lowRegister;
 
     setRegisterAtIndex(rd, low);
+}
+
+void CPU::operationShiftRightLogical(Instruction instruction) {
+    uint32_t imm = instruction.shiftimm();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rd = instruction.rd();
+
+    uint32_t value = registerAtIndex(rt) >> imm;
+    setRegisterAtIndex(rd, value);
 }
