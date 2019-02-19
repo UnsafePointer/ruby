@@ -130,6 +130,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationShiftRightLogical(instruction);
                     break;
                 }
+                case 0b011011: {
+                    operationDivisionUnsigned(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -675,4 +679,20 @@ void CPU::operationSetIfLessThanImmediateUnsigned(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs) < imm;
     setRegisterAtIndex(rt, value);
+}
+
+void CPU::operationDivisionUnsigned(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint32_t n = registerAtIndex(rs);
+    uint32_t d = registerAtIndex(rt);
+
+    if (d == 0) {
+        highRegister = n;
+        lowRegister = 0xffffffff;
+    } else {
+        highRegister = n % d;
+        lowRegister = n / d;
+    }
 }
