@@ -68,7 +68,7 @@ class CPU {
     void operationBranchIfNotEqual(Instruction instruction);
     void operationAddImmediate(Instruction instruction);
     void operationLoadWord(Instruction instruction);
-    void operationSetLessThanUnsigned(Instruction instruction);
+    void operationSetOnLessThanUnsigned(Instruction instruction);
     void operationAddUnsigned(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction) const;
     void operationJumpAndLink(Instruction instruction);

@@ -87,7 +87,7 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     break;
                 }
                 case 0b101011: {
-                    operationSetLessThanUnsigned(instruction);
+                    operationSetOnLessThanUnsigned(instruction);
                     break;
                 }
                 case 0b100001: {
@@ -400,7 +400,7 @@ void CPU::operationLoadWord(Instruction instruction) {
     load = {rt, value};
 }
 
-void CPU::operationSetLessThanUnsigned(Instruction instruction) {
+void CPU::operationSetOnLessThanUnsigned(Instruction instruction) {
     RegisterIndex rd = instruction.rd();
     RegisterIndex rs = instruction.rs();
     RegisterIndex rt = instruction.rt();
