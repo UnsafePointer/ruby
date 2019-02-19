@@ -122,6 +122,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationDivision(instruction);
                     break;
                 }
+                case 0b010010: {
+                    operationMoveFromLowRegister(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -638,4 +642,11 @@ void CPU::operationDivision(Instruction instruction) {
         highRegister = ((uint32_t)(n % d));
         lowRegister = ((uint32_t)(n / d));
     }
+}
+
+void CPU::operationMoveFromLowRegister(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    uint32_t low = lowRegister;
+
+    setRegisterAtIndex(rd, low);
 }
