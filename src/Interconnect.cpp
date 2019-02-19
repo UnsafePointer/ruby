@@ -49,6 +49,11 @@ uint32_t Interconnect::readWord(uint32_t address) const {
     if (offset) {
         return ram.readWord(*offset);
     }
+    offset = interruptRequestControlRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Interrupt Request Control read at offset: 0x" << hex << *offset << endl;
+        return 0;
+    }
     cout << "Unhandled read at: 0x" << hex << address << endl;
     exit(1);
 }
