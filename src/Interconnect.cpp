@@ -23,6 +23,7 @@ const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
 const Range expansion2Range = Range(0x1f802000, 66);
 const Range expansion1Range = Range(0x1f000000, 512 * 1024);
 const Range interruptRequestControlRange = Range(0x1f801070, 8);
+const Range timerRegisterRange = Range(0x1f801100, 48);
 
 Interconnect::Interconnect(BIOS &bios, RAM &ram) : bios(bios), ram(ram) {
 }
@@ -142,6 +143,11 @@ void Interconnect::storeHalfWord(uint32_t address, uint16_t value) const {
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
         cout << "Unhandled Sound Processing Unit write at offset: 0x" << hex << *offset << endl;
+        return;
+    }
+    offset = timerRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Timer Register write at offset: 0x" << hex << *offset << endl;
         return;
     }
     cout << "Unhandled half write at: 0x" << hex << address << endl;
