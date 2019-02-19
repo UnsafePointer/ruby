@@ -46,6 +46,8 @@ class CPU {
     uint32_t outputRegisters[32];
     std::pair<RegisterIndex, uint32_t> load;
     uint32_t statusRegister;
+    uint32_t highRegister;
+    uint32_t lowRegister;
     const Interconnect &interconnect;
     void storeWord(uint32_t address, uint32_t value) const;
     void storeHalfWord(uint32_t address, uint16_t value) const;
@@ -86,6 +88,7 @@ class CPU {
     void operationSetIfLessThanImmediate(Instruction instruction);
     void operationSubstractUnsigned(Instruction instruction);
     void operationShiftRightArithmetic(Instruction instruction);
+    void operationDivision(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), load({RegisterIndex(), 0}), statusRegister(0), interconnect(interconnect) {
+CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), load({RegisterIndex(), 0}), statusRegister(0), highRegister(0xdeadbeef), lowRegister(0xdeadbeef), interconnect(interconnect) {
     fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
     copy(begin(registers), end(registers), begin(outputRegisters));
@@ -116,6 +116,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                 }
                 case 0b000011: {
                     operationShiftRightArithmetic(instruction);
+                    break;
+                }
+                case 0b011010: {
+                    operationDivision(instruction);
                     break;
                 }
                 default: {
@@ -611,4 +615,27 @@ void CPU::operationShiftRightArithmetic(Instruction instruction) {
 
     uint32_t value = ((int32_t)registerAtIndex(rt)) >> imm;
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationDivision(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    int32_t n = registerAtIndex(rs);
+    int32_t d = registerAtIndex(rt);
+
+    if (d == 0) {
+        highRegister = (uint32_t)n;
+        if (n >= 0) {
+            lowRegister = 0xffffffff;
+        } else {
+            lowRegister = 0x1;
+        }
+    } else if (((uint32_t)n) == 0x80000000 && d == -1) {
+        highRegister = 0;
+        lowRegister = 0x80000000;
+    } else {
+        highRegister = ((uint32_t)(n % d));
+        lowRegister = ((uint32_t)(n / d));
+    }
 }
