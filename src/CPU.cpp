@@ -138,6 +138,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
                     operationMoveFromHighRegister(instruction);
                     break;
                 }
+                case 0b101010: {
+                    operationSetOnLessThan(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -706,4 +710,15 @@ void CPU::operationMoveFromHighRegister(Instruction instruction) {
     uint32_t high = highRegister;
 
     setRegisterAtIndex(rd, high);
+}
+
+void CPU::operationSetOnLessThan(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    int32_t s = (int32_t)registerAtIndex(rs);
+    int32_t t = (int32_t)registerAtIndex(rt);
+    uint32_t value = s < t;
+    setRegisterAtIndex(rd, value);
 }
