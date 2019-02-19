@@ -217,6 +217,10 @@ void CPU::executeNextInstruction(Instruction instruction) {
             operationSetIfLessThanImmediate(instruction);
             break;
         }
+        case 0b001011: {
+            operationSetIfLessThanImmediateUnsigned(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -662,4 +666,13 @@ void CPU::operationShiftRightLogical(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rt) >> imm;
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationSetIfLessThanImmediateUnsigned(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint32_t value = registerAtIndex(rs) < imm;
+    setRegisterAtIndex(rt, value);
 }

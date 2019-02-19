@@ -91,6 +91,7 @@ class CPU {
     void operationDivision(Instruction instruction);
     void operationMoveFromLowRegister(Instruction instruction);
     void operationShiftRightLogical(Instruction instruction);
+    void operationSetIfLessThanImmediateUnsigned(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;
