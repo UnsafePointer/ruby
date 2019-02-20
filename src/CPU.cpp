@@ -5,7 +5,8 @@
 
 using namespace std;
 
-CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), nextInstruction(Instruction(0x0)), load({RegisterIndex(), 0}), statusRegister(0), highRegister(0xdeadbeef), lowRegister(0xdeadbeef), interconnect(interconnect) {
+CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), load({RegisterIndex(), 0}), statusRegister(0), highRegister(0xdeadbeef), lowRegister(0xdeadbeef), interconnect(interconnect) {
+    nextProgramCounter = programCounter + 4;
     fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
     copy(begin(registers), end(registers), begin(outputRegisters));
@@ -48,10 +49,11 @@ void CPU::storeByte(uint32_t address, uint8_t value) const {
 }
 
 void CPU::executeNextInstruction() {
-    Instruction instruction = nextInstruction;
     uint32_t data = readWord(programCounter);
-    nextInstruction = Instruction(data);
-    programCounter+=4;
+    Instruction instruction = Instruction(data);
+
+    programCounter = nextProgramCounter;
+    nextProgramCounter = nextProgramCounter + 4;
 
     RegisterIndex loadRegisterIndex;
     uint32_t value;
@@ -59,7 +61,7 @@ void CPU::executeNextInstruction() {
     setRegisterAtIndex(loadRegisterIndex, value);
     load = {RegisterIndex(), 0};
 
-    executeNextInstruction(instruction);
+    decodeAndExecuteInstruction(instruction);
     copy(begin(outputRegisters), end(outputRegisters), begin(registers));
 }
 
@@ -74,7 +76,7 @@ void CPU::setRegisterAtIndex(RegisterIndex index, uint32_t value) {
     outputRegisters[0] = 0;
 }
 
-void CPU::executeNextInstruction(Instruction instruction) {
+void CPU::decodeAndExecuteInstruction(Instruction instruction) {
     switch (instruction.funct()) {
         case 0b000000: {
             switch (instruction.subfunct()) {
@@ -243,10 +245,7 @@ void CPU::executeNextInstruction(Instruction instruction) {
 void CPU::branch(uint32_t offset) {
     // Align to 32 bits
     offset <<= 2;
-    programCounter += offset;
-    // PC is positioned already at the next instruction
-    // we need to take in consideration that
-    programCounter -= 4;
+    nextProgramCounter = programCounter + offset;
 }
 
 void CPU::operationCoprocessor0(Instruction instruction) {
@@ -353,7 +352,7 @@ void CPU::operationAddImmediateUnsigned(Instruction instruction) {
 
 void CPU::operationJump(Instruction instruction) {
     uint32_t imm = instruction.immjump();
-    programCounter = (programCounter & 0xF0000000) | (imm << 2);
+    nextProgramCounter = (programCounter & 0xF0000000) | (imm << 2);
 }
 
 void CPU::operationBitwiseOr(Instruction instruction) {
@@ -438,9 +437,9 @@ void CPU::operationStoreHalfWord(Instruction instruction) const {
 }
 
 void CPU::operationJumpAndLink(Instruction instruction) {
-    uint32_t returnAddress = programCounter;
-    setRegisterAtIndex(RegisterIndex(31), returnAddress);
+    uint32_t returnAddress = nextProgramCounter;
     operationJump(instruction);
+    setRegisterAtIndex(RegisterIndex(31), returnAddress);
 }
 
 void CPU::operationBitwiseAndImmediate(Instruction instruction) {
@@ -470,7 +469,7 @@ void CPU::operationStoreByte(Instruction instruction) const {
 
 void CPU::operationJumpRegister(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
-    programCounter = registerAtIndex(rs);
+    nextProgramCounter = registerAtIndex(rs);
 }
 
 void CPU::operationLoadByte(Instruction instruction) {
@@ -577,10 +576,10 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
     RegisterIndex rd = instruction.rd();
     RegisterIndex rs = instruction.rs();
 
-    uint32_t returnAddress = programCounter;
+    uint32_t returnAddress = nextProgramCounter;
 
     setRegisterAtIndex(rd, returnAddress);
-    programCounter = registerAtIndex(rs);
+    nextProgramCounter = registerAtIndex(rs);
 }
 
 // Multipe branch-if instructions

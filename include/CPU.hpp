@@ -41,7 +41,7 @@ cop0r32-r63 - N/A - None such (Control regs)
 */
 class CPU {
     uint32_t programCounter;
-    Instruction nextInstruction;
+    uint32_t nextProgramCounter;
     uint32_t registers[32];
     uint32_t outputRegisters[32];
     std::pair<RegisterIndex, uint32_t> load;
@@ -54,7 +54,7 @@ class CPU {
     void storeByte(uint32_t address, uint8_t value) const;
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
-    void executeNextInstruction(Instruction instruction);
+    void decodeAndExecuteInstruction(Instruction instruction);
     void branch(uint32_t offset);
     void operationLoadUpperImmediate(Instruction instruction);
     void operationBitwiseOrImmediate(Instruction instruction);
