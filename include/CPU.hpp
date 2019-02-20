@@ -3,6 +3,10 @@
 #include "Instruction.hpp"
 #include "RegisterIndex.hpp"
 
+enum ExceptionType : uint32_t {
+    SysCall = 0x8
+};
+
 /*
 CPU Register Summary
 Name       Alias    Common Usage
@@ -59,6 +63,7 @@ class CPU {
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
     void decodeAndExecuteInstruction(Instruction instruction);
     void branch(uint32_t offset);
+    void triggerException(ExceptionType exceptionType);
     void operationLoadUpperImmediate(Instruction instruction);
     void operationBitwiseOrImmediate(Instruction instruction);
     void operationStoreWord(Instruction instruction) const;
@@ -98,6 +103,7 @@ class CPU {
     void operationDivisionUnsigned(Instruction instruction);
     void operationMoveFromHighRegister(Instruction instruction);
     void operationSetOnLessThan(Instruction instruction);
+    void operationSystemCall(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;

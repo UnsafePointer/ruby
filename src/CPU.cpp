@@ -144,6 +144,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationSetOnLessThan(instruction);
                     break;
                 }
+                case 0b001100: {
+                    operationSystemCall(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -724,4 +728,27 @@ void CPU::operationSetOnLessThan(Instruction instruction) {
     int32_t t = (int32_t)registerAtIndex(rt);
     uint32_t value = s < t;
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::triggerException(ExceptionType exceptionType) {
+    uint32_t handlerAddress = 0x80000000;
+    if ((statusRegister & (1 << 2)) != 0) {
+        handlerAddress = 0xbfc00180;
+    }
+
+    // Grab the last 6 bits of SR
+    // Shift the result two spaces to the left, padded with zeroes
+    // This is the Interrupt Enable/User Mode mask
+    uint32_t mode = statusRegister & 0x3f;
+    statusRegister &= ~0x3f;
+    statusRegister |= ((mode << 2) & 0x3f);
+
+    causeRegister = exceptionType << 2;
+    returnAddressFromTrap = currentProgramCounter;
+    programCounter = handlerAddress;
+    nextProgramCounter = programCounter + 4;
+}
+
+void CPU::operationSystemCall(Instruction instruction) {
+    triggerException(ExceptionType::SysCall);
 }
