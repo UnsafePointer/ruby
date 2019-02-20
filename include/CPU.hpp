@@ -42,10 +42,13 @@ cop0r32-r63 - N/A - None such (Control regs)
 class CPU {
     uint32_t programCounter;
     uint32_t nextProgramCounter;
+    uint32_t currentProgramCounter;
     uint32_t registers[32];
     uint32_t outputRegisters[32];
     std::pair<RegisterIndex, uint32_t> load;
-    uint32_t statusRegister;
+    uint32_t statusRegister; // cop0r12
+    uint32_t causeRegister; // cop0r13
+    uint32_t returnAddressFromTrap; // cop0r14
     uint32_t highRegister;
     uint32_t lowRegister;
     const Interconnect &interconnect;

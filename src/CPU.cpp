@@ -49,9 +49,9 @@ void CPU::storeByte(uint32_t address, uint8_t value) const {
 }
 
 void CPU::executeNextInstruction() {
-    uint32_t data = readWord(programCounter);
-    Instruction instruction = Instruction(data);
+    Instruction instruction = Instruction(readWord(programCounter));
 
+    currentProgramCounter = programCounter;
     programCounter = nextProgramCounter;
     nextProgramCounter = nextProgramCounter + 4;
 
@@ -290,10 +290,11 @@ void CPU::operationMoveToCoprocessor0(Instruction instruction) {
             break;
         }
         case 13: {
-            if (value != 0) {
-                cout << "Unhandled MTC0 at CAUSE register" << endl;
-                exit(1);
-            }
+            causeRegister = value;
+            break;
+        }
+        case 14: {
+            returnAddressFromTrap = value;
             break;
         }
         default: {
@@ -503,8 +504,11 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             break;
         }
         case 13: {
-            cout << "Unhandled MFC0 at CAUSE register" << endl;
-            exit(1);
+            value = causeRegister;
+            break;
+        }
+        case 14: {
+            value = returnAddressFromTrap;
             break;
         }
         default: {
