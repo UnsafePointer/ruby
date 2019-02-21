@@ -108,6 +108,7 @@ class CPU {
     void operationReturnFromException(Instruction instruction);
     void operationShiftLeftLogicalVariable(Instruction instruction);
     void operationBitwiseNotOr(Instruction instruction);
+    void operationShiftRightArithmeticVariable(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);

@@ -163,6 +163,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationBitwiseNotOr(instruction);
                     break;
                 }
+                case 0b000111: {
+                    operationShiftRightArithmeticVariable(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -886,5 +890,14 @@ void CPU::operationBitwiseNotOr(Instruction instruction) {
     RegisterIndex rt = instruction.rt();
 
     uint32_t value = !(registerAtIndex(rs) | registerAtIndex(rt));
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationShiftRightArithmeticVariable(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint32_t value = ((int32_t)registerAtIndex(rt)) >> (registerAtIndex(rs) & 0x1f);
     setRegisterAtIndex(rd, value);
 }
