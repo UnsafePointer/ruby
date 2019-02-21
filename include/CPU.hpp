@@ -47,6 +47,8 @@ class CPU {
     uint32_t programCounter;
     uint32_t nextProgramCounter;
     uint32_t currentProgramCounter;
+    bool isBranching;
+    bool isDelaySlot;
     uint32_t registers[32];
     uint32_t outputRegisters[32];
     std::pair<RegisterIndex, uint32_t> load;

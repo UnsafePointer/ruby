@@ -5,7 +5,7 @@
 
 using namespace std;
 
-CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), load({RegisterIndex(), 0}), statusRegister(0), highRegister(0xdeadbeef), lowRegister(0xdeadbeef), interconnect(interconnect) {
+CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), currentProgramCounter(0xbfc00000), isBranching(false), isDelaySlot(false), load({RegisterIndex(), 0}), statusRegister(0), highRegister(0xdeadbeef), lowRegister(0xdeadbeef), interconnect(interconnect) {
     nextProgramCounter = programCounter + 4;
     fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
@@ -50,6 +50,9 @@ void CPU::storeByte(uint32_t address, uint8_t value) const {
 
 void CPU::executeNextInstruction() {
     Instruction instruction = Instruction(readWord(programCounter));
+
+    isDelaySlot = isBranching;
+    isBranching = false;
 
     currentProgramCounter = programCounter;
     programCounter = nextProgramCounter;
@@ -258,6 +261,7 @@ void CPU::branch(uint32_t offset) {
     // Align to 32 bits
     offset <<= 2;
     nextProgramCounter = programCounter + offset;
+    isBranching = true;
 }
 
 void CPU::operationCoprocessor0(Instruction instruction) {
@@ -370,6 +374,7 @@ void CPU::operationAddImmediateUnsigned(Instruction instruction) {
 void CPU::operationJump(Instruction instruction) {
     uint32_t imm = instruction.immjump();
     nextProgramCounter = (programCounter & 0xF0000000) | (imm << 2);
+    isBranching = true;
 }
 
 void CPU::operationBitwiseOr(Instruction instruction) {
@@ -487,6 +492,7 @@ void CPU::operationStoreByte(Instruction instruction) const {
 void CPU::operationJumpRegister(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
     nextProgramCounter = registerAtIndex(rs);
+    isBranching = true;
 }
 
 void CPU::operationLoadByte(Instruction instruction) {
@@ -600,6 +606,7 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
 
     setRegisterAtIndex(rd, returnAddress);
     nextProgramCounter = registerAtIndex(rs);
+    isBranching = true;
 }
 
 // Multipe branch-if instructions
@@ -756,7 +763,13 @@ void CPU::triggerException(ExceptionType exceptionType) {
     statusRegister |= ((mode << 2) & 0x3f);
 
     causeRegister = exceptionType << 2;
+
     returnAddressFromTrap = currentProgramCounter;
+    if (isDelaySlot) {
+        returnAddressFromTrap = returnAddressFromTrap - 4;
+        causeRegister |= 1 << 31;
+    }
+
     programCounter = handlerAddress;
     nextProgramCounter = programCounter + 4;
 }
