@@ -266,7 +266,7 @@ void CPU::operationCoprocessor0(Instruction instruction) {
             operationMoveToCoprocessor0(instruction);
             break;
         }
-        case 0x00000: {
+        case 0b00000: {
             operationMoveFromCoprocessor0(instruction);
             break;
         }
