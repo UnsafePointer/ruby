@@ -22,6 +22,17 @@ uint32_t RAM::loadWord(uint32_t offset) const {
     return b0 | b1 | b2 | b3;
 }
 
+uint16_t RAM::loadHalfWord(uint32_t offset) const {
+    uint32_t b0 = data[offset + 0];
+    uint32_t b1 = data[offset + 1];
+    b1 <<= 8;
+    return b0 | b1;
+}
+
+uint8_t RAM::loadByte(uint32_t offset) const {
+    return data[offset];
+}
+
 void RAM::storeWord(uint32_t offset, uint32_t value) {
     uint8_t b0 = value & 0xFF;
     uint8_t b1 = (value & 0xFF00) >> 8;
@@ -34,14 +45,6 @@ void RAM::storeWord(uint32_t offset, uint32_t value) {
     data[offset + 3] = b3;
 }
 
-uint8_t RAM::loadByte(uint32_t offset) const {
-    return data[offset];
-}
-
-void RAM::storeByte(uint32_t offset, uint8_t value) {
-    data[offset] = value;
-}
-
 void RAM::storeHalfWord(uint32_t offset, uint16_t value) {
     uint8_t b0 = value & 0xFF;
     uint8_t b1 = (value & 0xFF00) >> 8;
@@ -50,9 +53,6 @@ void RAM::storeHalfWord(uint32_t offset, uint16_t value) {
     data[offset + 1] = b1;
 }
 
-uint16_t RAM::loadHalfWord(uint32_t offset) const {
-    uint32_t b0 = data[offset + 0];
-    uint32_t b1 = data[offset + 1];
-    b1 <<= 8;
-    return b0 | b1;
+void RAM::storeByte(uint32_t offset, uint8_t value) {
+    data[offset] = value;
 }
