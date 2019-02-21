@@ -36,16 +36,16 @@ uint32_t Interconnect::maskRegion(uint32_t address) const {
     return address & regionMask[index];
 }
 
-uint32_t Interconnect::readWord(uint32_t address) const {
+uint32_t Interconnect::loadWord(uint32_t address) const {
     uint32_t absoluteAddress = maskRegion(address);
 
     optional<uint32_t> offset = biosRange.contains(absoluteAddress);
     if (offset) {
-        return bios.readWord(*offset);
+        return bios.loadWord(*offset);
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        return ram.readWord(*offset);
+        return ram.loadWord(*offset);
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
@@ -56,13 +56,13 @@ uint32_t Interconnect::readWord(uint32_t address) const {
     exit(1);
 }
 
-uint8_t Interconnect::readByte(uint32_t address) const {
+uint8_t Interconnect::loadByte(uint32_t address) const {
     uint32_t absoluteAddress = maskRegion(address);
 
     optional<uint32_t> offset;
     offset = biosRange.contains(absoluteAddress);
     if (offset) {
-        return bios.readByte(*offset);
+        return bios.loadByte(*offset);
     }
     offset = expansion1Range.contains(absoluteAddress);
     if (offset) {
@@ -71,7 +71,7 @@ uint8_t Interconnect::readByte(uint32_t address) const {
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        return ram.readByte(*offset);
+        return ram.loadByte(*offset);
     }
 
     cout << "Unhandled read byte at: 0x" << hex << address << endl;

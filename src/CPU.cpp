@@ -16,12 +16,12 @@ CPU::~CPU() {
 
 }
 
-uint32_t CPU::readWord(uint32_t address) const {
-    return interconnect.readWord(address);
+uint32_t CPU::loadWord(uint32_t address) const {
+    return interconnect.loadWord(address);
 }
 
-uint8_t CPU::readByte(uint32_t address) const {
-    return interconnect.readByte(address);
+uint8_t CPU::loadByte(uint32_t address) const {
+    return interconnect.loadByte(address);
 }
 
 void CPU::storeWord(uint32_t address, uint32_t value) const {
@@ -33,15 +33,11 @@ void CPU::storeHalfWord(uint32_t address, uint16_t value) const {
 }
 
 void CPU::storeByte(uint32_t address, uint8_t value) const {
-    if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
-        return;
-    }
     return interconnect.storeByte(address, value);
 }
 
 void CPU::executeNextInstruction() {
-    Instruction instruction = Instruction(readWord(programCounter));
+    Instruction instruction = Instruction(loadWord(programCounter));
 
     isDelaySlot = isBranching;
     isBranching = false;
@@ -421,10 +417,10 @@ void CPU::operationLoadWord(Instruction instruction) {
         return;
     }
     if (address % 4 != 0) {
-        triggerException(ExceptionType::ReadAddress);
+        triggerException(ExceptionType::LoadAddress);
         return;
     }
-    uint32_t value = readWord(address);
+    uint32_t value = loadWord(address);
     load = {rt, value};
 }
 
@@ -508,7 +504,11 @@ void CPU::operationLoadByte(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t value = (int8_t)readByte(address);
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
+    uint32_t value = (int8_t)loadByte(address);
     load = {rt, value};
 }
 
@@ -599,7 +599,11 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t value = readByte(address);
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
+    uint32_t value = loadByte(address);
     load = {rt, value};
 }
 

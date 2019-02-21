@@ -6,7 +6,7 @@
 enum ExceptionType : uint32_t {
     SysCall = 0x8,
     Overflow = 0xc,
-    ReadAddress = 0x4,
+    LoadAddress = 0x4,
     StoreAddress = 0x5
 };
 
@@ -61,17 +61,16 @@ class CPU {
     uint32_t highRegister;
     uint32_t lowRegister;
     const Interconnect &interconnect;
-    void storeWord(uint32_t address, uint32_t value) const;
-    void storeHalfWord(uint32_t address, uint16_t value) const;
-    void storeByte(uint32_t address, uint8_t value) const;
+
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
+
     void decodeAndExecuteInstruction(Instruction instruction);
     void branch(uint32_t offset);
     void triggerException(ExceptionType exceptionType);
+
     void operationLoadUpperImmediate(Instruction instruction);
     void operationBitwiseOrImmediate(Instruction instruction);
-    void operationStoreWord(Instruction instruction);
     void operationShiftLeftLogical(Instruction instruction);
     void operationAddImmediateUnsigned(Instruction instruction);
     void operationJump(Instruction instruction);
@@ -80,22 +79,17 @@ class CPU {
     void operationMoveToCoprocessor0(Instruction instruction);
     void operationBranchIfNotEqual(Instruction instruction);
     void operationAddImmediate(Instruction instruction);
-    void operationLoadWord(Instruction instruction);
     void operationSetOnLessThanUnsigned(Instruction instruction);
     void operationAddUnsigned(Instruction instruction);
-    void operationStoreHalfWord(Instruction instruction);
     void operationJumpAndLink(Instruction instruction);
     void operationBitwiseAndImmediate(Instruction instruction);
-    void operationStoreByte(Instruction instruction) const;
     void operationJumpRegister(Instruction instruction);
-    void operationLoadByte(Instruction instruction);
     void operationBranchIfEqual(Instruction instruction);
     void operationMoveFromCoprocessor0(Instruction instruction);
     void operationBitwiseAnd(Instruction instruction);
     void operationAdd(Instruction instruction);
     void operationBranchIfGreaterThanZero(Instruction instruction);
     void operationBranchIfLessThanOrEqualToZero(Instruction instruction);
-    void operationLoadByteUnsigned(Instruction instruction);
     void operationJumpAndLinkRegister(Instruction instruction);
     void operationsMultipleBranchIf(Instruction instruction);
     void operationSetIfLessThanImmediate(Instruction instruction);
@@ -113,8 +107,19 @@ class CPU {
     void operationMoveToHighRegister(Instruction instruction);
     void operationReturnFromException(Instruction instruction);
 
-    uint32_t readWord(uint32_t address) const;
-    uint8_t readByte(uint32_t address) const;
+    void operationStoreWord(Instruction instruction);
+    void operationStoreHalfWord(Instruction instruction);
+    void operationStoreByte(Instruction instruction) const;
+
+    void operationLoadWord(Instruction instruction);
+    void operationLoadByte(Instruction instruction);
+    void operationLoadByteUnsigned(Instruction instruction);
+
+    uint32_t loadWord(uint32_t address) const;
+    uint8_t loadByte(uint32_t address) const;
+    void storeWord(uint32_t address, uint32_t value) const;
+    void storeHalfWord(uint32_t address, uint16_t value) const;
+    void storeByte(uint32_t address, uint8_t value) const;
 public:
     CPU(Interconnect &interconnect);
     ~CPU();

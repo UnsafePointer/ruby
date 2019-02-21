@@ -11,7 +11,7 @@ RAM::~RAM() {
 
 }
 
-uint32_t RAM::readWord(uint32_t offset) const {
+uint32_t RAM::loadWord(uint32_t offset) const {
     uint32_t b0 = data[offset + 0];
     uint32_t b1 = data[offset + 1];
     b1 <<= 8;
@@ -34,7 +34,7 @@ void RAM::storeWord(uint32_t offset, uint32_t value) {
     data[offset + 3] = b3;
 }
 
-uint8_t RAM::readByte(uint32_t offset) const {
+uint8_t RAM::loadByte(uint32_t offset) const {
     return data[offset];
 }
 

@@ -22,7 +22,7 @@ void BIOS::loadBin(const string& path) {
     file.close();
 }
 
-uint32_t BIOS::readWord(uint32_t offset) const {
+uint32_t BIOS::loadWord(uint32_t offset) const {
     uint32_t b0 = data[offset + 0];
     uint32_t b1 = data[offset + 1];
     b1 <<= 8;
@@ -34,6 +34,6 @@ uint32_t BIOS::readWord(uint32_t offset) const {
 }
 
 
-uint8_t BIOS::readByte(uint32_t offset) const {
+uint8_t BIOS::loadByte(uint32_t offset) const {
     return data[offset];
 }
