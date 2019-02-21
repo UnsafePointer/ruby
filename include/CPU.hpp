@@ -112,10 +112,12 @@ class CPU {
     void operationStoreByte(Instruction instruction) const;
 
     void operationLoadWord(Instruction instruction);
+    void operationLoadHalfWordUnsigned(Instruction instruction);
     void operationLoadByte(Instruction instruction);
     void operationLoadByteUnsigned(Instruction instruction);
 
     uint32_t loadWord(uint32_t address) const;
+    uint16_t loadHalfWord(uint32_t address) const;
     uint8_t loadByte(uint32_t address) const;
     void storeWord(uint32_t address, uint32_t value) const;
     void storeHalfWord(uint32_t address, uint16_t value) const;

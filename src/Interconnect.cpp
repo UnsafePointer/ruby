@@ -62,6 +62,19 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
     exit(1);
 }
 
+uint16_t Interconnect::loadHalfWord(uint32_t address) const {
+    uint32_t absoluteAddress = maskRegion(address);
+
+    optional<uint32_t> offset;
+    offset = soundProcessingUnitRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Sound Processing Unit write at offset: 0x" << hex << *offset << endl;
+        return 0;
+    }
+    cout << "Unhandled half read at: 0x" << hex << address << endl;
+    exit(1);
+}
+
 uint8_t Interconnect::loadByte(uint32_t address) const {
     uint32_t absoluteAddress = maskRegion(address);
 

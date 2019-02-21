@@ -20,6 +20,10 @@ uint32_t CPU::loadWord(uint32_t address) const {
     return interconnect.loadWord(address);
 }
 
+uint16_t CPU::loadHalfWord(uint32_t address) const {
+    return interconnect.loadHalfWord(address);
+}
+
 uint8_t CPU::loadByte(uint32_t address) const {
     return interconnect.loadByte(address);
 }
@@ -240,6 +244,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
         }
         case 0b001011: {
             operationSetIfLessThanImmediateUnsigned(instruction);
+            break;
+        }
+        case 0b100101: {
+            operationLoadHalfWordUnsigned(instruction);
             break;
         }
         default: {
@@ -813,4 +821,22 @@ void CPU::operationReturnFromException(Instruction instruction) {
     uint32_t mode = statusRegister & 0x3f;
     statusRegister &= !0x3f;
     statusRegister |= mode >> 2;
+}
+
+void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring load at address: 0x" << hex << address << endl;
+        return;
+    }
+    if (address % 2 != 0) {
+        triggerException(ExceptionType::LoadAddress);
+        return;
+    }
+    uint32_t value = loadHalfWord(address);
+    load = {rt, value};
 }
