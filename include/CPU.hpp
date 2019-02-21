@@ -107,6 +107,7 @@ class CPU {
     void operationMoveToHighRegister(Instruction instruction);
     void operationReturnFromException(Instruction instruction);
     void operationShiftLeftLogicalVariable(Instruction instruction);
+    void operationBitwiseNotOr(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);
