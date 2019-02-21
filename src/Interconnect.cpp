@@ -37,9 +37,6 @@ uint32_t Interconnect::maskRegion(uint32_t address) const {
 }
 
 uint32_t Interconnect::readWord(uint32_t address) const {
-    if (address % 4 != 0) {
-        exit(1);
-    }
     uint32_t absoluteAddress = maskRegion(address);
 
     optional<uint32_t> offset = biosRange.contains(absoluteAddress);

@@ -25,18 +25,10 @@ uint8_t CPU::readByte(uint32_t address) const {
 }
 
 void CPU::storeWord(uint32_t address, uint32_t value) const {
-    if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
-        return;
-    }
     return interconnect.storeWord(address, value);
 }
 
 void CPU::storeHalfWord(uint32_t address, uint16_t value) const {
-    if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
-        return;
-    }
     return interconnect.storeHalfWord(address, value);
 }
 
@@ -342,14 +334,22 @@ void CPU::operationBitwiseOrImmediate(Instruction instruction) {
     setRegisterAtIndex(rt, value);
 }
 
-void CPU::operationStoreWord(Instruction instruction) const {
+void CPU::operationStoreWord(Instruction instruction) {
     uint32_t imm = instruction.immSE();
     RegisterIndex rt = instruction.rt();
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t value = registerAtIndex(rt);
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
+    if (address % 4 != 0) {
+        triggerException(ExceptionType::StoreAddress);
+        return;
+    }
 
+    uint32_t value = registerAtIndex(rt);
     storeWord(address, value);
 }
 
@@ -420,6 +420,10 @@ void CPU::operationLoadWord(Instruction instruction) {
         cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
         return;
     }
+    if (address % 4 != 0) {
+        triggerException(ExceptionType::ReadAddress);
+        return;
+    }
     uint32_t value = readWord(address);
     load = {rt, value};
 }
@@ -442,7 +446,7 @@ void CPU::operationAddUnsigned(Instruction instruction) {
     setRegisterAtIndex(rd, value);
 }
 
-void CPU::operationStoreHalfWord(Instruction instruction) const {
+void CPU::operationStoreHalfWord(Instruction instruction) {
     uint32_t imm = instruction.immSE();
     RegisterIndex rt = instruction.rt();
     RegisterIndex rs = instruction.rs();
@@ -450,6 +454,10 @@ void CPU::operationStoreHalfWord(Instruction instruction) const {
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
         cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        return;
+    }
+    if (address % 2 != 0) {
+        triggerException(ExceptionType::StoreAddress);
         return;
     }
 

@@ -5,7 +5,9 @@
 
 enum ExceptionType : uint32_t {
     SysCall = 0x8,
-    Overflow = 0xc
+    Overflow = 0xc,
+    ReadAddress = 0x4,
+    StoreAddress = 0x5
 };
 
 /*
@@ -69,7 +71,7 @@ class CPU {
     void triggerException(ExceptionType exceptionType);
     void operationLoadUpperImmediate(Instruction instruction);
     void operationBitwiseOrImmediate(Instruction instruction);
-    void operationStoreWord(Instruction instruction) const;
+    void operationStoreWord(Instruction instruction);
     void operationShiftLeftLogical(Instruction instruction);
     void operationAddImmediateUnsigned(Instruction instruction);
     void operationJump(Instruction instruction);
@@ -81,7 +83,7 @@ class CPU {
     void operationLoadWord(Instruction instruction);
     void operationSetOnLessThanUnsigned(Instruction instruction);
     void operationAddUnsigned(Instruction instruction);
-    void operationStoreHalfWord(Instruction instruction) const;
+    void operationStoreHalfWord(Instruction instruction);
     void operationJumpAndLink(Instruction instruction);
     void operationBitwiseAndImmediate(Instruction instruction);
     void operationStoreByte(Instruction instruction) const;
