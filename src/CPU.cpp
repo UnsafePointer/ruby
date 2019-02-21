@@ -254,6 +254,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationLoadHalfWordUnsigned(instruction);
             break;
         }
+        case 0b100001: {
+            operationLoadHalfWord(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -852,4 +856,22 @@ void CPU::operationShiftLeftLogicalVariable(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rt) << (registerAtIndex(rs) & 0x1f);
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationLoadHalfWord(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if ((statusRegister & 0x10000) != 0) {
+        cout << "Cache is isolated, ignoring load at address: 0x" << hex << address << endl;
+        return;
+    }
+    if (address % 2 != 0) {
+        triggerException(ExceptionType::LoadAddress);
+        return;
+    }
+    uint32_t value = ((int16_t)loadHalfWord(address));
+    load = {rt, value};
 }

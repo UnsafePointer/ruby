@@ -113,6 +113,7 @@ class CPU {
     void operationStoreByte(Instruction instruction) const;
 
     void operationLoadWord(Instruction instruction);
+    void operationLoadHalfWord(Instruction instruction);
     void operationLoadHalfWordUnsigned(Instruction instruction);
     void operationLoadByte(Instruction instruction);
     void operationLoadByteUnsigned(Instruction instruction);
