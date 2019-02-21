@@ -152,6 +152,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationMoveToLowRegister(instruction);
                     break;
                 }
+                case 0b010001: {
+                    operationMoveToHighRegister(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -761,4 +765,10 @@ void CPU::operationMoveToLowRegister(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     lowRegister = registerAtIndex(rs);
+}
+
+void CPU::operationMoveToHighRegister(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+
+    highRegister = registerAtIndex(rs);
 }
