@@ -137,6 +137,11 @@ void Interconnect::storeHalfWord(uint32_t address, uint16_t value) const {
     }
     uint32_t absoluteAddress = maskRegion(address);
     optional<uint32_t> offset;
+    offset = ramRange.contains(absoluteAddress);
+    if (offset) {
+        ram.storeHalfWord(*offset, value);
+        return;
+    }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
         cout << "Unhandled Sound Processing Unit write at offset: 0x" << hex << *offset << endl;

@@ -41,3 +41,11 @@ uint8_t RAM::loadByte(uint32_t offset) const {
 void RAM::storeByte(uint32_t offset, uint8_t value) {
     data[offset] = value;
 }
+
+void RAM::storeHalfWord(uint32_t offset, uint16_t value) {
+    uint8_t b0 = value & 0xFF;
+    uint8_t b1 = (value & 0xFF00) >> 8;
+
+    data[offset + 0] = b0;
+    data[offset + 1] = b1;
+}
