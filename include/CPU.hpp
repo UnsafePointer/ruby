@@ -104,6 +104,7 @@ class CPU {
     void operationMoveFromHighRegister(Instruction instruction);
     void operationSetOnLessThan(Instruction instruction);
     void operationSystemCall(Instruction instruction);
+    void operationMoveToLowRegister(Instruction instruction);
 
     uint32_t readWord(uint32_t address) const;
     uint8_t readByte(uint32_t address) const;

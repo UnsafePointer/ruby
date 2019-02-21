@@ -148,6 +148,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationSystemCall(instruction);
                     break;
                 }
+                case 0b010011: {
+                    operationMoveToLowRegister(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -751,4 +755,10 @@ void CPU::triggerException(ExceptionType exceptionType) {
 
 void CPU::operationSystemCall(Instruction instruction) {
     triggerException(ExceptionType::SysCall);
+}
+
+void CPU::operationMoveToLowRegister(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+
+    lowRegister = registerAtIndex(rs);
 }
