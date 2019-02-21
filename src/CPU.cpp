@@ -155,6 +155,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationMoveToHighRegister(instruction);
                     break;
                 }
+                case 0b000100: {
+                    operationShiftLeftLogicalVariable(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -839,4 +843,13 @@ void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
     }
     uint32_t value = loadHalfWord(address);
     load = {rt, value};
+}
+
+void CPU::operationShiftLeftLogicalVariable(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint32_t value = registerAtIndex(rt) << (registerAtIndex(rs) & 0x1f);
+    setRegisterAtIndex(rd, value);
 }
