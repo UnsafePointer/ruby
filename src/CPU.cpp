@@ -37,12 +37,16 @@ void CPU::storeByte(uint32_t address, uint8_t value) const {
 }
 
 void CPU::executeNextInstruction() {
+    currentProgramCounter = programCounter;
+    if (currentProgramCounter % 4 != 0) {
+        triggerException(ExceptionType::LoadAddress);
+        return;
+    }
     Instruction instruction = Instruction(loadWord(programCounter));
 
     isDelaySlot = isBranching;
     isBranching = false;
 
-    currentProgramCounter = programCounter;
     programCounter = nextProgramCounter;
     nextProgramCounter = nextProgramCounter + 4;
 
