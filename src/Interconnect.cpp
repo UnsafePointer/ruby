@@ -24,6 +24,7 @@ const Range expansion2Range = Range(0x1f802000, 66);
 const Range expansion1Range = Range(0x1f000000, 512 * 1024);
 const Range interruptRequestControlRange = Range(0x1f801070, 8);
 const Range timerRegisterRange = Range(0x1f801100, 48);
+const Range dmaRegisterRange = Range(0x1f801080, 0x80);
 
 Interconnect::Interconnect(BIOS &bios, RAM &ram) : bios(bios), ram(ram) {
 }
@@ -50,6 +51,11 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
         cout << "Unhandled Interrupt Request Control read at offset: 0x" << hex << *offset << endl;
+        return 0;
+    }
+    offset = dmaRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled DMA read at offset: 0x" << hex << *offset << endl;
         return 0;
     }
     cout << "Unhandled read at: 0x" << hex << address << endl;
@@ -125,6 +131,11 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
         cout << "Unhandled Interrupt Request Control write at offset: 0x" << hex << *offset << endl;
+        return;
+    }
+    offset = dmaRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled DMA write at offset: 0x" << hex << *offset << endl;
         return;
     }
     cout << "Unhandled write at: 0x" << hex << address << endl;
