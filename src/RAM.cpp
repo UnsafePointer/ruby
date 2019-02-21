@@ -49,3 +49,10 @@ void RAM::storeHalfWord(uint32_t offset, uint16_t value) {
     data[offset + 0] = b0;
     data[offset + 1] = b1;
 }
+
+uint16_t RAM::loadHalfWord(uint32_t offset) const {
+    uint32_t b0 = data[offset + 0];
+    uint32_t b1 = data[offset + 1];
+    b1 <<= 8;
+    return b0 | b1;
+}
