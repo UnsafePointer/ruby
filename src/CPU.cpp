@@ -404,8 +404,7 @@ void CPU::operationAddImmediate(Instruction instruction) {
     uint32_t value = registerAtIndex(rs);
     uint32_t result = value + imm;
     if (!((value ^ imm) & 0x80000000) && ((result ^ value) & 0x80000000)) {
-        cout << "Unhandled ADDI overflow" << endl;
-        exit(1);
+        triggerException(ExceptionType::Overflow);
     } else {
         setRegisterAtIndex(rt, result);
     }
@@ -560,8 +559,7 @@ void CPU::operationAdd(Instruction instruction) {
 
     int64_t result = s + t;
     if (result < INT32_MIN || result > INT32_MAX) {
-        cout << "Unhandled ADDI overflow" << endl;
-        exit(1);
+        triggerException(ExceptionType::Overflow);
     }
 
     setRegisterAtIndex(rd, result);

@@ -4,7 +4,8 @@
 #include "RegisterIndex.hpp"
 
 enum ExceptionType : uint32_t {
-    SysCall = 0x8
+    SysCall = 0x8,
+    Overflow = 0xc
 };
 
 /*
