@@ -270,6 +270,10 @@ void CPU::operationCoprocessor0(Instruction instruction) {
             operationMoveFromCoprocessor0(instruction);
             break;
         }
+        case 0b10000: {
+            operationReturnFromException(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled coprocessor0 instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -771,4 +775,15 @@ void CPU::operationMoveToHighRegister(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     highRegister = registerAtIndex(rs);
+}
+
+void CPU::operationReturnFromException(Instruction instruction) {
+    if (instruction.subfunct() != 0b010000) {
+        cout << "Unhandled cop0 instruction (0b010000) with last 6 bits: 0x" << hex << instruction.subfunct() << endl;
+        exit(1);
+    }
+
+    uint32_t mode = statusRegister & 0x3f;
+    statusRegister &= !0x3f;
+    statusRegister |= mode >> 2;
 }
