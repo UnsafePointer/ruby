@@ -294,6 +294,18 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationBitwiseExclusiveOrImmediate(instruction);
             break;
         }
+        case 0b010001: {
+            operationCoprocessor1(instruction);
+            break;
+        }
+        case 0b010010: {
+            operationCoprocessor2(instruction);
+            break;
+        }
+        case 0b010011: {
+            operationCoprocessor3(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -999,4 +1011,17 @@ void CPU::operationBitwiseExclusiveOrImmediate(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs) ^ imm;
     setRegisterAtIndex(rt, value);
+}
+
+void CPU::operationCoprocessor1(Instruction instruction) {
+    triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationCoprocessor2(Instruction instruction) {
+    cout << "Unhandled Geometry Translation Engine instruction: 0x" << hex << instruction.dat() << endl;
+    exit(1);
+}
+
+void CPU::operationCoprocessor3(Instruction instruction) {
+    triggerException(ExceptionType::Coprocessor);
 }

@@ -8,7 +8,8 @@ enum ExceptionType : uint32_t {
     Overflow = 0xc,
     LoadAddress = 0x4,
     StoreAddress = 0x5,
-    Break = 0x9
+    Break = 0x9,
+    Coprocessor = 0xb
 };
 
 /*
@@ -117,6 +118,9 @@ class CPU {
     void operationMultiply(Instruction instruction);
     void operationSubstract(Instruction instruction);
     void operationBitwiseExclusiveOrImmediate(Instruction instruction);
+    void operationCoprocessor1(Instruction instruction);
+    void operationCoprocessor2(Instruction instruction);
+    void operationCoprocessor3(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);
