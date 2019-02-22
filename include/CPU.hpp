@@ -7,7 +7,8 @@ enum ExceptionType : uint32_t {
     SysCall = 0x8,
     Overflow = 0xc,
     LoadAddress = 0x4,
-    StoreAddress = 0x5
+    StoreAddress = 0x5,
+    Break = 0x9
 };
 
 /*
@@ -112,6 +113,7 @@ class CPU {
     void operationShiftRightLogicalVariable(Instruction instruction);
     void operationMultiplyUnsigned(Instruction instruction);
     void operationBitwiseExclusiveOr(Instruction instruction);
+    void operationBreak(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);

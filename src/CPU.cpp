@@ -179,6 +179,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationBitwiseExclusiveOr(instruction);
                     break;
                 }
+                case 0b001101: {
+                    operationBreak(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -942,4 +946,8 @@ void CPU::operationBitwiseExclusiveOr(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rs) ^ registerAtIndex(rt);
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationBreak(Instruction instruction) {
+    triggerException(ExceptionType::Break);
 }
