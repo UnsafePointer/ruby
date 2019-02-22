@@ -74,7 +74,7 @@ uint16_t Interconnect::loadHalfWord(uint32_t address) const {
     optional<uint32_t> offset;
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        cout << "Unhandled Sound Processing Unit write at offset: 0x" << hex << *offset << endl;
+        cout << "Unhandled Sound Processing Unit read at offset: 0x" << hex << *offset << endl;
         return 0;
     }
     offset = ramRange.contains(absoluteAddress);
