@@ -61,8 +61,15 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
-        cout << "Unhandled GPU read at offset: 0x" << hex << *offset << endl;
-        return 0;
+        switch (*offset) {
+            case 4: {
+                return 0x10000000;
+            }
+            default: {
+                cout << "Unhandled GPU read at offset: 0x" << hex << *offset << endl;
+                return 0;
+            }
+        }
     }
     cout << "Unhandled read at: 0x" << hex << address << endl;
     exit(1);
@@ -169,6 +176,11 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
         cout << "Unhandled GPU write at offset: 0x" << hex << *offset << endl;
+        return;
+    }
+    offset = timerRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Timer Register write at offset: 0x" << hex << *offset << endl;
         return;
     }
     cout << "Unhandled write at: 0x" << hex << address << endl;
