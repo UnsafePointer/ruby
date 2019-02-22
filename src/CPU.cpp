@@ -314,6 +314,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationLoadWordRight(instruction);
             break;
         }
+        case 0b101010: {
+            operationStoreWordLeft(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -1100,4 +1104,38 @@ void CPU::operationLoadWordRight(Instruction instruction) {
     }
 
     load = {rt, value};
+}
+
+void CPU::operationStoreWordLeft(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t value = registerAtIndex(rt);
+
+    uint32_t alignedAddress = address & !3;
+    uint32_t currentMemoryValue = loadWord(alignedAddress);
+
+    uint32_t memoryValue;
+    switch (address & 3) {
+        case 0: {
+            memoryValue = (currentMemoryValue & 0xffffff00) | (value >> 24);
+            break;
+        }
+        case 1: {
+            memoryValue = (currentMemoryValue & 0xffff0000) | (value >> 16);
+            break;
+        }
+        case 2: {
+            memoryValue = (currentMemoryValue & 0xff000000) | (value >> 8);
+            break;
+        }
+        case 3: {
+            memoryValue = (currentMemoryValue & 0x00000000) | (value >> 0);
+            break;
+        }
+    }
+
+    storeWord(alignedAddress, memoryValue);
 }
