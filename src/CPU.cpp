@@ -187,6 +187,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationMultiply(instruction);
                     break;
                 }
+                case 0b100010: {
+                    operationSubstract(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -966,4 +970,20 @@ void CPU::operationMultiply(Instruction instruction) {
     uint64_t result = s * t;
     highRegister = ((uint32_t)(result >> 32));
     lowRegister = ((uint32_t)result);
+}
+
+void CPU::operationSubstract(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rd = instruction.rd();
+
+    int32_t s = registerAtIndex(rs);
+    int32_t t = registerAtIndex(rt);
+    uint32_t result = s - t;
+    if (((s ^ t) & 0x80000000) && ((result ^ s) & 0x80000000)) {
+        triggerException(ExceptionType::Overflow);
+        return;
+    } else {
+        setRegisterAtIndex(rd, result);
+    }
 }
