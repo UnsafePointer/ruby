@@ -83,112 +83,112 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationShiftLeftLogical(instruction);
                     break;
                 }
-                case 0b100101: {
-                    operationBitwiseOr(instruction);
-                    break;
-                }
-                case 0b101011: {
-                    operationSetOnLessThanUnsigned(instruction);
-                    break;
-                }
-                case 0b100001: {
-                    operationAddUnsigned(instruction);
-                    break;
-                }
-                case 0b001000: {
-                    operationJumpRegister(instruction);
-                    break;
-                }
-                case 0b100100: {
-                    operationBitwiseAnd(instruction);
-                    break;
-                }
-                case 0b100000: {
-                    operationAdd(instruction);
-                    break;
-                }
-                case 0b001001: {
-                    operationJumpAndLinkRegister(instruction);
-                    break;
-                }
-                case 0b100011: {
-                    operationSubstractUnsigned(instruction);
+                case 0b000010: {
+                    operationShiftRightLogical(instruction);
                     break;
                 }
                 case 0b000011: {
                     operationShiftRightArithmetic(instruction);
                     break;
                 }
-                case 0b011010: {
-                    operationDivision(instruction);
-                    break;
-                }
-                case 0b010010: {
-                    operationMoveFromLowRegister(instruction);
-                    break;
-                }
-                case 0b000010: {
-                    operationShiftRightLogical(instruction);
-                    break;
-                }
-                case 0b011011: {
-                    operationDivisionUnsigned(instruction);
-                    break;
-                }
-                case 0b010000: {
-                    operationMoveFromHighRegister(instruction);
-                    break;
-                }
-                case 0b101010: {
-                    operationSetOnLessThan(instruction);
-                    break;
-                }
-                case 0b001100: {
-                    operationSystemCall(instruction);
-                    break;
-                }
-                case 0b010011: {
-                    operationMoveToLowRegister(instruction);
-                    break;
-                }
-                case 0b010001: {
-                    operationMoveToHighRegister(instruction);
-                    break;
-                }
                 case 0b000100: {
                     operationShiftLeftLogicalVariable(instruction);
-                    break;
-                }
-                case 0b100111: {
-                    operationBitwiseNotOr(instruction);
-                    break;
-                }
-                case 0b000111: {
-                    operationShiftRightArithmeticVariable(instruction);
                     break;
                 }
                 case 0b000110: {
                     operationShiftRightLogicalVariable(instruction);
                     break;
                 }
-                case 0b011001: {
-                    operationMultiplyUnsigned(instruction);
+                case 0b000111: {
+                    operationShiftRightArithmeticVariable(instruction);
                     break;
                 }
-                case 0b100110: {
-                    operationBitwiseExclusiveOr(instruction);
+                case 0b001000: {
+                    operationJumpRegister(instruction);
+                    break;
+                }
+                case 0b001001: {
+                    operationJumpAndLinkRegister(instruction);
+                    break;
+                }
+                case 0b001100: {
+                    operationSystemCall(instruction);
                     break;
                 }
                 case 0b001101: {
                     operationBreak(instruction);
                     break;
                 }
+                case 0b010000: {
+                    operationMoveFromHighRegister(instruction);
+                    break;
+                }
+                case 0b010001: {
+                    operationMoveToHighRegister(instruction);
+                    break;
+                }
+                case 0b010010: {
+                    operationMoveFromLowRegister(instruction);
+                    break;
+                }
+                case 0b010011: {
+                    operationMoveToLowRegister(instruction);
+                    break;
+                }
                 case 0b011000: {
                     operationMultiply(instruction);
                     break;
                 }
+                case 0b011001: {
+                    operationMultiplyUnsigned(instruction);
+                    break;
+                }
+                case 0b011010: {
+                    operationDivision(instruction);
+                    break;
+                }
+                case 0b011011: {
+                    operationDivisionUnsigned(instruction);
+                    break;
+                }
+                case 0b100000: {
+                    operationAdd(instruction);
+                    break;
+                }
+                case 0b100001: {
+                    operationAddUnsigned(instruction);
+                    break;
+                }
                 case 0b100010: {
                     operationSubstract(instruction);
+                    break;
+                }
+                case 0b100011: {
+                    operationSubstractUnsigned(instruction);
+                    break;
+                }
+                case 0b100100: {
+                    operationBitwiseAnd(instruction);
+                    break;
+                }
+                case 0b100101: {
+                    operationBitwiseOr(instruction);
+                    break;
+                }
+                case 0b100110: {
+                    operationBitwiseExclusiveOr(instruction);
+                    break;
+                }
+                case 0b100111: {
+                    operationBitwiseNotOr(instruction);
+                    break;
+                }
+                case 0b101010: {
+                    operationSetOnLessThan(instruction);
+                    break;
+                }
+                case 0b101011: {
+                    operationSetOnLessThanUnsigned(instruction);
                     break;
                 }
                 default: {
@@ -198,80 +198,40 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             }
             break;
         }
-        case 0b001111: {
-            operationLoadUpperImmediate(instruction);
-            break;
-        }
-        case 0b001101: {
-            operationBitwiseOrImmediate(instruction);
-            break;
-        }
-        case 0b101011: {
-            operationStoreWord(instruction);
-            break;
-        }
-        case 0b01001: {
-            operationAddImmediateUnsigned(instruction);
+        case 0b000001: {
+            operationsMultipleBranchIf(instruction);
             break;
         }
         case 0b000010: {
             operationJump(instruction);
             break;
         }
-        case 0b010000: {
-            operationCoprocessor0(instruction);
-            break;
-        }
-        case 0b000101: {
-            operationBranchIfNotEqual(instruction);
-            break;
-        }
-        case 0b001000: {
-            operationAddImmediate(instruction);
-            break;
-        }
-        case 0b100011: {
-            operationLoadWord(instruction);
-            break;
-        }
-        case 0b101001: {
-            operationStoreHalfWord(instruction);
-            break;
-        }
         case 0b000011: {
             operationJumpAndLink(instruction);
-            break;
-        }
-        case 0b001100: {
-            operationBitwiseAndImmediate(instruction);
-            break;
-        }
-        case 0b101000: {
-            operationStoreByte(instruction);
-            break;
-        }
-        case 0b100000: {
-            operationLoadByte(instruction);
             break;
         }
         case 0b000100: {
             operationBranchIfEqual(instruction);
             break;
         }
-        case 0b000111: {
-            operationBranchIfGreaterThanZero(instruction);
+        case 0b000101: {
+            operationBranchIfNotEqual(instruction);
             break;
         }
         case 0b000110: {
             operationBranchIfLessThanOrEqualToZero(instruction);
             break;
         }
-        case 0b100100: {
-            operationLoadByteUnsigned(instruction);
+        case 0b000111: {
+            operationBranchIfGreaterThanZero(instruction);
             break;
         }
-        case 0b000001: {
-            operationsMultipleBranchIf(instruction);
+        case 0b001000: {
+            operationAddImmediate(instruction);
+            break;
+        }
+        case 0b01001: {
+            operationAddImmediateUnsigned(instruction);
             break;
         }
         case 0b001010: {
@@ -282,16 +242,24 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationSetIfLessThanImmediateUnsigned(instruction);
             break;
         }
-        case 0b100101: {
-            operationLoadHalfWordUnsigned(instruction);
+        case 0b001100: {
+            operationBitwiseAndImmediate(instruction);
             break;
         }
-        case 0b100001: {
-            operationLoadHalfWord(instruction);
+        case 0b001101: {
+            operationBitwiseOrImmediate(instruction);
             break;
         }
         case 0b001110: {
             operationBitwiseExclusiveOrImmediate(instruction);
+            break;
+        }
+        case 0b001111: {
+            operationLoadUpperImmediate(instruction);
+            break;
+        }
+        case 0b010000: {
+            operationCoprocessor0(instruction);
             break;
         }
         case 0b010001: {
@@ -306,16 +274,48 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationCoprocessor3(instruction);
             break;
         }
+        case 0b100000: {
+            operationLoadByte(instruction);
+            break;
+        }
+        case 0b100001: {
+            operationLoadHalfWord(instruction);
+            break;
+        }
         case 0b100010: {
             operationLoadWordLeft(instruction);
+            break;
+        }
+        case 0b100011: {
+            operationLoadWord(instruction);
+            break;
+        }
+        case 0b100100: {
+            operationLoadByteUnsigned(instruction);
+            break;
+        }
+        case 0b100101: {
+            operationLoadHalfWordUnsigned(instruction);
             break;
         }
         case 0b100110: {
             operationLoadWordRight(instruction);
             break;
         }
+        case 0b101000: {
+            operationStoreByte(instruction);
+            break;
+        }
+        case 0b101001: {
+            operationStoreHalfWord(instruction);
+            break;
+        }
         case 0b101010: {
             operationStoreWordLeft(instruction);
+            break;
+        }
+        case 0b101011: {
+            operationStoreWord(instruction);
             break;
         }
         case 0b101110: {
