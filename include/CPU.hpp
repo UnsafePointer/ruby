@@ -110,6 +110,7 @@ class CPU {
     void operationBitwiseNotOr(Instruction instruction);
     void operationShiftRightArithmeticVariable(Instruction instruction);
     void operationShiftRightLogicalVariable(Instruction instruction);
+    void operationMultiplyUnsigned(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);

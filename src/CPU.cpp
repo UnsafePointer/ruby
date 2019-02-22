@@ -171,6 +171,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationShiftRightLogicalVariable(instruction);
                     break;
                 }
+                case 0b011001: {
+                    operationMultiplyUnsigned(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -913,4 +917,16 @@ void CPU::operationShiftRightLogicalVariable(Instruction instruction) {
 
     uint32_t value = registerAtIndex(rt) >> (registerAtIndex(rs) & 0x1f);
     setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationMultiplyUnsigned(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint64_t s = registerAtIndex(rs);
+    uint64_t t = registerAtIndex(rt);
+
+    uint64_t result = s * t;
+    highRegister = ((uint32_t)(result >> 32));
+    lowRegister = ((uint32_t)result);
 }
