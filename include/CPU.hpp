@@ -127,6 +127,11 @@ class CPU {
     void operationStoreWordLeft(Instruction instruction);
     void operationStoreWordRight(Instruction instruction);
 
+    void operationLoadWordCoprocessor0(Instruction instruction);
+    void operationLoadWordCoprocessor1(Instruction instruction);
+    void operationLoadWordCoprocessor2(Instruction instruction);
+    void operationLoadWordCoprocessor3(Instruction instruction);
+
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);
     void operationStoreByte(Instruction instruction) const;
