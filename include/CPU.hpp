@@ -123,6 +123,7 @@ class CPU {
     void operationCoprocessor3(Instruction instruction);
 
     void operationLoadWordLeft(Instruction instruction);
+    void operationLoadWordRight(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);
