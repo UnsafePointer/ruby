@@ -131,6 +131,10 @@ class CPU {
     void operationLoadWordCoprocessor1(Instruction instruction);
     void operationLoadWordCoprocessor2(Instruction instruction);
     void operationLoadWordCoprocessor3(Instruction instruction);
+    void operationStoreWordCoprocessor0(Instruction instruction);
+    void operationStoreWordCoprocessor1(Instruction instruction);
+    void operationStoreWordCoprocessor2(Instruction instruction);
+    void operationStoreWordCoprocessor3(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);

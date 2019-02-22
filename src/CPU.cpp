@@ -338,6 +338,22 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationLoadWordCoprocessor3(instruction);
             break;
         }
+        case 0b111000: {
+            operationStoreWordCoprocessor0(instruction);
+            break;
+        }
+        case 0b111001: {
+            operationStoreWordCoprocessor1(instruction);
+            break;
+        }
+        case 0b111010: {
+            operationStoreWordCoprocessor2(instruction);
+            break;
+        }
+        case 0b111011: {
+            operationStoreWordCoprocessor3(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -1208,5 +1224,22 @@ void CPU::operationLoadWordCoprocessor2(Instruction instruction) {
 }
 
 void CPU::operationLoadWordCoprocessor3(Instruction instruction) {
+    triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationStoreWordCoprocessor0(Instruction instruction) {
+    triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationStoreWordCoprocessor1(Instruction instruction) {
+    triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
+    cout << "Unhandled GTE SWC" << hex << instruction.dat() << endl;
+    exit(1);
+}
+
+void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
 }
