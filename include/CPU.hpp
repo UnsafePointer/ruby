@@ -116,6 +116,7 @@ class CPU {
     void operationBreak(Instruction instruction);
     void operationMultiply(Instruction instruction);
     void operationSubstract(Instruction instruction);
+    void operationBitwiseExclusiveOrImmediate(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);

@@ -290,6 +290,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationLoadHalfWord(instruction);
             break;
         }
+        case 0b001110: {
+            operationBitwiseExclusiveOrImmediate(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -986,4 +990,13 @@ void CPU::operationSubstract(Instruction instruction) {
     } else {
         setRegisterAtIndex(rd, result);
     }
+}
+
+void CPU::operationBitwiseExclusiveOrImmediate(Instruction instruction) {
+    uint32_t imm = instruction.imm();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t value = registerAtIndex(rs) ^ imm;
+    setRegisterAtIndex(rt, value);
 }
