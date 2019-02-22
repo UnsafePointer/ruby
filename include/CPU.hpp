@@ -9,7 +9,8 @@ enum ExceptionType : uint32_t {
     LoadAddress = 0x4,
     StoreAddress = 0x5,
     Break = 0x9,
-    Coprocessor = 0xb
+    Coprocessor = 0xb,
+    Illegal = 0xa
 };
 
 /*
@@ -145,6 +146,8 @@ class CPU {
     void operationLoadHalfWordUnsigned(Instruction instruction);
     void operationLoadByte(Instruction instruction);
     void operationLoadByteUnsigned(Instruction instruction);
+
+    void operationIllegal(Instruction instruction);
 
     uint32_t loadWord(uint32_t address) const;
     uint16_t loadHalfWord(uint32_t address) const;

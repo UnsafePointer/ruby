@@ -192,8 +192,8 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     break;
                 }
                 default: {
-                    cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
-                    exit(1);
+                    operationIllegal(instruction);
+                    break;
                 }
             }
             break;
@@ -355,8 +355,8 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             break;
         }
         default: {
-            cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
-            exit(1);
+            operationIllegal(instruction);
+            break;
         }
     }
 }
@@ -1242,4 +1242,8 @@ void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationIllegal(Instruction instruction) {
+    triggerException(ExceptionType::Illegal);
 }
