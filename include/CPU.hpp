@@ -125,6 +125,7 @@ class CPU {
     void operationLoadWordLeft(Instruction instruction);
     void operationLoadWordRight(Instruction instruction);
     void operationStoreWordLeft(Instruction instruction);
+    void operationStoreWordRight(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);
