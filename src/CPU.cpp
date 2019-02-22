@@ -306,6 +306,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
             operationCoprocessor3(instruction);
             break;
         }
+        case 0b100010: {
+            operationLoadWordLeft(instruction);
+            break;
+        }
         default: {
             cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
             exit(1);
@@ -1024,4 +1028,38 @@ void CPU::operationCoprocessor2(Instruction instruction) {
 
 void CPU::operationCoprocessor3(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationLoadWordLeft(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    RegisterIndex rt = instruction.rt();
+    RegisterIndex rs = instruction.rs();
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t currentValue = outputRegisters[rt.idx()];
+
+    uint32_t alignedAddress = address & !3;
+    uint32_t alignedWord = loadWord(alignedAddress);
+
+    uint32_t value;
+    switch (address & 3) {
+        case 0: {
+            value = (currentValue & 0x00ffffff) | (alignedWord << 24);
+            break;
+        }
+        case 1: {
+            value = (currentValue & 0x0000ffff) | (alignedWord << 16);
+            break;
+        }
+        case 2: {
+            value = (currentValue & 0x000000ff) | (alignedWord << 8);
+            break;
+        }
+        case 3: {
+            value = (currentValue & 0x00000000) | (alignedWord << 0);
+            break;
+        }
+    }
+
+    load = {rt, value};
 }
