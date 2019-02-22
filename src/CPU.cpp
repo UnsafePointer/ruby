@@ -175,6 +175,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationMultiplyUnsigned(instruction);
                     break;
                 }
+                case 0b100110: {
+                    operationBitwiseExclusiveOr(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -929,4 +933,13 @@ void CPU::operationMultiplyUnsigned(Instruction instruction) {
     uint64_t result = s * t;
     highRegister = ((uint32_t)(result >> 32));
     lowRegister = ((uint32_t)result);
+}
+
+void CPU::operationBitwiseExclusiveOr(Instruction instruction) {
+    RegisterIndex rd = instruction.rd();
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    uint32_t value = registerAtIndex(rs) ^ registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
 }
