@@ -81,6 +81,11 @@ uint16_t Interconnect::loadHalfWord(uint32_t address) const {
     if (offset) {
         return ram.loadHalfWord(absoluteAddress);
     }
+    offset = interruptRequestControlRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Interrupt Request Control read at offset: 0x" << hex << *offset << endl;
+        return 0;
+    }
     cout << "Unhandled half read at: 0x" << hex << address << endl;
     exit(1);
 }
@@ -189,6 +194,11 @@ void Interconnect::storeHalfWord(uint32_t address, uint16_t value) const {
     offset = timerRegisterRange.contains(absoluteAddress);
     if (offset) {
         cout << "Unhandled Timer Register write at offset: 0x" << hex << *offset << endl;
+        return;
+    }
+    offset = interruptRequestControlRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Interrupt Request Control write at offset: 0x" << hex << *offset << endl;
         return;
     }
     cout << "Unhandled half write at: 0x" << hex << address << endl;
