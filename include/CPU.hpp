@@ -114,6 +114,7 @@ class CPU {
     void operationMultiplyUnsigned(Instruction instruction);
     void operationBitwiseExclusiveOr(Instruction instruction);
     void operationBreak(Instruction instruction);
+    void operationMultiply(Instruction instruction);
 
     void operationStoreWord(Instruction instruction);
     void operationStoreHalfWord(Instruction instruction);

@@ -183,6 +183,10 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
                     operationBreak(instruction);
                     break;
                 }
+                case 0b011000: {
+                    operationMultiply(instruction);
+                    break;
+                }
                 default: {
                     cout << "Unhandled instruction 0x" << hex << instruction.dat() << endl;
                     exit(1);
@@ -950,4 +954,16 @@ void CPU::operationBitwiseExclusiveOr(Instruction instruction) {
 
 void CPU::operationBreak(Instruction instruction) {
     triggerException(ExceptionType::Break);
+}
+
+void CPU::operationMultiply(Instruction instruction) {
+    RegisterIndex rs = instruction.rs();
+    RegisterIndex rt = instruction.rt();
+
+    int64_t s = ((int64_t)registerAtIndex(rs));
+    int64_t t = ((int64_t)registerAtIndex(rt));
+
+    uint64_t result = s * t;
+    highRegister = ((uint32_t)(result >> 32));
+    lowRegister = ((uint32_t)result);
 }
