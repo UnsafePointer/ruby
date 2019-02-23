@@ -237,6 +237,9 @@ uint32_t Interconnect::dmaRegister(uint32_t offset) const {
         case 0x70: {
             return dma.ctrlRegister();
         }
+        case 0x74: {
+            return dma.interruptRegister();
+        }
         default: {
             cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
             exit(1);
@@ -248,6 +251,10 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
     switch (offset) {
         case 0x70: {
             dma.setControlRegister(value);
+            return;
+        }
+        case 0x74: {
+            dma.setInterruptRegister(value);
             return;
         }
         default: {
