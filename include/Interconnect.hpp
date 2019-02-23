@@ -1,6 +1,7 @@
 #pragma once
 #include "BIOS.hpp"
 #include "RAM.hpp"
+#include "DMA.hpp"
 
 /*
 Memory Map
@@ -19,9 +20,12 @@ See IOMap.md for I/O register mapping
 class Interconnect {
     const BIOS &bios;
     RAM &ram;
+    DMA &dma;
     uint32_t maskRegion(uint32_t address) const;
+    uint32_t dmaRegister(uint32_t offset) const;
+    void setDMARegister(uint32_t offset, uint32_t value) const;
 public:
-    Interconnect(BIOS &bios, RAM &ram);
+    Interconnect(BIOS &bios, RAM &ram, DMA &dma);
     ~Interconnect();
 
     uint32_t loadWord(uint32_t address) const;

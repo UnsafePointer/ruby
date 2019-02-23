@@ -27,7 +27,7 @@ const Range timerRegisterRange = Range(0x1f801100, 48);
 const Range dmaRegisterRange = Range(0x1f801080, 0x80);
 const Range gpuRegisterRange = Range(0x1f801810, 8);
 
-Interconnect::Interconnect(BIOS &bios, RAM &ram) : bios(bios), ram(ram) {
+Interconnect::Interconnect(BIOS &bios, RAM &ram, DMA &dma) : bios(bios), ram(ram), dma(dma) {
 }
 
 Interconnect::~Interconnect() {
@@ -56,8 +56,7 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
     if (offset) {
-        cout << "Unhandled DMA read at offset: 0x" << hex << *offset << endl;
-        return 0;
+        return dmaRegister(*offset);
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
@@ -170,7 +169,7 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
     if (offset) {
-        cout << "Unhandled DMA write at offset: 0x" << hex << *offset << endl;
+        setDMARegister(*offset, value);
         return;
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
@@ -231,4 +230,29 @@ void Interconnect::storeByte(uint32_t address, uint8_t value) const {
     }
     cout << "Unhandled byte write at: 0x" << hex << address << endl;
     exit(1);
+}
+
+uint32_t Interconnect::dmaRegister(uint32_t offset) const {
+    switch (offset) {
+        case 0x70: {
+            return dma.ctrlRegister();
+        }
+        default: {
+            cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
+            exit(1);
+        }
+    }
+}
+
+void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
+    switch (offset) {
+        case 0x70: {
+            dma.setControlRegister(value);
+            return;
+        }
+        default: {
+            cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;
+            exit(1);
+        }
+    }
 }

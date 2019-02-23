@@ -1,12 +1,14 @@
 #include "BIOS.hpp"
 #include "Interconnect.hpp"
 #include "CPU.hpp"
+#include "DMA.hpp"
 
 int main() {
     BIOS bios = BIOS();
     bios.loadBin("SCPH1001.BIN");
     RAM ram = RAM();
-    Interconnect interconnect = Interconnect(bios, ram);
+    DMA dma = DMA();
+    Interconnect interconnect = Interconnect(bios, ram, dma);
     CPU cpu = CPU(interconnect);
     while (true) {
         cpu.executeNextInstruction();
