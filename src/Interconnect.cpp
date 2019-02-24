@@ -233,12 +233,41 @@ void Interconnect::storeByte(uint32_t address, uint8_t value) const {
 }
 
 uint32_t Interconnect::dmaRegister(uint32_t offset) const {
-    switch (offset) {
-        case 0x70: {
-            return dma.ctrlRegister();
+    uint32_t upper = (offset & 0x70) >> 4;
+    uint32_t lower = (offset & 0xf);
+    switch (upper) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6: {
+            Port port = portWithIndex(upper);
+            Channel channel = dma.channelForPort(port);
+            switch (lower) {
+                case 8: {
+                    return channel.controlRegister();
+                }
+                default: {
+                    cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
+                    exit(1);
+                }
+            }
         }
-        case 0x74: {
-            return dma.interruptRegister();
+        case 7: {
+            switch (lower) {
+                case 0: {
+                    return dma.ctrlRegister();
+                }
+                case 4: {
+                    return dma.interruptRegister();
+                }
+                default: {
+                    cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
+                    exit(1);
+                }
+            }
         }
         default: {
             cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
@@ -248,14 +277,46 @@ uint32_t Interconnect::dmaRegister(uint32_t offset) const {
 }
 
 void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
-    switch (offset) {
-        case 0x70: {
-            dma.setControlRegister(value);
-            return;
+    uint32_t upper = (offset & 0x70) >> 4;
+    uint32_t lower = (offset & 0xf);
+    switch (upper) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6: {
+            Port port = portWithIndex(upper);
+            Channel channel = dma.channelForPort(port);
+            switch (lower) {
+                case 8: {
+                    channel.setControlRegister(value);
+                    break;
+                }
+                default: {
+                    cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;
+                    exit(1);
+                }
+            }
+            break;
         }
-        case 0x74: {
-            dma.setInterruptRegister(value);
-            return;
+        case 7: {
+            switch (lower) {
+                case 0: {
+                    dma.setControlRegister(value);
+                    break;
+                }
+                case 4: {
+                    dma.setInterruptRegister(value);
+                    break;
+                }
+                default: {
+                    cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;
+                    exit(1);
+                }
+            }
+            break;
         }
         default: {
             cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;

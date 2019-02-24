@@ -1,5 +1,29 @@
 #pragma once
 #include <cstdint>
+#include "Channel.hpp"
+
+// DMA Register Summary
+// 1F80108xh DMA0 channel 0  MDECin  (RAM to MDEC)
+// 1F80109xh DMA1 channel 1  MDECout (MDEC to RAM)
+// 1F8010Axh DMA2 channel 2  GPU (lists + image data)
+// 1F8010Bxh DMA3 channel 3  CDROM   (CDROM to RAM)
+// 1F8010Cxh DMA4 channel 4  SPU
+// 1F8010Dxh DMA5 channel 5  PIO (Expansion Port)
+// 1F8010Exh DMA6 channel 6  OTC (reverse clear OT) (GPU related)
+// 1F8010F0h DPCR - DMA Control register
+// 1F8010F4h DICR - DMA Interrupt register
+
+enum Port {
+    MDECin = 0,
+    MDECout = 1,
+    GPU = 2,
+    CDROM = 3,
+    SPU = 4,
+    PIO = 5,
+    OTC = 6
+};
+
+Port portWithIndex(uint32_t index);
 
 class DMA {
     uint32_t controlRegister;
@@ -18,6 +42,8 @@ class DMA {
     bool interruptRequestEnable;
     uint8_t interruptRequestChannelFlags;
 
+    Channel channels[7];
+
     bool interruptRequestStatus() const;
 public:
     DMA();
@@ -27,5 +53,5 @@ public:
     void setControlRegister(uint32_t value);
     uint32_t interruptRegister() const;
     void setInterruptRegister(uint32_t value);
-
+    Channel channelForPort(Port port);
 };

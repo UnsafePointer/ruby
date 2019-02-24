@@ -1,7 +1,20 @@
 #include "DMA.hpp"
+#include <iostream>
+
+using namespace std;
+
+Port portWithIndex(uint32_t index) {
+    if (index > Port::OTC) {
+        cout << "Attempting to get port with out-of-bounds index: " << dec << index << endl;
+        exit(1);
+    }
+    return Port(index);
+}
 
 DMA::DMA() : controlRegister(0x07654321) {
-
+    for (int i = 0; i < 7; i++) {
+        channels[i] = Channel();
+    }
 }
 
 DMA::~DMA() {
@@ -40,4 +53,8 @@ void DMA::setInterruptRegister(uint32_t value) {
 
     uint8_t flagReset = ((value >> 24) & 0x3f);
     interruptRequestChannelFlags &= !flagReset;
+}
+
+Channel DMA::channelForPort(Port port) {
+    return channels[port];
 }
