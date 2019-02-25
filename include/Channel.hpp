@@ -62,4 +62,6 @@ public:
     void setBaseAddressRegister(uint32_t value);
     uint32_t blockControlRegister() const;
     void setBlockControlRegister(uint32_t value);
+    bool isActive() const;
+    Sync snc() const;
 };

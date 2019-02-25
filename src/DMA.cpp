@@ -58,3 +58,18 @@ void DMA::setInterruptRegister(uint32_t value) {
 Channel DMA::channelForPort(Port port) {
     return channels[port];
 }
+
+void DMA::execute(Port port) {
+    Channel channel = channels[port];
+    if (channel.snc() == Sync::LinkedList) {
+        cout << "Linked List unimplemented" << endl;
+        exit(1);
+    } else {
+        executeBlock(channel);
+    }
+    return;
+}
+
+void DMA::executeBlock(Channel channel) {
+    return;
+}

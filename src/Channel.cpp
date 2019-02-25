@@ -77,3 +77,14 @@ void Channel::setBlockControlRegister(uint32_t value) {
     blockSize = value & 0xffff;
     blockCount = (value >> 16) & 0xffff;
 }
+
+bool Channel::isActive() const {
+    if (sync == Sync::Manual) {
+        return enable && trigger;
+    }
+    return enable;
+}
+
+Sync Channel::snc() const {
+    return sync;
+}

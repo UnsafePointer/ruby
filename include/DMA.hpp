@@ -20,7 +20,8 @@ enum Port {
     CDROM = 3,
     SPU = 4,
     PIO = 5,
-    OTC = 6
+    OTC = 6,
+    None = 1337
 };
 
 Port portWithIndex(uint32_t index);
@@ -45,6 +46,7 @@ class DMA {
     Channel channels[7];
 
     bool interruptRequestStatus() const;
+    void executeBlock(Channel channel);
 public:
     DMA();
     ~DMA();
@@ -54,4 +56,6 @@ public:
     uint32_t interruptRegister() const;
     void setInterruptRegister(uint32_t value);
     Channel channelForPort(Port port);
+
+    void execute(Port port);
 };

@@ -285,6 +285,7 @@ uint32_t Interconnect::dmaRegister(uint32_t offset) const {
 void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
+    Port activePort = Port::None;
     switch (upper) {
         case 0:
         case 1:
@@ -313,6 +314,9 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
                     exit(1);
                 }
             }
+            if (channel.isActive()) {
+                activePort = port;
+            }
             break;
         }
         case 7: {
@@ -336,5 +340,8 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
             cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;
             exit(1);
         }
+    }
+    if (activePort != Port::None) {
+        dma.execute(activePort);
     }
 }
