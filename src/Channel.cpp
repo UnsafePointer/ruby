@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Channel::Channel() : enable(false), direction(Direction::ToRam), step(Step::Increment), sync(Sync::Manual), trigger(false), chop(false), chopDMAWindowSize(0), chopCPUWindowSize(0), unknown(0)  {
+Channel::Channel() : enable(false), direction(Direction::ToRam), step(Step::Increment), sync(Sync::Manual), trigger(false), chop(false), chopDMAWindowSize(0), chopCPUWindowSize(0), unknown(0), baseAddress(0)  {
 
 }
 
@@ -56,4 +56,12 @@ void Channel::setControlRegister(uint32_t value) {
     enable = ((value >> 24) & 1) != 0;
     trigger = ((value >> 28) & 1) != 0;
     unknown = ((value >> 29) & 3) != 0;
+}
+
+uint32_t Channel::baseAddressRegister() const {
+    return baseAddress;
+}
+
+void Channel::setBaseAddressRegister(uint32_t value) {
+    baseAddress = (value & 0xffffff);
 }

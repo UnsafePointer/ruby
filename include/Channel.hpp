@@ -48,10 +48,14 @@ class Channel {
     uint8_t chopDMAWindowSize;
     uint8_t chopCPUWindowSize;
     uint8_t unknown;
+
+    uint32_t baseAddress;
 public:
     Channel();
     ~Channel();
 
     uint32_t controlRegister() const;
     void setControlRegister(uint32_t value);
+    uint32_t baseAddressRegister() const;
+    void setBaseAddressRegister(uint32_t value);
 };

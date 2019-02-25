@@ -246,6 +246,9 @@ uint32_t Interconnect::dmaRegister(uint32_t offset) const {
             Port port = portWithIndex(upper);
             Channel channel = dma.channelForPort(port);
             switch (lower) {
+                case 0: {
+                    return channel.baseAddressRegister();
+                }
                 case 8: {
                     return channel.controlRegister();
                 }
@@ -290,6 +293,10 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
             Port port = portWithIndex(upper);
             Channel channel = dma.channelForPort(port);
             switch (lower) {
+                case 0: {
+                    channel.setBaseAddressRegister(value);
+                    break;
+                }
                 case 8: {
                     channel.setControlRegister(value);
                     break;
