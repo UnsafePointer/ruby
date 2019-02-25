@@ -50,6 +50,8 @@ class Channel {
     uint8_t unknown;
 
     uint32_t baseAddress;
+    uint16_t blockSize;
+    uint16_t blockCount;
 public:
     Channel();
     ~Channel();
@@ -58,4 +60,6 @@ public:
     void setControlRegister(uint32_t value);
     uint32_t baseAddressRegister() const;
     void setBaseAddressRegister(uint32_t value);
+    uint32_t blockControlRegister() const;
+    void setBlockControlRegister(uint32_t value);
 };

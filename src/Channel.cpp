@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Channel::Channel() : enable(false), direction(Direction::ToRam), step(Step::Increment), sync(Sync::Manual), trigger(false), chop(false), chopDMAWindowSize(0), chopCPUWindowSize(0), unknown(0), baseAddress(0)  {
+Channel::Channel() : enable(false), direction(Direction::ToRam), step(Step::Increment), sync(Sync::Manual), trigger(false), chop(false), chopDMAWindowSize(0), chopCPUWindowSize(0), unknown(0), baseAddress(0), blockSize(0), blockCount(0)  {
 
 }
 
@@ -64,4 +64,16 @@ uint32_t Channel::baseAddressRegister() const {
 
 void Channel::setBaseAddressRegister(uint32_t value) {
     baseAddress = (value & 0xffffff);
+}
+
+uint32_t Channel::blockControlRegister() const {
+    uint32_t blockSizeData = blockSize;
+    uint32_t blockCountData = blockCount;
+
+    return (blockCountData << 16) | blockSizeData;
+}
+
+void Channel::setBlockControlRegister(uint32_t value) {
+    blockSize = value & 0xffff;
+    blockCount = (value >> 16) & 0xffff;
 }

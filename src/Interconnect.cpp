@@ -249,6 +249,9 @@ uint32_t Interconnect::dmaRegister(uint32_t offset) const {
                 case 0: {
                     return channel.baseAddressRegister();
                 }
+                case 4: {
+                    return channel.blockControlRegister();
+                }
                 case 8: {
                     return channel.controlRegister();
                 }
@@ -295,6 +298,10 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
             switch (lower) {
                 case 0: {
                     channel.setBaseAddressRegister(value);
+                    break;
+                }
+                case 4: {
+                    channel.setBlockControlRegister(value);
                     break;
                 }
                 case 8: {
