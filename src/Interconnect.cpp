@@ -62,7 +62,7 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
     if (offset) {
         switch (*offset) {
             case 4: {
-                return 0x10000000;
+                return 0x1c000000;
             }
             default: {
                 cout << "Unhandled GPU read at offset: 0x" << hex << *offset << endl;
