@@ -55,7 +55,7 @@ public:
     void setControlRegister(uint32_t value);
     uint32_t interruptRegister() const;
     void setInterruptRegister(uint32_t value);
-    Channel channelForPort(Port port);
+    Channel& channelForPort(Port port);
 
     void execute(Port port);
 };
