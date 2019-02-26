@@ -70,6 +70,11 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
             }
         }
     }
+    offset = timerRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        cout << "Unhandled Timer Register read at offset: 0x" << hex << *offset << endl;
+        return 0;
+    }
     cout << "Unhandled read at: 0x" << hex << address << endl;
     exit(1);
 }
