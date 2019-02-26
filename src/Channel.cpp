@@ -88,3 +88,34 @@ bool Channel::isActive() const {
 Sync Channel::snc() const {
     return sync;
 }
+
+Direction Channel::dir() const {
+    return direction;
+}
+
+Step Channel::stp() const {
+    return step;
+}
+
+optional<uint32_t> Channel::transferSize() const {
+    switch (sync) {
+        case Sync::LinkedList: {
+            return nullopt;
+        }
+        case Sync::Manual: {
+            return { blockSize };
+        }
+        case Sync::Request: {
+            return { blockSize * blockCount };
+        }
+        default: {
+            cout << "Unknown DMA sync mode" << endl;
+            exit(1);
+        }
+    }
+}
+
+void Channel::done() {
+    enable = false;
+    trigger = false;
+}

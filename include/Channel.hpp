@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <optional>
 
 enum Direction {
     ToRam = 0,
@@ -64,4 +65,8 @@ public:
     void setBlockControlRegister(uint32_t value);
     bool isActive() const;
     Sync snc() const;
+    Direction dir() const;
+    Step stp() const;
+    std::optional<uint32_t> transferSize() const;
+    void done();
 };

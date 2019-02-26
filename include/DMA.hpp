@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "Channel.hpp"
+#include "RAM.hpp"
 
 // DMA Register Summary
 // 1F80108xh DMA0 channel 0  MDECin  (RAM to MDEC)
@@ -27,6 +28,8 @@ enum Port {
 Port portWithIndex(uint32_t index);
 
 class DMA {
+    RAM &ram;
+
     uint32_t controlRegister;
 
 // 1F8010F4h - DICR - DMA Interrupt Register (R/W)
@@ -48,7 +51,7 @@ class DMA {
     bool interruptRequestStatus() const;
     void executeBlock(Channel channel);
 public:
-    DMA();
+    DMA(RAM &ram);
     ~DMA();
 
     uint32_t ctrlRegister() const;
@@ -58,4 +61,5 @@ public:
     Channel& channelForPort(Port port);
 
     void execute(Port port);
+    void executeBlock(Port port, Channel& channel);
 };

@@ -7,7 +7,7 @@ int main() {
     BIOS bios = BIOS();
     bios.loadBin("SCPH1001.BIN");
     RAM ram = RAM();
-    DMA dma = DMA();
+    DMA dma = DMA(ram);
     Interconnect interconnect = Interconnect(bios, ram, dma);
     CPU cpu = CPU(interconnect);
     while (true) {

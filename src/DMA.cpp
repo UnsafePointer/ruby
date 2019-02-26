@@ -11,7 +11,7 @@ Port portWithIndex(uint32_t index) {
     return Port(index);
 }
 
-DMA::DMA() : controlRegister(0x07654321) {
+DMA::DMA(RAM &ram) : ram(ram), controlRegister(0x07654321) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel();
     }
@@ -65,11 +65,60 @@ void DMA::execute(Port port) {
         cout << "Linked List unimplemented" << endl;
         exit(1);
     } else {
-        executeBlock(channel);
+        executeBlock(port, channel);
     }
     return;
 }
 
-void DMA::executeBlock(Channel channel) {
+void DMA::executeBlock(Port port, Channel& channel) {
+    int8_t step = 4;
+    if (channel.stp() == Step::Decrement) {
+        step *= -1;
+    }
+    uint32_t address = channel.baseAddressRegister();
+    optional<uint32_t> transferSize = channel.transferSize();
+    if (!transferSize) {
+        cout << "Unknown DMA transfer size" << endl;
+        exit(1);
+    }
+    uint32_t remainingTransferSize = *transferSize;
+    while (remainingTransferSize > 0) {
+        uint32_t currentAddress = address & 0x1ffffc;
+        switch (channel.dir()) {
+            case Direction::FromRam: {
+                cout << "Unhandled DMA direction" << endl;
+                exit(1);
+                break;
+            }
+            case Direction::ToRam: {
+                uint32_t source;
+                switch (port) {
+                    case Port::OTC: {
+                        switch (remainingTransferSize) {
+                            case 1: {
+                                source = 0xffffff;
+                                break;
+                            }
+                            default: {
+                                source = (address - 4) & 0x1fffff;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    default: {
+                        cout << "Unhandled DMA source port" << endl;
+                        exit(1);
+                        break;
+                    }
+                }
+                ram.storeWord(currentAddress, source);
+                break;
+            }
+        }
+        address += step;
+        remainingTransferSize -= 1;
+    }
+    channel.done();
     return;
 }
