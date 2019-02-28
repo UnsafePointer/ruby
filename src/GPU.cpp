@@ -15,7 +15,27 @@ TexturePageColors texturePageColorsWithValue(uint32_t value) {
     return TexturePageColors(value);
 }
 
-GPU::GPU() : texturePageBaseX(0), texturePageBaseY(0), semiTransparency(0), texturePageColors(TexturePageColors::T4Bit), ditheringEnable(false), allowDrawToDisplayArea(false), shouldSetMaskBit(false), shouldPreserveMaskedPixels(false), interlaceField(Field::Top), textureDisable(false), horizontalResolution(horizontalResolutionFromValues(0, 0)), verticalResolution(VerticalResolution::Y240), videoMode(VideoMode::NTSC), displayAreaColorDepth(DisplayAreaColorDepth::D15Bits), verticalInterlaceEnable(false), displayDisable(true), interruptRequestEnable(false), dmaDirection(GPUDMADirection::Off), rectangleTextureFlipX(false), rectangleTextureFlipY(false) {
+GPU::GPU() : texturePageBaseX(0),
+             texturePageBaseY(0),
+             semiTransparency(0),
+             texturePageColors(TexturePageColors::T4Bit),
+             ditheringEnable(false),
+             allowDrawToDisplayArea(false),
+             shouldSetMaskBit(false),
+             shouldPreserveMaskedPixels(false),
+             interlaceField(Field::Top),
+             textureDisable(false),
+             horizontalResolution(horizontalResolutionFromValues(0, 0)),
+             verticalResolution(VerticalResolution::Y240),
+             videoMode(VideoMode::NTSC),
+             displayAreaColorDepth(DisplayAreaColorDepth::D15Bits),
+             verticalInterlaceEnable(false),
+             displayDisable(true),
+             interruptRequestEnable(false),
+             dmaDirection(GPUDMADirection::Off),
+             rectangleTextureFlipX(false),
+             rectangleTextureFlipY(false)
+{
 }
 
 GPU::~GPU() {
