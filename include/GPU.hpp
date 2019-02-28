@@ -85,9 +85,15 @@ class GPU {
     bool displayDisable;
     bool interruptRequestEnable;
     GPUDMADirection dmaDirection;
+
+    bool rectangleTextureFlipX;
+    bool rectangleTextureFlipY;
+
+    void operationGp0DrawMode(uint32_t value);
 public:
     GPU();
     ~GPU();
 
     uint32_t statusRegister() const;
+    void executeGp0(uint32_t value);
 };

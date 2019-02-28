@@ -27,7 +27,7 @@ const Range timerRegisterRange = Range(0x1f801100, 48);
 const Range dmaRegisterRange = Range(0x1f801080, 0x80);
 const Range gpuRegisterRange = Range(0x1f801810, 8);
 
-Interconnect::Interconnect(BIOS &bios, RAM &ram, DMA &dma) : bios(bios), ram(ram), dma(dma) {
+Interconnect::Interconnect(BIOS &bios, RAM &ram, DMA &dma, GPU &gpu) : bios(bios), ram(ram), dma(dma), gpu(gpu) {
 }
 
 Interconnect::~Interconnect() {
@@ -179,7 +179,16 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
-        cout << "Unhandled GPU write at offset: 0x" << hex << *offset << endl;
+        switch (*offset) {
+            case 0: {
+                gpu.executeGp0(value);
+                break;
+            }
+            default: {
+                cout << "Unhandled GPU write at offset: 0x" << hex << *offset << endl;
+                exit(1);
+            }
+        }
         return;
     }
     offset = timerRegisterRange.contains(absoluteAddress);
