@@ -62,11 +62,38 @@ Channel& DMA::channelForPort(Port port) {
 void DMA::execute(Port port) {
     Channel& channel = channels[port];
     if (channel.snc() == Sync::LinkedList) {
-        cout << "Linked List unimplemented" << endl;
-        exit(1);
+        executeLinkedList(port, channel);
     } else {
         executeBlock(port, channel);
     }
+    return;
+}
+
+void DMA::executeLinkedList(Port port, Channel& channel) {
+    uint32_t address = channel.baseAddressRegister() & 0x1ffffc;
+    if (channel.dir() == Direction::ToRam) {
+        cout << "Unhandled DMA direction" << endl;
+        exit(1);
+    }
+    if (port != Port::GPU) {
+        cout << "Unhandled DMA port" << endl;
+        exit(1);
+    }
+    while (true) {
+        uint32_t header = ram.loadWord(address);
+        uint32_t remainingTransferSize = header >> 24;
+        while (remainingTransferSize > 0) {
+            address = (address + 4) & 0x1ffffc;
+            uint32_t command = ram.loadWord(address);
+            cout << "GPU command: 0x" << hex << command << endl;
+            remainingTransferSize -= 1;
+        }
+        if ((header & 0x800000) != 0) {
+            break;
+        }
+        address = header & 0x1ffffc;
+    }
+    channel.done();
     return;
 }
 

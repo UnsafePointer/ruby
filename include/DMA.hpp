@@ -61,5 +61,6 @@ public:
     Channel& channelForPort(Port port);
 
     void execute(Port port);
+    void executeLinkedList(Port port, Channel& channel);
     void executeBlock(Port port, Channel& channel);
 };
