@@ -75,7 +75,7 @@ void DMA::executeLinkedList(Port port, Channel& channel) {
         cout << "Unhandled DMA direction" << endl;
         exit(1);
     }
-    if (port != Port::GPU) {
+    if (port != Port::GPUP) {
         cout << "Unhandled DMA port" << endl;
         exit(1);
     }
@@ -115,7 +115,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
             case Direction::FromRam: {
                 uint32_t source = ram.loadWord(currentAddress);
                 switch (port) {
-                    case Port::GPU: {
+                    case Port::GPUP: {
                         cout << "GPU transfer data: 0x" << hex << source << endl;
                         break;
                     }
