@@ -72,6 +72,10 @@ uint32_t GPU::statusRegister() const {
 void GPU::executeGp0(uint32_t value) {
     uint32_t opCode = (value >> 24) & 0xff;
     switch (opCode) {
+        case 0x00: {
+            // NOP
+            break;
+        }
         case 0xe1: {
             operationGp0DrawMode(value);
             break;
