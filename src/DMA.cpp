@@ -113,8 +113,18 @@ void DMA::executeBlock(Port port, Channel& channel) {
         uint32_t currentAddress = address & 0x1ffffc;
         switch (channel.dir()) {
             case Direction::FromRam: {
-                cout << "Unhandled DMA direction" << endl;
-                exit(1);
+                uint32_t source = ram.loadWord(currentAddress);
+                switch (port) {
+                    case Port::GPU: {
+                        cout << "GPU transfer data: 0x" << hex << source << endl;
+                        break;
+                    }
+                    default: {
+                        cout << "Unhandled DMA source port" << endl;
+                        exit(1);
+                        break;
+                    }
+                }
                 break;
             }
             case Direction::ToRam: {
