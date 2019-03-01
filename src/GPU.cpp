@@ -158,6 +158,14 @@ void GPU::executeGp1(uint32_t value) {
             operationGp1StartOfDisplayArea(value);
             break;
         }
+        case 0x06: {
+            operationGp1HorizontalDisplayRange(value);
+            break;
+        }
+        case 0x07: {
+            operationGp1VerticalDisplayRange(value);
+            break;
+        }
         case 0x08: {
             operationGp1DisplayMode(value);
             break;
@@ -367,4 +375,25 @@ GP1(05h) - Start of Display area (in VRAM)
 void GPU::operationGp1StartOfDisplayArea(uint32_t value) {
     displayVRAMStartX = (value & 0x3fe);
     displayVRAMStartY = ((value >> 10) & 0x1ff);
+}
+
+/*
+GP1(06h) - Horizontal Display range (on Screen)
+0-11   X1 (260h+0)       ;12bit       ;\counted in 53.222400MHz units,
+12-23  X2 (260h+320*8)   ;12bit       ;/relative to HSYNC
+*/
+void GPU::operationGp1HorizontalDisplayRange(uint32_t value) {
+    displayHorizontalStart = (value & 0xfff);
+    displayHorizontalEnd = ((value >> 12) & 0xfff);
+}
+
+/*
+GP1(07h) - Vertical Display range (on Screen)
+0-9   Y1 (NTSC=88h-(224/2), (PAL=A3h-(264/2))  ;\scanline numbers on screen,
+10-19 Y2 (NTSC=88h+(224/2), (PAL=A3h+(264/2))  ;/relative to VSYNC
+20-23 Not used (zero)
+*/
+void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
+    displayLineStart = (value & 0x3ff);
+    displayLineEnd = ((value >> 10) & 0x3ff);
 }
