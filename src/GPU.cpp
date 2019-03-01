@@ -130,6 +130,10 @@ void GPU::executeGp1(uint32_t value) {
             operationGp1Reset(value);
             break;
         }
+        case 0x08: {
+            operationGp1DisplayMode(value);
+            break;
+        }
         default: {
             cout << "Unhandled gp1 instruction 0x" << hex << opCode << endl;
             exit(1);
@@ -225,4 +229,30 @@ void GPU::operationGp1Reset(uint32_t value) {
 
 uint32_t GPU::readRegister() const {
     return 0;
+}
+
+/*
+GP1(08h) - Display mode
+0-1   Horizontal Resolution 1     (0=256, 1=320, 2=512, 3=640) ;GPUSTAT.17-18
+2     Vertical Resolution         (0=240, 1=480, when Bit5=1)  ;GPUSTAT.19
+3     Video Mode                  (0=NTSC/60Hz, 1=PAL/50Hz)    ;GPUSTAT.20
+4     Display Area Color Depth    (0=15bit, 1=24bit)           ;GPUSTAT.21
+5     Vertical Interlace          (0=Off, 1=On)                ;GPUSTAT.22
+6     Horizontal Resolution 2     (0=256/320/512/640, 1=368)   ;GPUSTAT.16
+7     "Reverseflag"               (0=Normal, 1=Distorted)      ;GPUSTAT.14
+8-23  Not used (zero)
+*/
+void GPU::operationGp1DisplayMode(uint32_t value) {
+    uint8_t horizontalResolutionValue1 = (value & 3);
+    uint8_t horizontalResolutionValue2 = (value >> 6) & 1;
+    horizontalResolution = horizontalResolutionFromValues(horizontalResolutionValue1, horizontalResolutionValue2);
+    verticalResolution = VerticalResolution((value >> 2) & 0x1);
+    videoMode = VideoMode((value >> 3) & 0x1);
+    displayAreaColorDepth = DisplayAreaColorDepth((value >> 4) & 0x1);
+    verticalInterlaceEnable = (value >> 5) & 0x1;
+    if ((value & 0x80) != 0) {
+        // This is supposed to be bit 14 on GPUSTAT
+        cout << "Unsupported display mode: distorted" << endl;
+        exit(1);
+    }
 }
