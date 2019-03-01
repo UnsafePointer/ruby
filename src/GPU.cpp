@@ -116,6 +116,10 @@ void GPU::executeGp0(uint32_t value) {
             operationGp0DrawMode(value);
             break;
         }
+        case 0xe2: {
+            operationGp0TextureWindowSetting(value);
+            break;
+        }
         case 0xe3: {
             operationGp0SetDrawingAreaTopLeft(value);
             break;
@@ -315,4 +319,20 @@ void GPU::operationGp0SetDrawingOffset(uint32_t value) {
 
     drawingOffsetX = ((int16_t)(x << 5)) >> 5;
     drawingOffsetY = ((int16_t)(y << 5)) >> 5;
+}
+
+/*
+GP0(E2h) - Texture Window setting
+0-4    Texture window Mask X   (in 8 pixel steps)
+5-9    Texture window Mask Y   (in 8 pixel steps)
+10-14  Texture window Offset X (in 8 pixel steps)
+15-19  Texture window Offset Y (in 8 pixel steps)
+20-23  Not used (zero)
+24-31  Command  (E2h)
+*/
+void GPU::operationGp0TextureWindowSetting(uint32_t value) {
+    textureWindowMaskX = (value & 0x1f);
+    textureWindowMaskY = ((value >> 5) & 0x1f);
+    textureWindowOffsetX = ((value >> 10) & 0x1f);
+    textureWindowOffsetY = ((value >> 15) & 0x1f);
 }
