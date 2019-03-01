@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "Channel.hpp"
 #include "RAM.hpp"
+#include "GPU.hpp"
 
 // DMA Register Summary
 // 1F80108xh DMA0 channel 0  MDECin  (RAM to MDEC)
@@ -29,6 +30,7 @@ Port portWithIndex(uint32_t index);
 
 class DMA {
     RAM &ram;
+    GPU &gpu;
 
     uint32_t controlRegister;
 
@@ -51,7 +53,7 @@ class DMA {
     bool interruptRequestStatus() const;
     void executeBlock(Channel channel);
 public:
-    DMA(RAM &ram);
+    DMA(RAM &ram, GPU &gpu);
     ~DMA();
 
     uint32_t ctrlRegister() const;

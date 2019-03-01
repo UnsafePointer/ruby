@@ -11,7 +11,7 @@ Port portWithIndex(uint32_t index) {
     return Port(index);
 }
 
-DMA::DMA(RAM &ram) : ram(ram), controlRegister(0x07654321) {
+DMA::DMA(RAM &ram, GPU &gpu) : ram(ram), gpu(gpu), controlRegister(0x07654321) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel();
     }
@@ -85,7 +85,7 @@ void DMA::executeLinkedList(Port port, Channel& channel) {
         while (remainingTransferSize > 0) {
             address = (address + 4) & 0x1ffffc;
             uint32_t command = ram.loadWord(address);
-            cout << "GPU command: 0x" << hex << command << endl;
+            gpu.executeGp0(command);
             remainingTransferSize -= 1;
         }
         if ((header & 0x800000) != 0) {
