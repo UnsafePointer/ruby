@@ -124,6 +124,10 @@ void GPU::executeGp0(uint32_t value) {
             operationGp0SetDrawingAreaBottomRight(value);
             break;
         }
+        case 0xe5: {
+            operationGp0SetDrawingOffset(value);
+            break;
+        }
         default: {
             cout << "Unhandled gp0 instruction 0x" << hex << opCode << endl;
             exit(1);
@@ -296,4 +300,19 @@ void GPU::operationGp0SetDrawingAreaTopLeft(uint32_t value) {
 void GPU::operationGp0SetDrawingAreaBottomRight(uint32_t value) {
     drawingAreaBottom = ((value >> 10) & 0x3ff);
     drawingAreaRight = (value & 0x3ff);
+}
+
+/*
+GP0(E5h) - Set Drawing Offset (X,Y)
+0-10   X-offset (-1024..+1023) (usually within X1,X2 of Drawing Area)
+11-21  Y-offset (-1024..+1023) (usually within Y1,Y2 of Drawing Area)
+22-23  Not used (zero)
+24-31  Command  (E5h)
+*/
+void GPU::operationGp0SetDrawingOffset(uint32_t value) {
+    uint16_t x = (value & 0x7ff);
+    uint16_t y = ((value >> 11) & 0x7ff);
+
+    drawingOffsetX = ((int16_t)(x << 5)) >> 5;
+    drawingOffsetY = ((int16_t)(y << 5)) >> 5;
 }
