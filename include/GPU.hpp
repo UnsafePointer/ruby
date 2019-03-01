@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include <functional>
+#include "GPUInstructionBuffer.hpp"
 
 enum TexturePageColors {
     T4Bit = 0,
@@ -128,15 +130,21 @@ GP1(07h) - Vertical Display range (on Screen)
     uint16_t displayLineStart;
     uint16_t displayLineEnd;
 
-    void operationGp0DrawMode(uint32_t value);
+    GPUInstructionBuffer gp0InstructionBuffer;
+    uint32_t gp0InstructionBufferRemaining;
+    std::function<void(void)> gp0InstructionMethod;
+
+    void operationGp0Nop();
+    void operationGp0DrawMode();
+    void operationGp0SetDrawingAreaTopLeft();
+    void operationGp0SetDrawingAreaBottomRight();
+    void operationGp0SetDrawingOffset();
+    void operationGp0TextureWindowSetting();
+    void operationGp0MaskBitSetting();
+
     void operationGp1Reset(uint32_t value);
     void operationGp1DisplayMode(uint32_t value);
     void operationGp1DMADirection(uint32_t value);
-    void operationGp0SetDrawingAreaTopLeft(uint32_t value);
-    void operationGp0SetDrawingAreaBottomRight(uint32_t value);
-    void operationGp0SetDrawingOffset(uint32_t value);
-    void operationGp0TextureWindowSetting(uint32_t value);
-    void operationGp0MaskBitSetting(uint32_t value);
     void operationGp1StartOfDisplayArea(uint32_t value);
     void operationGp1HorizontalDisplayRange(uint32_t value);
     void operationGp1VerticalDisplayRange(uint32_t value);

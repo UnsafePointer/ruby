@@ -36,7 +36,8 @@
         "vector": "cpp",
         "sstream": "cpp",
         "tuple": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "functional": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe"
 }

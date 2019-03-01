@@ -50,7 +50,10 @@ GPU::GPU() : texturePageBaseX(0),
              displayHorizontalStart(0),
              displayHorizontalEnd(0),
              displayLineStart(0),
-             displayLineEnd(0)
+             displayLineEnd(0),
+             gp0InstructionBuffer(GPUInstructionBuffer()),
+             gp0InstructionBufferRemaining(0),
+             gp0InstructionMethod(nullptr)
 {
 }
 
@@ -106,40 +109,70 @@ uint32_t GPU::statusRegister() const {
 }
 
 void GPU::executeGp0(uint32_t value) {
-    uint32_t opCode = (value >> 24) & 0xff;
-    switch (opCode) {
-        case 0x00: {
-            // NOP
-            break;
+    if (gp0InstructionBufferRemaining == 0) {
+        uint32_t opCode = (value >> 24) & 0xff;
+        switch (opCode) {
+            case 0x00: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0Nop();
+                };
+                break;
+            }
+            case 0xe1: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0DrawMode();
+                };
+                break;
+            }
+            case 0xe2: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0TextureWindowSetting();
+                };
+                break;
+            }
+            case 0xe3: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0SetDrawingAreaTopLeft();
+                };
+                break;
+            }
+            case 0xe4: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0SetDrawingAreaBottomRight();
+                };
+                break;
+            }
+            case 0xe5: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0SetDrawingOffset();
+                };
+                break;
+            }
+            case 0xe6: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0MaskBitSetting();
+                };
+                break;
+            }
+            default: {
+                cout << "Unhandled gp0 instruction 0x" << hex << opCode << endl;
+                exit(1);
+            }
         }
-        case 0xe1: {
-            operationGp0DrawMode(value);
-            break;
-        }
-        case 0xe2: {
-            operationGp0TextureWindowSetting(value);
-            break;
-        }
-        case 0xe3: {
-            operationGp0SetDrawingAreaTopLeft(value);
-            break;
-        }
-        case 0xe4: {
-            operationGp0SetDrawingAreaBottomRight(value);
-            break;
-        }
-        case 0xe5: {
-            operationGp0SetDrawingOffset(value);
-            break;
-        }
-        case 0xe6: {
-            operationGp0MaskBitSetting(value);
-            break;
-        }
-        default: {
-            cout << "Unhandled gp0 instruction 0x" << hex << opCode << endl;
-            exit(1);
-        }
+        gp0InstructionBuffer.clear();
+    }
+    gp0InstructionBuffer.pushWord(value);
+    gp0InstructionBufferRemaining -= 1;
+
+    if (gp0InstructionBufferRemaining == 0) {
+        gp0InstructionMethod();
     }
 }
 
@@ -177,6 +210,10 @@ void GPU::executeGp1(uint32_t value) {
     }
 }
 
+void GPU::operationGp0Nop() {
+    return;
+}
+
 /*
 GP0(E1h) - Draw Mode setting (aka "Texpage")
 0-3   Texture page X Base   (N*64) (ie. in 64-halfword steps)    ;GPUSTAT.0-3
@@ -192,7 +229,8 @@ GP0(E1h) - Draw Mode setting (aka "Texpage")
 14-23 Not used (should be 0)
 24-31 Command  (E1h)
 */
-void GPU::operationGp0DrawMode(uint32_t value) {
+void GPU::operationGp0DrawMode() {
+    uint32_t value = gp0InstructionBuffer[0];
     texturePageBaseX = value & 0xf;
     texturePageBaseY = (value >> 4) & 1;
     semiTransparency = (value >> 5) & 3;
@@ -312,12 +350,14 @@ GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
 20-23  Not used (zero)         ;/(retail consoles have only 1MB though)
 24-31  Command  (Exh)
 */
-void GPU::operationGp0SetDrawingAreaTopLeft(uint32_t value) {
+void GPU::operationGp0SetDrawingAreaTopLeft() {
+    uint32_t value = gp0InstructionBuffer[0];
     drawingAreaTop = ((value >> 10) & 0x3ff);
     drawingAreaLeft = (value & 0x3ff);
 }
 
-void GPU::operationGp0SetDrawingAreaBottomRight(uint32_t value) {
+void GPU::operationGp0SetDrawingAreaBottomRight() {
+    uint32_t value = gp0InstructionBuffer[0];
     drawingAreaBottom = ((value >> 10) & 0x3ff);
     drawingAreaRight = (value & 0x3ff);
 }
@@ -329,7 +369,8 @@ GP0(E5h) - Set Drawing Offset (X,Y)
 22-23  Not used (zero)
 24-31  Command  (E5h)
 */
-void GPU::operationGp0SetDrawingOffset(uint32_t value) {
+void GPU::operationGp0SetDrawingOffset() {
+    uint32_t value = gp0InstructionBuffer[0];
     uint16_t x = (value & 0x7ff);
     uint16_t y = ((value >> 11) & 0x7ff);
 
@@ -346,7 +387,8 @@ GP0(E2h) - Texture Window setting
 20-23  Not used (zero)
 24-31  Command  (E2h)
 */
-void GPU::operationGp0TextureWindowSetting(uint32_t value) {
+void GPU::operationGp0TextureWindowSetting() {
+    uint32_t value = gp0InstructionBuffer[0];
     textureWindowMaskX = (value & 0x1f);
     textureWindowMaskY = ((value >> 5) & 0x1f);
     textureWindowOffsetX = ((value >> 10) & 0x1f);
