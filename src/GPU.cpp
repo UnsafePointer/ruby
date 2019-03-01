@@ -119,6 +119,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x28: {
+                gp0InstructionBufferRemaining = 5;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0MonochromeQuadOpaque();
+                };
+                break;
+            }
             case 0xe1: {
                 gp0InstructionBufferRemaining = 1;
                 gp0InstructionMethod = [=]() {
@@ -438,4 +445,9 @@ GP1(07h) - Vertical Display range (on Screen)
 void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
     displayLineStart = (value & 0x3ff);
     displayLineEnd = ((value >> 10) & 0x3ff);
+}
+
+void GPU::operationGp0MonochromeQuadOpaque() {
+    // TODO:
+    return;
 }
