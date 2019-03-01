@@ -132,6 +132,10 @@ void GPU::executeGp0(uint32_t value) {
             operationGp0SetDrawingOffset(value);
             break;
         }
+        case 0xe6: {
+            operationGp0MaskBitSetting(value);
+            break;
+        }
         default: {
             cout << "Unhandled gp0 instruction 0x" << hex << opCode << endl;
             exit(1);
@@ -335,4 +339,17 @@ void GPU::operationGp0TextureWindowSetting(uint32_t value) {
     textureWindowMaskY = ((value >> 5) & 0x1f);
     textureWindowOffsetX = ((value >> 10) & 0x1f);
     textureWindowOffsetY = ((value >> 15) & 0x1f);
+}
+
+/*
+GP0(E6h) - Mask Bit Setting
+0     Set mask while drawing (0=TextureBit15, 1=ForceBit15=1)   ;GPUSTAT.11
+1     Check mask before draw (0=Draw Always, 1=Draw if Bit15=0) ;GPUSTAT.12
+2-23  Not used (zero)
+24-31 Command  (E6h)
+*/
+void GPU::operationGp0MaskBitSetting() {
+    uint32_t value = gp0InstructionBuffer[0];
+    shouldSetMaskBit = (value & 1) != 0;
+    shouldPreserveMaskedPixels = (value & 2) != 0;
 }
