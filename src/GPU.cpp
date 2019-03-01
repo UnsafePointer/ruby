@@ -222,3 +222,7 @@ void GPU::operationGp1Reset(uint32_t value) {
     // TODO: clear the command FIFO
     // TODO: invalidate GPU cache
 }
+
+uint32_t GPU::readRegister() const {
+    return 0;
+}

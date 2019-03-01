@@ -137,4 +137,5 @@ public:
     uint32_t statusRegister() const;
     void executeGp0(uint32_t value);
     void executeGp1(uint32_t value);
+    uint32_t readRegister() const;
 };

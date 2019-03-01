@@ -61,6 +61,9 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
         switch (*offset) {
+            case 0: {
+                return gpu.readRegister();
+            }
             case 4: {
                 return 0x1c000000;
             }
