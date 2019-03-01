@@ -132,6 +132,8 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp1Reset(uint32_t value);
     void operationGp1DisplayMode(uint32_t value);
     void operationGp1DMADirection(uint32_t value);
+    void operationGp0SetDrawingAreaTopLeft(uint32_t value);
+    void operationGp0SetDrawingAreaBottomRight(uint32_t value);
 public:
     GPU();
     ~GPU();

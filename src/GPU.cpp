@@ -116,6 +116,14 @@ void GPU::executeGp0(uint32_t value) {
             operationGp0DrawMode(value);
             break;
         }
+        case 0xe3: {
+            operationGp0SetDrawingAreaTopLeft(value);
+            break;
+        }
+        case 0xe4: {
+            operationGp0SetDrawingAreaBottomRight(value);
+            break;
+        }
         default: {
             cout << "Unhandled gp0 instruction 0x" << hex << opCode << endl;
             exit(1);
@@ -268,4 +276,24 @@ GP1(04h) - DMA Direction / Data Request
 */
 void GPU::operationGp1DMADirection(uint32_t value) {
     dmaDirection = GPUDMADirection(value & 3);
+}
+
+/*
+GP0(E3h) - Set Drawing Area top left (X1,Y1)
+GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
+0-9    X-coordinate (0..1023)
+10-18  Y-coordinate (0..511)   ;\on Old 160pin GPU (max 1MB VRAM)
+19-23  Not used (zero)         ;/
+10-19  Y-coordinate (0..1023)  ;\on New 208pin GPU (max 2MB VRAM)
+20-23  Not used (zero)         ;/(retail consoles have only 1MB though)
+24-31  Command  (Exh)
+*/
+void GPU::operationGp0SetDrawingAreaTopLeft(uint32_t value) {
+    drawingAreaTop = ((value >> 10) & 0x3ff);
+    drawingAreaLeft = (value & 0x3ff);
+}
+
+void GPU::operationGp0SetDrawingAreaBottomRight(uint32_t value) {
+    drawingAreaBottom = ((value >> 10) & 0x3ff);
+    drawingAreaRight = (value & 0x3ff);
 }
