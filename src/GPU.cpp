@@ -154,6 +154,10 @@ void GPU::executeGp1(uint32_t value) {
             operationGp1DMADirection(value);
             break;
         }
+        case 0x05: {
+            operationGp1StartOfDisplayArea(value);
+            break;
+        }
         case 0x08: {
             operationGp1DisplayMode(value);
             break;
@@ -352,4 +356,15 @@ void GPU::operationGp0MaskBitSetting() {
     uint32_t value = gp0InstructionBuffer[0];
     shouldSetMaskBit = (value & 1) != 0;
     shouldPreserveMaskedPixels = (value & 2) != 0;
+}
+
+/*
+GP1(05h) - Start of Display area (in VRAM)
+0-9   X (0-1023)    (halfword address in VRAM)  (relative to begin of VRAM)
+10-18 Y (0-511)     (scanline number in VRAM)   (relative to begin of VRAM)
+19-23 Not used (zero)
+*/
+void GPU::operationGp1StartOfDisplayArea(uint32_t value) {
+    displayVRAMStartX = (value & 0x3fe);
+    displayVRAMStartY = ((value >> 10) & 0x1ff);
 }
