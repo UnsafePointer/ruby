@@ -130,6 +130,10 @@ void GPU::executeGp1(uint32_t value) {
             operationGp1Reset(value);
             break;
         }
+        case 0x04: {
+            operationGp1DMADirection(value);
+            break;
+        }
         case 0x08: {
             operationGp1DisplayMode(value);
             break;
@@ -255,4 +259,13 @@ void GPU::operationGp1DisplayMode(uint32_t value) {
         cout << "Unsupported display mode: distorted" << endl;
         exit(1);
     }
+}
+
+/*
+GP1(04h) - DMA Direction / Data Request
+0-1  DMA Direction (0=Off, 1=FIFO, 2=CPUtoGP0, 3=GPUREADtoCPU) ;GPUSTAT.29-30
+2-23 Not used (zero)
+*/
+void GPU::operationGp1DMADirection(uint32_t value) {
+    dmaDirection = GPUDMADirection(value & 3);
 }
