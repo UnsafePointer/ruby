@@ -34,7 +34,23 @@ GPU::GPU() : texturePageBaseX(0),
              interruptRequestEnable(false),
              dmaDirection(GPUDMADirection::Off),
              rectangleTextureFlipX(false),
-             rectangleTextureFlipY(false)
+             rectangleTextureFlipY(false),
+             textureWindowMaskX(0),
+             textureWindowMaskY(0),
+             textureWindowOffsetX(0),
+             textureWindowOffsetY(0),
+             drawingAreaTop(0),
+             drawingAreaLeft(0),
+             drawingAreaBottom(0),
+             drawingAreaRight(0),
+             drawingOffsetX(0),
+             drawingOffsetY(0),
+             displayVRAMStartX(0),
+             displayVRAMStartY(0),
+             displayHorizontalStart(0),
+             displayHorizontalEnd(0),
+             displayLineStart(0),
+             displayLineEnd(0)
 {
 }
 
@@ -107,6 +123,20 @@ void GPU::executeGp0(uint32_t value) {
     }
 }
 
+void GPU::executeGp1(uint32_t value) {
+    uint32_t opCode = (value >> 24) & 0xff;
+    switch (opCode) {
+        case 0x00: {
+            operationGp1Reset(value);
+            break;
+        }
+        default: {
+            cout << "Unhandled gp1 instruction 0x" << hex << opCode << endl;
+            exit(1);
+        }
+    }
+}
+
 /*
 GP0(E1h) - Draw Mode setting (aka "Texpage")
 0-3   Texture page X Base   (N*64) (ie. in 64-halfword steps)    ;GPUSTAT.0-3
@@ -132,4 +162,63 @@ void GPU::operationGp0DrawMode(uint32_t value) {
     textureDisable = ((value >> 11) & 1) != 0;
     rectangleTextureFlipX = ((value >> 12) & 1) != 0;
     rectangleTextureFlipY = ((value >> 13) & 1) != 0;
+}
+
+/*
+GP1(00h) - Reset GPU
+0-23  Not used (zero)
+Resets the GPU to the following values:
+GP1(01h)      ;clear fifo
+GP1(02h)      ;ack irq (0)
+GP1(03h)      ;display off (1)
+GP1(04h)      ;dma off (0)
+GP1(05h)      ;display address (0)
+GP1(06h)      ;display x1,x2 (x1=200h, x2=200h+256*10)
+GP1(07h)      ;display y1,y2 (y1=010h, y2=010h+240)
+GP1(08h)      ;display mode 320x200 NTSC (0)
+GP0(E1h..E6h) ;rendering attributes (0)
+*/
+void GPU::operationGp1Reset(uint32_t value) {
+    interruptRequestEnable = false;
+
+    texturePageBaseX = 0;
+    texturePageBaseY = 0;
+    semiTransparency = 0;
+    texturePageColors = TexturePageColors::T4Bit;
+    textureWindowMaskX = 0;
+    textureWindowMaskY = 0;
+    textureWindowOffsetX = 0;
+    textureWindowOffsetY = 0;
+    ditheringEnable = false;
+    allowDrawToDisplayArea = false;
+    textureDisable = false;
+    rectangleTextureFlipX = false;
+    rectangleTextureFlipY = false;
+    drawingAreaLeft = 0;
+    drawingAreaTop = 0;
+    drawingAreaRight = 0;
+    drawingAreaBottom = 0;
+    drawingOffsetX = 0;
+    drawingOffsetY = 0;
+    shouldSetMaskBit = false;
+    shouldPreserveMaskedPixels = false;
+
+    dmaDirection = GPUDMADirection::Off;
+
+    displayDisable = true;
+    displayVRAMStartX = 0;
+    displayVRAMStartY = 0;
+    horizontalResolution = horizontalResolutionFromValues(0, 0);
+    verticalResolution = VerticalResolution::Y240;
+
+    videoMode = VideoMode::NTSC;
+    verticalInterlaceEnable = false;
+    displayHorizontalStart = 0x200;
+    displayHorizontalEnd = 0xc00;
+    displayLineStart = 0x10;
+    displayLineEnd = 0x100;
+    displayAreaColorDepth = DisplayAreaColorDepth::D15Bits;
+
+    // TODO: clear the command FIFO
+    // TODO: invalidate GPU cache
 }

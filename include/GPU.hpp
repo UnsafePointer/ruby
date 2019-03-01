@@ -85,15 +85,56 @@ class GPU {
     bool displayDisable;
     bool interruptRequestEnable;
     GPUDMADirection dmaDirection;
-
+/*
+GP0(E1h) - Draw Mode setting (aka "Texpage")
+*/
     bool rectangleTextureFlipX;
     bool rectangleTextureFlipY;
+/*
+GP0(E2h) - Texture Window setting
+*/
+    uint8_t textureWindowMaskX;
+    uint8_t textureWindowMaskY;
+    uint8_t textureWindowOffsetX;
+    uint8_t textureWindowOffsetY;
+/*
+GP0(E3h) - Set Drawing Area top left (X1,Y1)
+*/
+    uint16_t drawingAreaTop;
+    uint16_t drawingAreaLeft;
+/*
+GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
+*/
+    uint16_t drawingAreaBottom;
+    uint16_t drawingAreaRight;
+/*
+GP0(E5h) - Set Drawing Offset (X,Y)
+*/
+    int16_t drawingOffsetX;
+    int16_t drawingOffsetY;
+/*
+GP1(05h) - Start of Display area (in VRAM)
+*/
+    uint16_t displayVRAMStartX;
+    uint16_t displayVRAMStartY;
+/*
+GP1(06h) - Horizontal Display range (on Screen)
+*/
+    uint16_t displayHorizontalStart;
+    uint16_t displayHorizontalEnd;
+/*
+GP1(07h) - Vertical Display range (on Screen)
+*/
+    uint16_t displayLineStart;
+    uint16_t displayLineEnd;
 
     void operationGp0DrawMode(uint32_t value);
+    void operationGp1Reset(uint32_t value);
 public:
     GPU();
     ~GPU();
 
     uint32_t statusRegister() const;
     void executeGp0(uint32_t value);
+    void executeGp1(uint32_t value);
 };

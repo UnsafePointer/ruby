@@ -184,6 +184,10 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
                 gpu.executeGp0(value);
                 break;
             }
+            case 4: {
+                gpu.executeGp1(value);
+                break;
+            }
             default: {
                 cout << "Unhandled GPU write at offset: 0x" << hex << *offset << endl;
                 exit(1);
