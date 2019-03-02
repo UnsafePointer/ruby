@@ -65,7 +65,7 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
                 return gpu.readRegister();
             }
             case 4: {
-                return 0x1c000000;
+                return gpu.statusRegister();
             }
             default: {
                 cout << "Unhandled GPU read at offset: 0x" << hex << *offset << endl;
