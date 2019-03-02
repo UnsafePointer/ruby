@@ -135,6 +135,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x38: {
+                gp0WordsRemaining = 8;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0ShadedQuadOpaque();
+                };
+                break;
+            }
             case 0xa0: {
                 gp0WordsRemaining = 3;
                 gp0InstructionMethod = [=]() {
@@ -535,4 +542,9 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
     uint32_t height = resolution >> 16;
 
     cout << "Unhandled GP0 Copy Rectangle VRAM to CPU with with: " << dec << width << "x" << dec << height << endl;
+}
+
+void GPU::operationGp0ShadedQuadOpaque() {
+    // TODO:
+    return;
 }
