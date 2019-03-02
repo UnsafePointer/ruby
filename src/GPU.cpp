@@ -241,6 +241,14 @@ void GPU::executeGp1(uint32_t value) {
             operationGp1Reset(value);
             break;
         }
+        case 0x01: {
+            operationGp1ResetCommandBuffer(value);
+            break;
+        }
+        case 0x02: {
+            operationGp1AcknowledgeGPUInterrupt(value);
+            break;
+        }
         case 0x03: {
             operationGp1DisplayEnable(value);
             break;
@@ -571,4 +579,16 @@ void GPU::operationGp0ShadedTriangleOpaque() {
 void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
     // TODO:
     return;
+}
+
+void GPU::operationGp1AcknowledgeGPUInterrupt(uint32_t value) {
+    interruptRequestEnable = false;
+    return;
+}
+
+void GPU::operationGp1ResetCommandBuffer(uint32_t value) {
+    gp0InstructionBuffer.clear();
+    gp0WordsRemaining = 0;
+    gp0Mode = GP0Mode::Command;
+    // TODO: clear the command FIFO
 }
