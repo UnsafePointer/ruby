@@ -120,6 +120,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x01: {
+                gp0InstructionBufferRemaining = 1;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0ClearCache();
+                };
+                break;
+            }
             case 0x28: {
                 gp0InstructionBufferRemaining = 5;
                 gp0InstructionMethod = [=]() {
@@ -450,5 +457,9 @@ void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
 
 void GPU::operationGp0MonochromeQuadOpaque() {
     // TODO:
+    return;
+}
+
+void GPU::operationGp0ClearCache() {
     return;
 }

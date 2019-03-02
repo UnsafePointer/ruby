@@ -142,6 +142,7 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp0TextureWindowSetting();
     void operationGp0MaskBitSetting();
     void operationGp0MonochromeQuadOpaque();
+    void operationGp0ClearCache();
 
     void operationGp1Reset(uint32_t value);
     void operationGp1DisplayMode(uint32_t value);
