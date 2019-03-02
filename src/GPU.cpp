@@ -135,6 +135,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x30: {
+                gp0WordsRemaining = 6;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0ShadedTriangleOpaque();
+                };
+                break;
+            }
             case 0x38: {
                 gp0WordsRemaining = 8;
                 gp0InstructionMethod = [=]() {
@@ -545,6 +552,11 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
 }
 
 void GPU::operationGp0ShadedQuadOpaque() {
+    // TODO:
+    return;
+}
+
+void GPU::operationGp0ShadedTriangleOpaque() {
     // TODO:
     return;
 }
