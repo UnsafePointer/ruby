@@ -52,8 +52,9 @@ GPU::GPU() : texturePageBaseX(0),
              displayLineStart(0),
              displayLineEnd(0),
              gp0InstructionBuffer(GPUInstructionBuffer()),
-             gp0InstructionBufferRemaining(0),
-             gp0InstructionMethod(nullptr)
+             gp0WordsRemaining(0),
+             gp0InstructionMethod(nullptr),
+             gp0Mode(GP0Mode::Command)
 {
 }
 
@@ -110,67 +111,74 @@ uint32_t GPU::statusRegister() const {
 }
 
 void GPU::executeGp0(uint32_t value) {
-    if (gp0InstructionBufferRemaining == 0) {
+    if (gp0WordsRemaining == 0) {
         uint32_t opCode = (value >> 24) & 0xff;
         switch (opCode) {
             case 0x00: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0Nop();
                 };
                 break;
             }
             case 0x01: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0ClearCache();
                 };
                 break;
             }
             case 0x28: {
-                gp0InstructionBufferRemaining = 5;
+                gp0WordsRemaining = 5;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0MonochromeQuadOpaque();
                 };
                 break;
             }
+            case 0xa0: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0CopyRectangleCPUToVRAM();
+                };
+                break;
+            }
             case 0xe1: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0DrawMode();
                 };
                 break;
             }
             case 0xe2: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0TextureWindowSetting();
                 };
                 break;
             }
             case 0xe3: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0SetDrawingAreaTopLeft();
                 };
                 break;
             }
             case 0xe4: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0SetDrawingAreaBottomRight();
                 };
                 break;
             }
             case 0xe5: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0SetDrawingOffset();
                 };
                 break;
             }
             case 0xe6: {
-                gp0InstructionBufferRemaining = 1;
+                gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
                     this->operationGp0MaskBitSetting();
                 };
@@ -183,11 +191,18 @@ void GPU::executeGp0(uint32_t value) {
         }
         gp0InstructionBuffer.clear();
     }
-    gp0InstructionBuffer.pushWord(value);
-    gp0InstructionBufferRemaining -= 1;
+    gp0WordsRemaining -= 1;
 
-    if (gp0InstructionBufferRemaining == 0) {
-        gp0InstructionMethod();
+    if (gp0Mode == GP0Mode::Command) {
+        gp0InstructionBuffer.pushWord(value);
+        if (gp0WordsRemaining == 0) {
+            gp0InstructionMethod();
+        }
+    } else if (gp0Mode == GP0Mode::ImageLoad) {
+        // TODO: copy pixel data to VRAM
+        if (gp0WordsRemaining == 0) {
+            gp0Mode = GP0Mode::Command;
+        }
     }
 }
 
@@ -461,5 +476,28 @@ void GPU::operationGp0MonochromeQuadOpaque() {
 }
 
 void GPU::operationGp0ClearCache() {
+    return;
+}
+
+/*
+GP0(A0h) - Copy Rectangle (CPU to VRAM)
+1st  Command           (Cc000000h)
+2nd  Destination Coord (YyyyXxxxh)  ;Xpos counted in halfwords
+3rd  Width+Height      (YsizXsizh)  ;Xsiz counted in halfwords
+...  Data              (...)      <--- usually transferred via DMA
+*/
+void GPU::operationGp0CopyRectangleCPUToVRAM() {
+    uint32_t resolution = gp0InstructionBuffer[2];
+    uint32_t width = resolution & 0xffff;
+    uint32_t height = resolution >> 16;
+    uint32_t imageSize = width * height;
+    // Pixels are 16 bit wide and transactions are 32 bit wide
+    // If the resolution is odd, add a unit to get the right
+    // number of transactions
+    if (imageSize % 2 != 0) {
+        imageSize++;
+    }
+    gp0WordsRemaining = imageSize / 2;
+    gp0Mode = GP0Mode::ImageLoad;
     return;
 }

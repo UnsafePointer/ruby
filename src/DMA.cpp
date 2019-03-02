@@ -116,7 +116,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                 uint32_t source = ram.loadWord(currentAddress);
                 switch (port) {
                     case Port::GPUP: {
-                        cout << "GPU transfer data: 0x" << hex << source << endl;
+                        gpu.executeGp0(source);
                         break;
                     }
                     default: {

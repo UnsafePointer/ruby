@@ -36,6 +36,11 @@ enum GPUDMADirection {
     VRAMToCPU = 3
 };
 
+enum GP0Mode {
+    Command = 0,
+    ImageLoad = 1
+};
+
 /*
 1F801814h - GPUSTAT - GPU Status Register (R)
 0-3   Texture page X Base   (N*64)                              ;GP0(E1h).0-3
@@ -131,8 +136,10 @@ GP1(07h) - Vertical Display range (on Screen)
     uint16_t displayLineEnd;
 
     GPUInstructionBuffer gp0InstructionBuffer;
-    uint32_t gp0InstructionBufferRemaining;
+    uint32_t gp0WordsRemaining;
     std::function<void(void)> gp0InstructionMethod;
+
+    GP0Mode gp0Mode;
 
     void operationGp0Nop();
     void operationGp0DrawMode();
@@ -143,6 +150,7 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp0MaskBitSetting();
     void operationGp0MonochromeQuadOpaque();
     void operationGp0ClearCache();
+    void operationGp0CopyRectangleCPUToVRAM();
 
     void operationGp1Reset(uint32_t value);
     void operationGp1DisplayMode(uint32_t value);
