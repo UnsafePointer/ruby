@@ -74,7 +74,8 @@ uint32_t GPU::statusRegister() const {
     // Nobody knows what bit 14 really does
     value |= ((uint32_t)textureDisable) << 15;
     value |= ((uint32_t)horizontalResolution) << 16;
-    value |= ((uint32_t)verticalResolution) << 19;
+    // TODO: remove this commented out line
+    // value |= ((uint32_t)verticalResolution) << 19;
     value |= ((uint32_t)videoMode) << 20;
     value |= ((uint32_t)displayAreaColorDepth) << 21;
     value |= ((uint32_t)verticalInterlaceEnable) << 22;
