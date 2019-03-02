@@ -142,6 +142,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0xc0: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0CopyRectangleVRAMToCPU();
+                };
+                break;
+            }
             case 0xe1: {
                 gp0WordsRemaining = 1;
                 gp0InstructionMethod = [=]() {
@@ -513,4 +520,19 @@ GP1(03h) - Display Enable
 */
 void GPU::operationGp1DisplayEnable(uint32_t value) {
     displayDisable = (value & 1) != 0;
+}
+
+/*
+GP0(C0h) - Copy Rectangle (VRAM to CPU)
+1st  Command           (Cc000000h) ;\
+2nd  Source Coord      (YyyyXxxxh) ; write to GP0 port (as usually)
+3rd  Width+Height      (YsizXsizh) ;/
+...  Data              (...)       ;<--- read from GPUREAD port (or via DMA)
+*/
+void GPU::operationGp0CopyRectangleVRAMToCPU() {
+    uint32_t resolution = gp0InstructionBuffer[2];
+    uint32_t width = resolution & 0xffff;
+    uint32_t height = resolution >> 16;
+
+    cout << "Unhandled GP0 Copy Rectangle VRAM to CPU with with: " << dec << width << "x" << dec << height << endl;
 }
