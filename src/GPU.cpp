@@ -213,6 +213,10 @@ void GPU::executeGp1(uint32_t value) {
             operationGp1Reset(value);
             break;
         }
+        case 0x03: {
+            operationGp1DisplayEnable(value);
+            break;
+        }
         case 0x04: {
             operationGp1DMADirection(value);
             break;
@@ -500,4 +504,13 @@ void GPU::operationGp0CopyRectangleCPUToVRAM() {
     gp0WordsRemaining = imageSize / 2;
     gp0Mode = GP0Mode::ImageLoad;
     return;
+}
+
+/*
+GP1(03h) - Display Enable
+0     Display On/Off   (0=On, 1=Off)                         ;GPUSTAT.23
+1-23  Not used (zero)
+*/
+void GPU::operationGp1DisplayEnable(uint32_t value) {
+    displayDisable = (value & 1) != 0;
 }
