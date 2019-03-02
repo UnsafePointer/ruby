@@ -135,6 +135,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x2c: {
+                gp0WordsRemaining = 9;
+                gp0InstructionMethod = [=]() {
+                    this->operationGp0TexturedQuadOpaqueTextureBlending();
+                };
+                break;
+            }
             case 0x30: {
                 gp0WordsRemaining = 6;
                 gp0InstructionMethod = [=]() {
@@ -557,6 +564,11 @@ void GPU::operationGp0ShadedQuadOpaque() {
 }
 
 void GPU::operationGp0ShadedTriangleOpaque() {
+    // TODO:
+    return;
+}
+
+void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
     // TODO:
     return;
 }
