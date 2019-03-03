@@ -568,16 +568,19 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
 
 void GPU::operationGp0ShadedQuadOpaque() {
     // TODO:
+    cout << "Draw Shaded Quad Opaque" << endl;
     return;
 }
 
 void GPU::operationGp0ShadedTriangleOpaque() {
     // TODO:
+    cout << "Draw Shaded Triangle Opaque" << endl;
     return;
 }
 
 void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
     // TODO:
+    cout << "Draw Textured Quad Opaque with Texture Blending" << endl;
     return;
 }
 
