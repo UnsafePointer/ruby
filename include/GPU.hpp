@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <functional>
 #include "GPUInstructionBuffer.hpp"
+#include "Renderer.hpp"
 
 enum TexturePageColors {
     T4Bit = 0,
@@ -140,6 +141,8 @@ GP1(07h) - Vertical Display range (on Screen)
     std::function<void(void)> gp0InstructionMethod;
 
     GP0Mode gp0Mode;
+
+    Renderer renderer;
 
     void operationGp0Nop();
     void operationGp0DrawMode();

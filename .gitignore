@@ -74,3 +74,6 @@ bin/
 
 # Valgrind
 valgrind-out.txt
+
+# glad
+glad/

@@ -54,7 +54,8 @@ GPU::GPU() : texturePageBaseX(0),
              gp0InstructionBuffer(GPUInstructionBuffer()),
              gp0WordsRemaining(0),
              gp0InstructionMethod(nullptr),
-             gp0Mode(GP0Mode::Command)
+             gp0Mode(GP0Mode::Command),
+             renderer(Renderer())
 {
 }
 
