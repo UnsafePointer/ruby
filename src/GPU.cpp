@@ -1,5 +1,7 @@
 #include "GPU.hpp"
 #include <iostream>
+#include "Point.hpp"
+#include "Color.hpp"
 
 using namespace std;
 
@@ -574,8 +576,10 @@ void GPU::operationGp0ShadedQuadOpaque() {
 }
 
 void GPU::operationGp0ShadedTriangleOpaque() {
-    // TODO:
-    cout << "Draw Shaded Triangle Opaque" << endl;
+    Point points[3] = { Point(gp0InstructionBuffer[1]), Point(gp0InstructionBuffer[3]), Point(gp0InstructionBuffer[5])};
+    Color colors[3] = { Color(gp0InstructionBuffer[0]), Color(gp0InstructionBuffer[2]), Color(gp0InstructionBuffer[4])};
+
+    renderer.pushTriangle(points, colors);
     return;
 }
 

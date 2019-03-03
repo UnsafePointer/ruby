@@ -29,3 +29,7 @@ Renderer::Renderer() {
 Renderer::~Renderer() {
     SDL_Quit();
 }
+
+void Renderer::pushTriangle(Point (&points)[3], Color (&colors)[3]) {
+    return;
+}
