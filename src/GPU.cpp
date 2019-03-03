@@ -116,98 +116,98 @@ void GPU::executeGp0(uint32_t value) {
         switch (opCode) {
             case 0x00: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0Nop();
                 };
                 break;
             }
             case 0x01: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0ClearCache();
                 };
                 break;
             }
             case 0x28: {
                 gp0WordsRemaining = 5;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0MonochromeQuadOpaque();
                 };
                 break;
             }
             case 0x2c: {
                 gp0WordsRemaining = 9;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0TexturedQuadOpaqueTextureBlending();
                 };
                 break;
             }
             case 0x30: {
                 gp0WordsRemaining = 6;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0ShadedTriangleOpaque();
                 };
                 break;
             }
             case 0x38: {
                 gp0WordsRemaining = 8;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0ShadedQuadOpaque();
                 };
                 break;
             }
             case 0xa0: {
                 gp0WordsRemaining = 3;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0CopyRectangleCPUToVRAM();
                 };
                 break;
             }
             case 0xc0: {
                 gp0WordsRemaining = 3;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0CopyRectangleVRAMToCPU();
                 };
                 break;
             }
             case 0xe1: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0DrawMode();
                 };
                 break;
             }
             case 0xe2: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0TextureWindowSetting();
                 };
                 break;
             }
             case 0xe3: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0SetDrawingAreaTopLeft();
                 };
                 break;
             }
             case 0xe4: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0SetDrawingAreaBottomRight();
                 };
                 break;
             }
             case 0xe5: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0SetDrawingOffset();
                 };
                 break;
             }
             case 0xe6: {
                 gp0WordsRemaining = 1;
-                gp0InstructionMethod = [=]() {
+                gp0InstructionMethod = [&]() {
                     this->operationGp0MaskBitSetting();
                 };
                 break;
