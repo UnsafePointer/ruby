@@ -5,7 +5,16 @@
 
 using namespace std;
 
-CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), currentProgramCounter(0xbfc00000), isBranching(false), isDelaySlot(false), load({RegisterIndex(), 0}), statusRegister(0), highRegister(0xdeadbeef), lowRegister(0xdeadbeef), interconnect(interconnect) {
+CPU::CPU() : programCounter(0xbfc00000),
+             currentProgramCounter(0xbfc00000),
+             isBranching(false),
+             isDelaySlot(false),
+             load({RegisterIndex(), 0}),
+             statusRegister(0),
+             highRegister(0xdeadbeef),
+             lowRegister(0xdeadbeef)
+{
+    interconnect = make_unique<Interconnect>();
     nextProgramCounter = programCounter + 4;
     fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
@@ -13,31 +22,30 @@ CPU::CPU(Interconnect &interconnect) : programCounter(0xbfc00000), currentProgra
 }
 
 CPU::~CPU() {
-
 }
 
 uint32_t CPU::loadWord(uint32_t address) const {
-    return interconnect.loadWord(address);
+    return interconnect->loadWord(address);
 }
 
 uint16_t CPU::loadHalfWord(uint32_t address) const {
-    return interconnect.loadHalfWord(address);
+    return interconnect->loadHalfWord(address);
 }
 
 uint8_t CPU::loadByte(uint32_t address) const {
-    return interconnect.loadByte(address);
+    return interconnect->loadByte(address);
 }
 
 void CPU::storeWord(uint32_t address, uint32_t value) const {
-    return interconnect.storeWord(address, value);
+    return interconnect->storeWord(address, value);
 }
 
 void CPU::storeHalfWord(uint32_t address, uint16_t value) const {
-    return interconnect.storeHalfWord(address, value);
+    return interconnect->storeHalfWord(address, value);
 }
 
 void CPU::storeByte(uint32_t address, uint8_t value) const {
-    return interconnect.storeByte(address, value);
+    return interconnect->storeByte(address, value);
 }
 
 void CPU::executeNextInstruction() {

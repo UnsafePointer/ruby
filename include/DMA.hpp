@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <memory>
 #include "Channel.hpp"
 #include "RAM.hpp"
 #include "GPU.hpp"
@@ -29,8 +30,8 @@ enum Port {
 Port portWithIndex(uint32_t index);
 
 class DMA {
-    RAM &ram;
-    GPU &gpu;
+    std::unique_ptr<RAM> &ram;
+    std::unique_ptr<GPU> &gpu;
 
     uint32_t controlRegister;
 
@@ -53,7 +54,7 @@ class DMA {
     bool interruptRequestStatus() const;
     void executeBlock(Channel channel);
 public:
-    DMA(RAM &ram, GPU &gpu);
+    DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu);
     ~DMA();
 
     uint32_t ctrlRegister() const;

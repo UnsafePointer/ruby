@@ -38,7 +38,8 @@
         "tuple": "cpp",
         "algorithm": "cpp",
         "functional": "cpp",
-        "cstdarg": "cpp"
+        "cstdarg": "cpp",
+        "memory": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe"
 }

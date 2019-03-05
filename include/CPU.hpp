@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "Interconnect.hpp"
 #include "Instruction.hpp"
 #include "RegisterIndex.hpp"
@@ -63,7 +64,7 @@ class CPU {
     uint32_t returnAddressFromTrap; // cop0r14
     uint32_t highRegister;
     uint32_t lowRegister;
-    const Interconnect &interconnect;
+    std::unique_ptr<Interconnect> interconnect;
 
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
@@ -156,7 +157,7 @@ class CPU {
     void storeHalfWord(uint32_t address, uint16_t value) const;
     void storeByte(uint32_t address, uint8_t value) const;
 public:
-    CPU(Interconnect &interconnect);
+    CPU();
     ~CPU();
 
     void executeNextInstruction();

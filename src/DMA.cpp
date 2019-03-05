@@ -11,7 +11,7 @@ Port portWithIndex(uint32_t index) {
     return Port(index);
 }
 
-DMA::DMA(RAM &ram, GPU &gpu) : ram(ram), gpu(gpu), controlRegister(0x07654321) {
+DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu) : ram(ram), gpu(gpu), controlRegister(0x07654321) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel();
     }
@@ -80,12 +80,12 @@ void DMA::executeLinkedList(Port port, Channel& channel) {
         exit(1);
     }
     while (true) {
-        uint32_t header = ram.loadWord(address);
+        uint32_t header = ram->loadWord(address);
         uint32_t remainingTransferSize = header >> 24;
         while (remainingTransferSize > 0) {
             address = (address + 4) & 0x1ffffc;
-            uint32_t command = ram.loadWord(address);
-            gpu.executeGp0(command);
+            uint32_t command = ram->loadWord(address);
+            gpu->executeGp0(command);
             remainingTransferSize -= 1;
         }
         if ((header & 0x800000) != 0) {
@@ -113,10 +113,10 @@ void DMA::executeBlock(Port port, Channel& channel) {
         uint32_t currentAddress = address & 0x1ffffc;
         switch (channel.dir()) {
             case Direction::FromRam: {
-                uint32_t source = ram.loadWord(currentAddress);
+                uint32_t source = ram->loadWord(currentAddress);
                 switch (port) {
                     case Port::GPUP: {
-                        gpu.executeGp0(source);
+                        gpu->executeGp0(source);
                         break;
                     }
                     default: {
@@ -149,7 +149,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                 }
-                ram.storeWord(currentAddress, source);
+                ram->storeWord(currentAddress, source);
                 break;
             }
         }

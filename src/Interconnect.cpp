@@ -27,7 +27,12 @@ const Range timerRegisterRange = Range(0x1f801100, 48);
 const Range dmaRegisterRange = Range(0x1f801080, 0x80);
 const Range gpuRegisterRange = Range(0x1f801810, 8);
 
-Interconnect::Interconnect(BIOS &bios, RAM &ram, DMA &dma, GPU &gpu) : bios(bios), ram(ram), dma(dma), gpu(gpu) {
+Interconnect::Interconnect() {
+    bios = make_unique<BIOS>();
+    bios->loadBin("SCPH1001.BIN");
+    ram = make_unique<RAM>();
+    gpu = make_unique<GPU>();
+    dma = make_unique<DMA>(ram, gpu);
 }
 
 Interconnect::~Interconnect() {
@@ -43,11 +48,11 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
 
     optional<uint32_t> offset = biosRange.contains(absoluteAddress);
     if (offset) {
-        return bios.loadWord(*offset);
+        return bios->loadWord(*offset);
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        return ram.loadWord(*offset);
+        return ram->loadWord(*offset);
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
@@ -62,10 +67,10 @@ uint32_t Interconnect::loadWord(uint32_t address) const {
     if (offset) {
         switch (*offset) {
             case 0: {
-                return gpu.readRegister();
+                return gpu->readRegister();
             }
             case 4: {
-                return gpu.statusRegister();
+                return gpu->statusRegister();
             }
             default: {
                 cout << "Unhandled GPU read at offset: 0x" << hex << *offset << endl;
@@ -94,7 +99,7 @@ uint16_t Interconnect::loadHalfWord(uint32_t address) const {
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        return ram.loadHalfWord(absoluteAddress);
+        return ram->loadHalfWord(absoluteAddress);
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
@@ -111,7 +116,7 @@ uint8_t Interconnect::loadByte(uint32_t address) const {
     optional<uint32_t> offset;
     offset = biosRange.contains(absoluteAddress);
     if (offset) {
-        return bios.loadByte(*offset);
+        return bios->loadByte(*offset);
     }
     offset = expansion1Range.contains(absoluteAddress);
     if (offset) {
@@ -120,7 +125,7 @@ uint8_t Interconnect::loadByte(uint32_t address) const {
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        return ram.loadByte(*offset);
+        return ram->loadByte(*offset);
     }
 
     cout << "Unhandled read byte at: 0x" << hex << address << endl;
@@ -168,7 +173,7 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        ram.storeWord(*offset, value);
+        ram->storeWord(*offset, value);
         return;
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
@@ -185,11 +190,11 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     if (offset) {
         switch (*offset) {
             case 0: {
-                gpu.executeGp0(value);
+                gpu->executeGp0(value);
                 break;
             }
             case 4: {
-                gpu.executeGp1(value);
+                gpu->executeGp1(value);
                 break;
             }
             default: {
@@ -216,7 +221,7 @@ void Interconnect::storeHalfWord(uint32_t address, uint16_t value) const {
     optional<uint32_t> offset;
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        ram.storeHalfWord(*offset, value);
+        ram->storeHalfWord(*offset, value);
         return;
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
@@ -248,7 +253,7 @@ void Interconnect::storeByte(uint32_t address, uint8_t value) const {
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
-        return ram.storeByte(*offset, value);
+        return ram->storeByte(*offset, value);
     }
     cout << "Unhandled byte write at: 0x" << hex << address << endl;
     exit(1);
@@ -266,7 +271,7 @@ uint32_t Interconnect::dmaRegister(uint32_t offset) const {
         case 5:
         case 6: {
             Port port = portWithIndex(upper);
-            Channel channel = dma.channelForPort(port);
+            Channel channel = dma->channelForPort(port);
             switch (lower) {
                 case 0: {
                     return channel.baseAddressRegister();
@@ -286,10 +291,10 @@ uint32_t Interconnect::dmaRegister(uint32_t offset) const {
         case 7: {
             switch (lower) {
                 case 0: {
-                    return dma.ctrlRegister();
+                    return dma->ctrlRegister();
                 }
                 case 4: {
-                    return dma.interruptRegister();
+                    return dma->interruptRegister();
                 }
                 default: {
                     cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
@@ -317,7 +322,7 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
         case 5:
         case 6: {
             Port port = portWithIndex(upper);
-            Channel& channel = dma.channelForPort(port);
+            Channel& channel = dma->channelForPort(port);
             switch (lower) {
                 case 0: {
                     channel.setBaseAddressRegister(value);
@@ -344,11 +349,11 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
         case 7: {
             switch (lower) {
                 case 0: {
-                    dma.setControlRegister(value);
+                    dma->setControlRegister(value);
                     break;
                 }
                 case 4: {
-                    dma.setInterruptRegister(value);
+                    dma->setInterruptRegister(value);
                     break;
                 }
                 default: {
@@ -364,6 +369,6 @@ void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
         }
     }
     if (activePort != Port::None) {
-        dma.execute(activePort);
+        dma->execute(activePort);
     }
 }

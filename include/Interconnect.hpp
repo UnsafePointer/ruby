@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "BIOS.hpp"
 #include "RAM.hpp"
 #include "DMA.hpp"
@@ -19,15 +20,15 @@ KUSEG     KSEG0     KSEG1
 See IOMap.md for I/O register mapping
 */
 class Interconnect {
-    const BIOS &bios;
-    RAM &ram;
-    DMA &dma;
-    GPU &gpu;
+    std::unique_ptr<BIOS> bios;
+    std::unique_ptr<RAM> ram;
+    std::unique_ptr<GPU> gpu;
+    std::unique_ptr<DMA> dma;
     uint32_t maskRegion(uint32_t address) const;
     uint32_t dmaRegister(uint32_t offset) const;
     void setDMARegister(uint32_t offset, uint32_t value) const;
 public:
-    Interconnect(BIOS &bios, RAM &ram, DMA &dma, GPU &gpu);
+    Interconnect();
     ~Interconnect();
 
     uint32_t loadWord(uint32_t address) const;
