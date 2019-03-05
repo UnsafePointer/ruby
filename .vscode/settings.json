@@ -37,7 +37,8 @@
         "sstream": "cpp",
         "tuple": "cpp",
         "algorithm": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "cstdarg": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe"
 }

@@ -449,6 +449,9 @@ void GPU::operationGp0SetDrawingOffset() {
 
     drawingOffsetX = ((int16_t)(x << 5)) >> 5;
     drawingOffsetY = ((int16_t)(y << 5)) >> 5;
+
+    // TODO: Remove. Temporary workaround to update the window.
+    renderer.display();
 }
 
 /*
