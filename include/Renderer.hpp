@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <memory>
+#include <array>
 #include "Point.hpp"
 #include "Color.hpp"
 #include "RendererBuffer.hpp"
@@ -29,6 +30,6 @@ public:
     Renderer();
     ~Renderer();
 
-    void pushTriangle(Point (&points)[3], Color (&colors)[3]);
+    void pushTriangle(std::array<Point, 3> points, std::array<Color, 3> colors);
     void display();
 };

@@ -579,8 +579,8 @@ void GPU::operationGp0ShadedQuadOpaque() {
 }
 
 void GPU::operationGp0ShadedTriangleOpaque() {
-    Point points[3] = { Point(gp0InstructionBuffer[1]), Point(gp0InstructionBuffer[3]), Point(gp0InstructionBuffer[5])};
-    Color colors[3] = { Color(gp0InstructionBuffer[0]), Color(gp0InstructionBuffer[2]), Color(gp0InstructionBuffer[4])};
+    array<Point, 3> points = { Point(gp0InstructionBuffer[1]), Point(gp0InstructionBuffer[3]), Point(gp0InstructionBuffer[5])};
+    array<Color, 3> colors = { Color(gp0InstructionBuffer[0]), Color(gp0InstructionBuffer[2]), Color(gp0InstructionBuffer[4])};
 
     renderer.pushTriangle(points, colors);
     return;

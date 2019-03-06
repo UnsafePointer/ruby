@@ -100,7 +100,7 @@ GLuint Renderer::findProgramAttribute(string attribute) const {
     return index;
 }
 
-void Renderer::pushTriangle(Point (&points)[3], Color (&colors)[3]) {
+void Renderer::pushTriangle(array<Point, 3> points, array<Color, 3> colors) {
     if (verticesCount + 3 > RENDERER_BUFFER_SIZE) {
         cout << "Renderer buffer full, forcing draw!" << endl;
         draw();
