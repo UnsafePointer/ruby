@@ -45,8 +45,6 @@ GPU::GPU() : texturePageBaseX(0),
              drawingAreaLeft(0),
              drawingAreaBottom(0),
              drawingAreaRight(0),
-             drawingOffsetX(0),
-             drawingOffsetY(0),
              displayVRAMStartX(0),
              displayVRAMStartY(0),
              displayHorizontalStart(0),
@@ -349,8 +347,6 @@ void GPU::operationGp1Reset(uint32_t value) {
     drawingAreaTop = 0;
     drawingAreaRight = 0;
     drawingAreaBottom = 0;
-    drawingOffsetX = 0;
-    drawingOffsetY = 0;
     shouldSetMaskBit = false;
     shouldPreserveMaskedPixels = false;
 
@@ -447,10 +443,10 @@ void GPU::operationGp0SetDrawingOffset() {
     uint16_t x = (value & 0x7ff);
     uint16_t y = ((value >> 11) & 0x7ff);
 
-    drawingOffsetX = ((int16_t)(x << 5)) >> 5;
-    drawingOffsetY = ((int16_t)(y << 5)) >> 5;
+    int16_t drawingOffsetX = ((int16_t)(x << 5)) >> 5;
+    int16_t drawingOffsetY = ((int16_t)(y << 5)) >> 5;
 
-    // TODO: Remove. Temporary workaround to update the window.
+    renderer.setDrawingOffset(drawingOffsetX, drawingOffsetY);
     renderer.display();
 }
 

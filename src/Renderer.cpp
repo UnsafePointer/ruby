@@ -48,6 +48,9 @@ Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>(
     GLuint colorIndex = findProgramAttribute("vertex_color");
     glEnableVertexAttribArray(colorIndex);
     glVertexAttribIPointer(colorIndex, 3, GL_UNSIGNED_BYTE, 0, NULL);
+
+    offsetUniform = findProgramAttribute("offset");
+    glUniform2i(offsetUniform, 0, 0);
 }
 
 Renderer::~Renderer() {
@@ -151,4 +154,9 @@ void Renderer::draw() {
 void Renderer::display() {
     draw();
     SDL_GL_SwapWindow(window);
+}
+
+void Renderer::setDrawingOffset(int16_t x, int16_t y) {
+    draw();
+    glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }

@@ -15,6 +15,7 @@ class Renderer {
     GLuint vertexShader;
     GLuint fragmentShader;
     GLuint glProgram;
+    GLuint offsetUniform;
     GLuint vertexArrayObject;
     std::unique_ptr<RendererBuffer<Point>> pointsBuffer;
     std::unique_ptr<RendererBuffer<Color>> colorsBuffer;
@@ -32,5 +33,6 @@ public:
 
     void pushTriangle(std::array<Point, 3> points, std::array<Color, 3> colors);
     void pushQuad(std::array<Point, 4> points, std::array<Color, 4> colors);
+    void setDrawingOffset(int16_t x, int16_t y);
     void display();
 };

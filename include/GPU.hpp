@@ -116,11 +116,6 @@ GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
     uint16_t drawingAreaBottom;
     uint16_t drawingAreaRight;
 /*
-GP0(E5h) - Set Drawing Offset (X,Y)
-*/
-    int16_t drawingOffsetX;
-    int16_t drawingOffsetY;
-/*
 GP1(05h) - Start of Display area (in VRAM)
 */
     uint16_t displayVRAMStartX;
