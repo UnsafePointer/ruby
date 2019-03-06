@@ -4,7 +4,7 @@
 
 Ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(console)) emulator written in C++.
 
-![current_progress.png](current_progress.png)
+![current_progress.gif](current_progress.gif)
 
 ### Progress
 
