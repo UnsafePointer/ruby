@@ -23,7 +23,7 @@ run: clean all
 	./$(BIN)/$(EXECUTABLE)
 
 $(GLAD_BUILD_DIR)/src/*.c:
-	python -m glad --out-path=$(GLAD_BUILD_DIR) --api="gl=4.5" --extensions="" --generator="c"
+	python -m glad --out-path=$(GLAD_BUILD_DIR) --api="gl=4.5" --extensions="GL_KHR_debug" --generator="c"
 
 $(BIN)/$(EXECUTABLE): $(SRC)/*.cpp $(GLAD_BUILD_DIR)/src/*.c
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -I$(GLAD_BUILD_DIR)/include -L$(LIB) $^ -o $@ $(LIBRARIES) $(SDL2_FLAGS)

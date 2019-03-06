@@ -7,13 +7,14 @@
 
 using namespace std;
 
-Renderer::Renderer() : verticesCount(0) {
+Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>()) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         cout << "Error initializing SDL: " << SDL_GetError() << endl;
         exit(1);
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
     window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 512, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
@@ -77,15 +78,7 @@ GLuint Renderer::compileShader(string filePath, GLenum shaderType) const {
     glCompileShader(shader);
     GLint status = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        cout << "Shader compilation error." << endl;
-        GLint maxLength = 0;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-        vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
-        cout << string(errorLog.begin(), errorLog.end()) << endl;
-        exit(1);
-    }
+    debugger->checkForErrors();
     return shader;
 }
 
@@ -96,25 +89,14 @@ GLuint Renderer::linkProgram() const {
     glLinkProgram(program);
     GLint status = GL_FALSE;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE) {
-        cout << "OpenGL program link error." << endl;
-        GLint maxLength = 0;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-        vector<GLchar> errorLog(maxLength);
-        glGetProgramInfoLog(program, maxLength, &maxLength, &errorLog[0]);
-        cout << string(errorLog.begin(), errorLog.end()) << endl;
-        exit(1);
-    }
+    debugger->checkForErrors();
     return program;
 }
 
 GLuint Renderer::findProgramAttribute(string attribute) const {
     const GLchar *attrib = attribute.c_str();
     GLint index = glGetAttribLocation(glProgram, attrib);
-    if (index < 0) {
-        cout << "Attribute " << attribute << " not found in main OpenGL program." << endl;
-        exit(1);
-    }
+    debugger->checkForErrors();
     return index;
 }
 
@@ -143,6 +125,7 @@ void Renderer::draw() {
         }
     }
     verticesCount = 0;
+    debugger->checkForErrors();
 }
 
 void Renderer::display() {

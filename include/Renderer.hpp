@@ -5,6 +5,7 @@
 #include "Point.hpp"
 #include "Color.hpp"
 #include "RendererBuffer.hpp"
+#include "RendererDebugger.hpp"
 
 class Renderer {
     SDL_GLContext glContext;
@@ -17,6 +18,7 @@ class Renderer {
     std::unique_ptr<RendererBuffer<Point>> pointsBuffer;
     std::unique_ptr<RendererBuffer<Color>> colorsBuffer;
     uint32_t verticesCount;
+    std::unique_ptr<RendererDebugger> debugger;
 
     std::string openShaderSource(std::string filePath) const;
     GLuint compileShader(std::string source, GLenum shaderType) const;
