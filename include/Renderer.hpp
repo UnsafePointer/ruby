@@ -31,5 +31,6 @@ public:
     ~Renderer();
 
     void pushTriangle(std::array<Point, 3> points, std::array<Color, 3> colors);
+    void pushQuad(std::array<Point, 4> points, std::array<Color, 4> colors);
     void display();
 };

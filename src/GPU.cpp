@@ -517,7 +517,15 @@ void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
 }
 
 void GPU::operationGp0MonochromeQuadOpaque() {
-    // TODO:
+    array<Point, 4> points = { Point(gp0InstructionBuffer[1]),
+                               Point(gp0InstructionBuffer[2]),
+                               Point(gp0InstructionBuffer[3]),
+                               Point(gp0InstructionBuffer[4])};
+    array<Color, 4> colors = { Color(gp0InstructionBuffer[0]),
+                               Color(gp0InstructionBuffer[0]),
+                               Color(gp0InstructionBuffer[0]),
+                               Color(gp0InstructionBuffer[0])};
+    renderer.pushQuad(points, colors);
     return;
 }
 
@@ -573,8 +581,15 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
 }
 
 void GPU::operationGp0ShadedQuadOpaque() {
-    // TODO:
-    cout << "Draw Shaded Quad Opaque" << endl;
+    array<Point, 4> points = { Point(gp0InstructionBuffer[1]),
+                               Point(gp0InstructionBuffer[3]),
+                               Point(gp0InstructionBuffer[5]),
+                               Point(gp0InstructionBuffer[7])};
+    array<Color, 4> colors = { Color(gp0InstructionBuffer[0]),
+                               Color(gp0InstructionBuffer[2]),
+                               Color(gp0InstructionBuffer[4]),
+                               Color(gp0InstructionBuffer[6])};
+    renderer.pushQuad(points, colors);
     return;
 }
 
@@ -587,8 +602,15 @@ void GPU::operationGp0ShadedTriangleOpaque() {
 }
 
 void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
-    // TODO:
-    cout << "Draw Textured Quad Opaque with Texture Blending" << endl;
+    array<Point, 4> points = { Point(gp0InstructionBuffer[1]),
+                               Point(gp0InstructionBuffer[3]),
+                               Point(gp0InstructionBuffer[5]),
+                               Point(gp0InstructionBuffer[7])};
+    array<Color, 4> colors = { Color(0xFF,0x00,0xFF),
+                               Color(0xFF,0x00,0xFF),
+                               Color(0xFF,0x00,0xFF),
+                               Color(0xFF,0x00,0xFF)};
+    renderer.pushQuad(points, colors);
     return;
 }
 

@@ -114,6 +114,26 @@ void Renderer::pushTriangle(array<Point, 3> points, array<Color, 3> colors) {
     return;
 }
 
+
+void Renderer::pushQuad(std::array<Point, 4> points, std::array<Color, 4> colors) {
+    if (verticesCount + 6 > RENDERER_BUFFER_SIZE) {
+        cout << "Renderer buffer full, forcing draw!" << endl;
+        draw();
+    }
+
+    for (uint8_t i = 0; i < 3; i++) {
+        pointsBuffer->set(verticesCount, points[i]);
+        colorsBuffer->set(verticesCount, colors[i]);
+        verticesCount++;
+    }
+    for (uint8_t i = 1; i < 4; i++) {
+        pointsBuffer->set(verticesCount, points[i]);
+        colorsBuffer->set(verticesCount, colors[i]);
+        verticesCount++;
+    }
+    return;
+}
+
 void Renderer::draw() {
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei)verticesCount);

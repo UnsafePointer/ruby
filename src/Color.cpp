@@ -6,6 +6,10 @@ Color::Color(uint32_t value) {
     blue = ((GLubyte)((value >> 16) & 0xff));
 }
 
+Color::Color(GLubyte red, GLubyte green, GLubyte blue) : red(red), green(green), blue(blue) {
+
+}
+
 Color::~Color() {
 
 }
