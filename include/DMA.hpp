@@ -66,6 +66,8 @@ public:
     DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu);
     ~DMA();
 
-    uint32_t dmaRegister(uint32_t offset);
-    void setDMARegister(uint32_t offset, uint32_t value);
+    template <typename T>
+    inline T load(uint32_t offset);
+    template <typename T>
+    inline void store(uint32_t offset, T value);
 };

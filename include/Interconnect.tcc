@@ -4,6 +4,7 @@
 #include "RAM.tcc"
 #include "BIOS.tcc"
 #include "GPU.tcc"
+#include "DMA.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -25,7 +26,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
     if (offset) {
-        return dma->dmaRegister(*offset);
+        return dma->load<T>(*offset);
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
@@ -104,7 +105,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
     if (offset) {
-        dma->setDMARegister(*offset, value);
+        dma->store<T>(*offset, value);
         return;
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
