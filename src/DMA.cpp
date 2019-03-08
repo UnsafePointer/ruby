@@ -1,5 +1,6 @@
 #include "DMA.hpp"
 #include <iostream>
+#include "RAM.tcc"
 
 using namespace std;
 
@@ -80,11 +81,11 @@ void DMA::executeLinkedList(Port port, Channel& channel) {
         exit(1);
     }
     while (true) {
-        uint32_t header = ram->loadWord(address);
+        uint32_t header = ram->load<uint32_t>(address);
         uint32_t remainingTransferSize = header >> 24;
         while (remainingTransferSize > 0) {
             address = (address + 4) & 0x1ffffc;
-            uint32_t command = ram->loadWord(address);
+            uint32_t command = ram->load<uint32_t>(address);
             gpu->executeGp0(command);
             remainingTransferSize -= 1;
         }
@@ -113,7 +114,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
         uint32_t currentAddress = address & 0x1ffffc;
         switch (channel.dir()) {
             case Direction::FromRam: {
-                uint32_t source = ram->loadWord(currentAddress);
+                uint32_t source = ram->load<uint32_t>(currentAddress);
                 switch (port) {
                     case Port::GPUP: {
                         gpu->executeGp0(source);
@@ -149,7 +150,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                 }
-                ram->storeWord(currentAddress, source);
+                ram->store<uint32_t>(currentAddress, source);
                 break;
             }
         }

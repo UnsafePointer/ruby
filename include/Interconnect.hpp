@@ -4,6 +4,20 @@
 #include "RAM.hpp"
 #include "DMA.hpp"
 #include "GPU.hpp"
+#include "Range.hpp"
+
+const Range ramRange = Range(0x00000000, RAM_SIZE);
+const Range biosRange = Range(0x1fc00000, 512 * 1024);
+const Range memoryControlRange = Range(0x1f801000, 36);
+const Range ramSizeRange = Range(0x1f801060, 4);
+const Range cacheControlRange = Range(0xfffe0130, 4);
+const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
+const Range expansion2Range = Range(0x1f802000, 66);
+const Range expansion1Range = Range(0x1f000000, 512 * 1024);
+const Range interruptRequestControlRange = Range(0x1f801070, 8);
+const Range timerRegisterRange = Range(0x1f801100, 48);
+const Range dmaRegisterRange = Range(0x1f801080, 0x80);
+const Range gpuRegisterRange = Range(0x1f801810, 8);
 
 /*
 Memory Map
@@ -25,16 +39,12 @@ class Interconnect {
     std::unique_ptr<GPU> gpu;
     std::unique_ptr<DMA> dma;
     uint32_t maskRegion(uint32_t address) const;
-    uint32_t dmaRegister(uint32_t offset) const;
-    void setDMARegister(uint32_t offset, uint32_t value) const;
 public:
     Interconnect();
     ~Interconnect();
 
-    uint32_t loadWord(uint32_t address) const;
-    uint16_t loadHalfWord(uint32_t address) const;
-    uint8_t loadByte(uint32_t address) const;
-    void storeWord(uint32_t address, uint32_t value) const;
-    void storeHalfWord(uint32_t address, uint16_t value) const;
-    void storeByte(uint32_t address, uint8_t value) const;
+    template <typename T>
+    inline T load(uint32_t address) const;
+    template <typename T>
+    inline void store(uint32_t address, T value) const;
 };

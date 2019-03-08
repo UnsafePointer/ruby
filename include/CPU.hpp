@@ -58,7 +58,7 @@ class CPU {
     bool isDelaySlot;
     uint32_t registers[32];
     uint32_t outputRegisters[32];
-    std::pair<RegisterIndex, uint32_t> load;
+    std::pair<RegisterIndex, uint32_t> loadPair;
     uint32_t statusRegister; // cop0r12
     uint32_t causeRegister; // cop0r13
     uint32_t returnAddressFromTrap; // cop0r14
@@ -150,12 +150,10 @@ class CPU {
 
     void operationIllegal(Instruction instruction);
 
-    uint32_t loadWord(uint32_t address) const;
-    uint16_t loadHalfWord(uint32_t address) const;
-    uint8_t loadByte(uint32_t address) const;
-    void storeWord(uint32_t address, uint32_t value) const;
-    void storeHalfWord(uint32_t address, uint16_t value) const;
-    void storeByte(uint32_t address, uint8_t value) const;
+    template <typename T>
+    inline T load(uint32_t address) const;
+    template <typename T>
+    inline void store(uint32_t address, T value) const;
 public:
     CPU();
     ~CPU();
