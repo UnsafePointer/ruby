@@ -110,20 +110,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
-        switch (*offset) {
-            case 0: {
-                gpu->executeGp0(value);
-                break;
-            }
-            case 4: {
-                gpu->executeGp1(value);
-                break;
-            }
-            default: {
-                std::cout << "Unhandled GPU write at offset: 0x" << std::hex << *offset << std::endl;
-                exit(1);
-            }
-        }
+        gpu->store<T>(*offset, value);
         return;
     }
     offset = timerRegisterRange.contains(absoluteAddress);

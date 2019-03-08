@@ -166,12 +166,16 @@ GP1(07h) - Vertical Display range (on Screen)
 
     uint32_t statusRegister() const;
     uint32_t readRegister() const;
+
+    void executeGp1(uint32_t value);
 public:
     GPU();
     ~GPU();
-
-    void executeGp0(uint32_t value);
-    void executeGp1(uint32_t value);
     template <typename T>
     inline T load(uint32_t offset) const;
+    template <typename T>
+    inline void store(uint32_t offset, T value);
+
+    // TODO: should be private
+    void executeGp0(uint32_t value);
 };
