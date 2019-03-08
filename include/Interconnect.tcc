@@ -7,6 +7,7 @@
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
+    static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     uint32_t absoluteAddress = maskRegion(address);
 
     std::optional<uint32_t> offset = biosRange.contains(absoluteAddress);
@@ -51,6 +52,7 @@ inline T Interconnect::load(uint32_t address) const {
 
 template <typename T>
 inline void Interconnect::store(uint32_t address, T value) const {
+    static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (address % sizeof(T) != 0) {
         std::cout << "Unaligned memory store" << std::endl;
         exit(1);
