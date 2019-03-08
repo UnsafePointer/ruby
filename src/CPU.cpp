@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <tuple>
+#include "CPU.tcc"
 
 using namespace std;
 
@@ -24,18 +25,6 @@ CPU::CPU() : programCounter(0xbfc00000),
 CPU::~CPU() {
 }
 
-uint32_t CPU::loadWord(uint32_t address) const {
-    return interconnect->loadWord(address);
-}
-
-uint16_t CPU::loadHalfWord(uint32_t address) const {
-    return interconnect->loadHalfWord(address);
-}
-
-uint8_t CPU::loadByte(uint32_t address) const {
-    return interconnect->loadByte(address);
-}
-
 void CPU::storeWord(uint32_t address, uint32_t value) const {
     return interconnect->storeWord(address, value);
 }
@@ -54,7 +43,7 @@ void CPU::executeNextInstruction() {
         triggerException(ExceptionType::LoadAddress);
         return;
     }
-    Instruction instruction = Instruction(loadWord(programCounter));
+    Instruction instruction = Instruction(load<uint32_t>(programCounter));
 
     isDelaySlot = isBranching;
     isBranching = false;
@@ -544,7 +533,7 @@ void CPU::operationLoadWord(Instruction instruction) {
         triggerException(ExceptionType::LoadAddress);
         return;
     }
-    uint32_t value = loadWord(address);
+    uint32_t value = load<uint32_t>(address);
     loadPair = {rt, value};
 }
 
@@ -632,7 +621,7 @@ void CPU::operationLoadByte(Instruction instruction) {
         cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
         return;
     }
-    uint32_t value = (int8_t)loadByte(address);
+    uint32_t value = (int8_t)load<uint8_t>(address);
     loadPair = {rt, value};
 }
 
@@ -727,7 +716,7 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
         cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
         return;
     }
-    uint32_t value = loadByte(address);
+    uint32_t value = load<uint8_t>(address);
     loadPair = {rt, value};
 }
 
@@ -949,7 +938,7 @@ void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
         triggerException(ExceptionType::LoadAddress);
         return;
     }
-    uint32_t value = loadHalfWord(address);
+    uint32_t value = load<uint16_t>(address);
     loadPair = {rt, value};
 }
 
@@ -976,7 +965,7 @@ void CPU::operationLoadHalfWord(Instruction instruction) {
         triggerException(ExceptionType::LoadAddress);
         return;
     }
-    uint32_t value = ((int16_t)loadHalfWord(address));
+    uint32_t value = ((int16_t)load<uint16_t>(address));
     loadPair = {rt, value};
 }
 
@@ -1091,7 +1080,7 @@ void CPU::operationLoadWordLeft(Instruction instruction) {
     uint32_t currentValue = outputRegisters[rt.idx()];
 
     uint32_t alignedAddress = address & !3;
-    uint32_t alignedWord = loadWord(alignedAddress);
+    uint32_t alignedWord = load<uint32_t>(alignedAddress);
 
     uint32_t value;
     switch (address & 3) {
@@ -1125,7 +1114,7 @@ void CPU::operationLoadWordRight(Instruction instruction) {
     uint32_t currentValue = outputRegisters[rt.idx()];
 
     uint32_t alignedAddress = address & !3;
-    uint32_t alignedWord = loadWord(alignedAddress);
+    uint32_t alignedWord = load<uint32_t>(alignedAddress);
 
     uint32_t value;
     switch (address & 3) {
@@ -1159,7 +1148,7 @@ void CPU::operationStoreWordLeft(Instruction instruction) {
     uint32_t value = registerAtIndex(rt);
 
     uint32_t alignedAddress = address & !3;
-    uint32_t currentMemoryValue = loadWord(alignedAddress);
+    uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
 
     uint32_t memoryValue;
     switch (address & 3) {
@@ -1193,7 +1182,7 @@ void CPU::operationStoreWordRight(Instruction instruction) {
     uint32_t value = registerAtIndex(rt);
 
     uint32_t alignedAddress = address & !3;
-    uint32_t currentMemoryValue = loadWord(alignedAddress);
+    uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
 
     uint32_t memoryValue;
     switch (address & 3) {

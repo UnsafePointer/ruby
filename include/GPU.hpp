@@ -163,12 +163,15 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp1DisplayEnable(uint32_t value);
     void operationGp1AcknowledgeGPUInterrupt(uint32_t value);
     void operationGp1ResetCommandBuffer(uint32_t value);
+
+    uint32_t statusRegister() const;
+    uint32_t readRegister() const;
 public:
     GPU();
     ~GPU();
 
-    uint32_t statusRegister() const;
     void executeGp0(uint32_t value);
     void executeGp1(uint32_t value);
-    uint32_t readRegister() const;
+    template <typename T>
+    inline T load(uint32_t offset) const;
 };

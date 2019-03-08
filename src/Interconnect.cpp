@@ -14,18 +14,6 @@ const uint32_t regionMask[8] = {
     // KSEG2: 1024MB
     0xffffffff, 0xffffffff,
 };
-const Range ramRange = Range(0x00000000, RAM_SIZE);
-const Range biosRange = Range(0x1fc00000, 512 * 1024);
-const Range memoryControlRange = Range(0x1f801000, 36);
-const Range ramSizeRange = Range(0x1f801060, 4);
-const Range cacheControlRange = Range(0xfffe0130, 4);
-const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
-const Range expansion2Range = Range(0x1f802000, 66);
-const Range expansion1Range = Range(0x1f000000, 512 * 1024);
-const Range interruptRequestControlRange = Range(0x1f801070, 8);
-const Range timerRegisterRange = Range(0x1f801100, 48);
-const Range dmaRegisterRange = Range(0x1f801080, 0x80);
-const Range gpuRegisterRange = Range(0x1f801810, 8);
 
 Interconnect::Interconnect() {
     bios = make_unique<BIOS>();
@@ -41,95 +29,6 @@ Interconnect::~Interconnect() {
 uint32_t Interconnect::maskRegion(uint32_t address) const {
     uint8_t index = address >> 29;
     return address & regionMask[index];
-}
-
-uint32_t Interconnect::loadWord(uint32_t address) const {
-    uint32_t absoluteAddress = maskRegion(address);
-
-    optional<uint32_t> offset = biosRange.contains(absoluteAddress);
-    if (offset) {
-        return bios->loadWord(*offset);
-    }
-    offset = ramRange.contains(absoluteAddress);
-    if (offset) {
-        return ram->loadWord(*offset);
-    }
-    offset = interruptRequestControlRange.contains(absoluteAddress);
-    if (offset) {
-        cout << "Unhandled Interrupt Request Control read at offset: 0x" << hex << *offset << endl;
-        return 0;
-    }
-    offset = dmaRegisterRange.contains(absoluteAddress);
-    if (offset) {
-        return dmaRegister(*offset);
-    }
-    offset = gpuRegisterRange.contains(absoluteAddress);
-    if (offset) {
-        switch (*offset) {
-            case 0: {
-                return gpu->readRegister();
-            }
-            case 4: {
-                return gpu->statusRegister();
-            }
-            default: {
-                cout << "Unhandled GPU read at offset: 0x" << hex << *offset << endl;
-                exit(1);
-                return 0;
-            }
-        }
-    }
-    offset = timerRegisterRange.contains(absoluteAddress);
-    if (offset) {
-        cout << "Unhandled Timer Register read at offset: 0x" << hex << *offset << endl;
-        return 0;
-    }
-    cout << "Unhandled read at: 0x" << hex << address << endl;
-    exit(1);
-}
-
-uint16_t Interconnect::loadHalfWord(uint32_t address) const {
-    uint32_t absoluteAddress = maskRegion(address);
-
-    optional<uint32_t> offset;
-    offset = soundProcessingUnitRange.contains(absoluteAddress);
-    if (offset) {
-        cout << "Unhandled Sound Processing Unit read at offset: 0x" << hex << *offset << endl;
-        return 0;
-    }
-    offset = ramRange.contains(absoluteAddress);
-    if (offset) {
-        return ram->loadHalfWord(absoluteAddress);
-    }
-    offset = interruptRequestControlRange.contains(absoluteAddress);
-    if (offset) {
-        cout << "Unhandled Interrupt Request Control read at offset: 0x" << hex << *offset << endl;
-        return 0;
-    }
-    cout << "Unhandled half read at: 0x" << hex << address << endl;
-    exit(1);
-}
-
-uint8_t Interconnect::loadByte(uint32_t address) const {
-    uint32_t absoluteAddress = maskRegion(address);
-
-    optional<uint32_t> offset;
-    offset = biosRange.contains(absoluteAddress);
-    if (offset) {
-        return bios->loadByte(*offset);
-    }
-    offset = expansion1Range.contains(absoluteAddress);
-    if (offset) {
-        // No expansion
-        return 0xFF;
-    }
-    offset = ramRange.contains(absoluteAddress);
-    if (offset) {
-        return ram->loadByte(*offset);
-    }
-
-    cout << "Unhandled read byte at: 0x" << hex << address << endl;
-    exit(1);
 }
 
 void Interconnect::storeWord(uint32_t address, uint32_t value) const {

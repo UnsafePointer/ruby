@@ -11,6 +11,8 @@ public:
     ~BIOS();
 
     void loadBin(const std::string& path);
+    template <typename T>
+    inline T load(uint32_t offset) const;
     uint32_t loadWord(uint32_t offset) const;
     uint8_t loadByte(uint32_t offset) const;
 };
