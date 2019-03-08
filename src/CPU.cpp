@@ -25,18 +25,6 @@ CPU::CPU() : programCounter(0xbfc00000),
 CPU::~CPU() {
 }
 
-void CPU::storeWord(uint32_t address, uint32_t value) const {
-    return interconnect->storeWord(address, value);
-}
-
-void CPU::storeHalfWord(uint32_t address, uint16_t value) const {
-    return interconnect->storeHalfWord(address, value);
-}
-
-void CPU::storeByte(uint32_t address, uint8_t value) const {
-    return interconnect->storeByte(address, value);
-}
-
 void CPU::executeNextInstruction() {
     currentProgramCounter = programCounter;
     if (currentProgramCounter % 4 != 0) {
@@ -459,7 +447,7 @@ void CPU::operationStoreWord(Instruction instruction) {
     }
 
     uint32_t value = registerAtIndex(rt);
-    storeWord(address, value);
+    store<uint32_t>(address, value);
 }
 
 void CPU::operationShiftLeftLogical(Instruction instruction) {
@@ -571,7 +559,7 @@ void CPU::operationStoreHalfWord(Instruction instruction) {
     }
 
     uint32_t value = registerAtIndex(rt);
-    storeHalfWord(address, value);
+    store<uint16_t>(address, value);
 }
 
 void CPU::operationJumpAndLink(Instruction instruction) {
@@ -602,7 +590,7 @@ void CPU::operationStoreByte(Instruction instruction) const {
     }
 
     uint32_t value = registerAtIndex(rt);
-    storeByte(address, value);
+    store<uint8_t>(address, value);
 }
 
 void CPU::operationJumpRegister(Instruction instruction) {
@@ -1170,7 +1158,7 @@ void CPU::operationStoreWordLeft(Instruction instruction) {
         }
     }
 
-    storeWord(alignedAddress, memoryValue);
+    store<uint32_t>(alignedAddress, memoryValue);
 }
 
 void CPU::operationStoreWordRight(Instruction instruction) {
@@ -1204,7 +1192,7 @@ void CPU::operationStoreWordRight(Instruction instruction) {
         }
     }
 
-    storeWord(alignedAddress, memoryValue);
+    store<uint32_t>(alignedAddress, memoryValue);
 }
 
 void CPU::operationLoadWordCoprocessor0(Instruction instruction) {

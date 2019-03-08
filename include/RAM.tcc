@@ -9,3 +9,10 @@ inline T RAM::load(uint32_t offset) const {
     }
     return value;
 }
+
+template <typename T>
+inline void RAM::store(uint32_t offset, T value) {
+    for (uint8_t i = 0; i < sizeof(T); i++) {
+        data[offset + i] = ((uint8_t)(((uint32_t)value) >> (i * 8)));
+    }
+}

@@ -152,9 +152,8 @@ class CPU {
 
     template <typename T>
     inline T load(uint32_t address) const;
-    void storeWord(uint32_t address, uint32_t value) const;
-    void storeHalfWord(uint32_t address, uint16_t value) const;
-    void storeByte(uint32_t address, uint8_t value) const;
+    template <typename T>
+    inline void store(uint32_t address, T value) const;
 public:
     CPU();
     ~CPU();

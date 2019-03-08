@@ -264,7 +264,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                 }
-                ram->storeWord(currentAddress, source);
+                ram->store<uint32_t>(currentAddress, source);
                 break;
             }
         }
