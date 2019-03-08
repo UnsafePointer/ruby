@@ -9,7 +9,7 @@ CPU::CPU() : programCounter(0xbfc00000),
              currentProgramCounter(0xbfc00000),
              isBranching(false),
              isDelaySlot(false),
-             load({RegisterIndex(), 0}),
+             loadPair({RegisterIndex(), 0}),
              statusRegister(0),
              highRegister(0xdeadbeef),
              lowRegister(0xdeadbeef)
@@ -64,9 +64,9 @@ void CPU::executeNextInstruction() {
 
     RegisterIndex loadRegisterIndex;
     uint32_t value;
-    tie(loadRegisterIndex, value) = load;
+    tie(loadRegisterIndex, value) = loadPair;
     setRegisterAtIndex(loadRegisterIndex, value);
-    load = {RegisterIndex(), 0};
+    loadPair = {RegisterIndex(), 0};
 
     decodeAndExecuteInstruction(instruction);
     copy(begin(outputRegisters), end(outputRegisters), begin(registers));
@@ -545,7 +545,7 @@ void CPU::operationLoadWord(Instruction instruction) {
         return;
     }
     uint32_t value = loadWord(address);
-    load = {rt, value};
+    loadPair = {rt, value};
 }
 
 void CPU::operationSetOnLessThanUnsigned(Instruction instruction) {
@@ -633,7 +633,7 @@ void CPU::operationLoadByte(Instruction instruction) {
         return;
     }
     uint32_t value = (int8_t)loadByte(address);
-    load = {rt, value};
+    loadPair = {rt, value};
 }
 
 void CPU::operationBranchIfEqual(Instruction instruction) {
@@ -669,7 +669,7 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             exit(1);
         }
     }
-    load = {cpuRegisterIndex, value};
+    loadPair = {cpuRegisterIndex, value};
 }
 
 void CPU::operationBitwiseAnd(Instruction instruction) {
@@ -728,7 +728,7 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
         return;
     }
     uint32_t value = loadByte(address);
-    load = {rt, value};
+    loadPair = {rt, value};
 }
 
 
@@ -950,7 +950,7 @@ void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
         return;
     }
     uint32_t value = loadHalfWord(address);
-    load = {rt, value};
+    loadPair = {rt, value};
 }
 
 void CPU::operationShiftLeftLogicalVariable(Instruction instruction) {
@@ -977,7 +977,7 @@ void CPU::operationLoadHalfWord(Instruction instruction) {
         return;
     }
     uint32_t value = ((int16_t)loadHalfWord(address));
-    load = {rt, value};
+    loadPair = {rt, value};
 }
 
 void CPU::operationBitwiseNotOr(Instruction instruction) {
@@ -1113,7 +1113,7 @@ void CPU::operationLoadWordLeft(Instruction instruction) {
         }
     }
 
-    load = {rt, value};
+    loadPair = {rt, value};
 }
 
 void CPU::operationLoadWordRight(Instruction instruction) {
@@ -1147,7 +1147,7 @@ void CPU::operationLoadWordRight(Instruction instruction) {
         }
     }
 
-    load = {rt, value};
+    loadPair = {rt, value};
 }
 
 void CPU::operationStoreWordLeft(Instruction instruction) {

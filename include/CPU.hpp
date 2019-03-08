@@ -58,7 +58,7 @@ class CPU {
     bool isDelaySlot;
     uint32_t registers[32];
     uint32_t outputRegisters[32];
-    std::pair<RegisterIndex, uint32_t> load;
+    std::pair<RegisterIndex, uint32_t> loadPair;
     uint32_t statusRegister; // cop0r12
     uint32_t causeRegister; // cop0r13
     uint32_t returnAddressFromTrap; // cop0r14
