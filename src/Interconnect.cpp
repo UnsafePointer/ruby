@@ -82,7 +82,7 @@ void Interconnect::storeWord(uint32_t address, uint32_t value) const {
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
     if (offset) {
-        setDMARegister(*offset, value);
+        dma->setDMARegister(*offset, value);
         return;
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
@@ -158,116 +158,4 @@ void Interconnect::storeByte(uint32_t address, uint8_t value) const {
     exit(1);
 }
 
-uint32_t Interconnect::dmaRegister(uint32_t offset) const {
-    uint32_t upper = (offset & 0x70) >> 4;
-    uint32_t lower = (offset & 0xf);
-    switch (upper) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6: {
-            Port port = portWithIndex(upper);
-            Channel channel = dma->channelForPort(port);
-            switch (lower) {
-                case 0: {
-                    return channel.baseAddressRegister();
-                }
-                case 4: {
-                    return channel.blockControlRegister();
-                }
-                case 8: {
-                    return channel.controlRegister();
-                }
-                default: {
-                    cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
-                    exit(1);
-                }
-            }
-        }
-        case 7: {
-            switch (lower) {
-                case 0: {
-                    return dma->ctrlRegister();
-                }
-                case 4: {
-                    return dma->interruptRegister();
-                }
-                default: {
-                    cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
-                    exit(1);
-                }
-            }
-        }
-        default: {
-            cout << "Unhandled DMA access at offset: 0x" << hex << offset << endl;
-            exit(1);
-        }
-    }
-}
 
-void Interconnect::setDMARegister(uint32_t offset, uint32_t value) const {
-    uint32_t upper = (offset & 0x70) >> 4;
-    uint32_t lower = (offset & 0xf);
-    Port activePort = Port::None;
-    switch (upper) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6: {
-            Port port = portWithIndex(upper);
-            Channel& channel = dma->channelForPort(port);
-            switch (lower) {
-                case 0: {
-                    channel.setBaseAddressRegister(value);
-                    break;
-                }
-                case 4: {
-                    channel.setBlockControlRegister(value);
-                    break;
-                }
-                case 8: {
-                    channel.setControlRegister(value);
-                    break;
-                }
-                default: {
-                    cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;
-                    exit(1);
-                }
-            }
-            if (channel.isActive()) {
-                activePort = port;
-            }
-            break;
-        }
-        case 7: {
-            switch (lower) {
-                case 0: {
-                    dma->setControlRegister(value);
-                    break;
-                }
-                case 4: {
-                    dma->setInterruptRegister(value);
-                    break;
-                }
-                default: {
-                    cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;
-                    exit(1);
-                }
-            }
-            break;
-        }
-        default: {
-            cout << "Unhandled DMA write access at offset: 0x" << hex << offset << endl;
-            exit(1);
-        }
-    }
-    if (activePort != Port::None) {
-        dma->execute(activePort);
-    }
-}

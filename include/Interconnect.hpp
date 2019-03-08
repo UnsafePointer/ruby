@@ -39,8 +39,6 @@ class Interconnect {
     std::unique_ptr<GPU> gpu;
     std::unique_ptr<DMA> dma;
     uint32_t maskRegion(uint32_t address) const;
-    uint32_t dmaRegister(uint32_t offset) const;
-    void setDMARegister(uint32_t offset, uint32_t value) const;
 public:
     Interconnect();
     ~Interconnect();

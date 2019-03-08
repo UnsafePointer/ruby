@@ -50,20 +50,22 @@ class DMA {
     uint8_t interruptRequestChannelFlags;
 
     Channel channels[7];
-
-    bool interruptRequestStatus() const;
-    void executeBlock(Channel channel);
-public:
-    DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu);
-    ~DMA();
+    Channel& channelForPort(Port port);
 
     uint32_t ctrlRegister() const;
     void setControlRegister(uint32_t value);
     uint32_t interruptRegister() const;
     void setInterruptRegister(uint32_t value);
-    Channel& channelForPort(Port port);
+
+    bool interruptRequestStatus() const;
 
     void execute(Port port);
-    void executeLinkedList(Port port, Channel& channel);
     void executeBlock(Port port, Channel& channel);
+    void executeLinkedList(Port port, Channel& channel);
+public:
+    DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu);
+    ~DMA();
+
+    uint32_t dmaRegister(uint32_t offset);
+    void setDMARegister(uint32_t offset, uint32_t value);
 };

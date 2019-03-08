@@ -24,7 +24,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
     if (offset) {
-        return dmaRegister(*offset);
+        return dma->dmaRegister(*offset);
     }
     offset = gpuRegisterRange.contains(absoluteAddress);
     if (offset) {
