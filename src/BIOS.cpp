@@ -21,19 +21,3 @@ void BIOS::loadBin(const string& path) {
     file.read(reinterpret_cast<char *>(data), size);
     file.close();
 }
-
-uint32_t BIOS::loadWord(uint32_t offset) const {
-    uint32_t b0 = data[offset + 0];
-    uint32_t b1 = data[offset + 1];
-    b1 <<= 8;
-    uint32_t b2 = data[offset + 2];
-    b2 <<= 16;
-    uint32_t b3 = data[offset + 3];
-    b3 <<= 24;
-    return b0 | b1 | b2 | b3;
-}
-
-
-uint8_t BIOS::loadByte(uint32_t offset) const {
-    return data[offset];
-}
