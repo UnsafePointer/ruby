@@ -11,7 +11,7 @@ Range::~Range() {
 }
 
 std::optional<uint32_t> Range::contains(uint32_t address) const {
-    if (address >= start && address <= (start + length)) {
+    if (address >= start && address < (start + length)) {
         uint32_t offset = address - start;
         return { offset };
     } else {
