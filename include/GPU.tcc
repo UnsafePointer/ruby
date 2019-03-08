@@ -5,6 +5,10 @@
 template <typename T>
 inline T GPU::load(uint32_t offset) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
+    if (sizeof(T) != 4) {
+        std::cout << "Unsupported GPU read with size: " << std::dec << sizeof(T) << std::endl;
+        exit(1);
+    }
     switch (offset) {
         case 0: {
             return readRegister();
@@ -23,6 +27,10 @@ inline T GPU::load(uint32_t offset) const {
 template <typename T>
 inline void GPU::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
+    if (sizeof(T) != 4) {
+        std::cout << "Unsupported GPU write with size: " << std::dec << sizeof(T) << std::endl;
+        exit(1);
+    }
     switch (offset) {
         case 0: {
             executeGp0(value);

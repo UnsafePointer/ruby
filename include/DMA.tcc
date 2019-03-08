@@ -5,6 +5,10 @@
 template <typename T>
 inline T DMA::load(uint32_t offset) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
+    if (sizeof(T) != 4) {
+        std::cout << "Unsupported DMA read with size: " << std::dec << sizeof(T) << std::endl;
+        exit(1);
+    }
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
     switch (upper) {
@@ -57,6 +61,10 @@ inline T DMA::load(uint32_t offset) {
 template <typename T>
 inline void DMA::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
+    if (sizeof(T) != 4) {
+        std::cout << "Unsupported DMA write with size: " << std::dec << sizeof(T) << std::endl;
+        exit(1);
+    }
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
     Port activePort = Port::None;
