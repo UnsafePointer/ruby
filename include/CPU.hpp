@@ -3,6 +3,7 @@
 #include "Interconnect.hpp"
 #include "Instruction.hpp"
 #include "RegisterIndex.hpp"
+#include "Debugger.hpp"
 
 enum ExceptionType : uint32_t {
     SysCall = 0x8,
@@ -51,7 +52,6 @@ cop0r16-r31 - Garbage
 cop0r32-r63 - N/A - None such (Control regs)
 */
 class CPU {
-    uint32_t programCounter;
     uint32_t nextProgramCounter;
     uint32_t currentProgramCounter;
     bool isBranching;
@@ -65,6 +65,7 @@ class CPU {
     uint32_t highRegister;
     uint32_t lowRegister;
     std::unique_ptr<Interconnect> interconnect;
+    std::unique_ptr<Debugger> &debugger;
 
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
@@ -155,8 +156,9 @@ class CPU {
     template <typename T>
     inline void store(uint32_t address, T value) const;
 public:
-    CPU();
+    CPU(std::unique_ptr<Debugger> &debugger);
     ~CPU();
 
+    uint32_t programCounter;
     void executeNextInstruction();
 };

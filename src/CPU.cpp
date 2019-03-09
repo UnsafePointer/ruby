@@ -6,14 +6,15 @@
 
 using namespace std;
 
-CPU::CPU() : programCounter(0xbfc00000),
-             currentProgramCounter(0xbfc00000),
+CPU::CPU(std::unique_ptr<Debugger> &debugger) : currentProgramCounter(0xbfc00000),
              isBranching(false),
              isDelaySlot(false),
              loadPair({RegisterIndex(), 0}),
              statusRegister(0),
              highRegister(0xdeadbeef),
-             lowRegister(0xdeadbeef)
+             lowRegister(0xdeadbeef),
+             debugger(debugger),
+             programCounter(0xbfc00000)
 {
     interconnect = make_unique<Interconnect>();
     nextProgramCounter = programCounter + 4;
@@ -27,6 +28,7 @@ CPU::~CPU() {
 
 void CPU::executeNextInstruction() {
     currentProgramCounter = programCounter;
+    debugger->inspectCPU(this);
     if (currentProgramCounter % 4 != 0) {
         triggerException(ExceptionType::LoadAddress);
         return;

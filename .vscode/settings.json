@@ -39,7 +39,16 @@
         "algorithm": "cpp",
         "functional": "cpp",
         "cstdarg": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "cstddef": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "atomic": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "mutex": "cpp",
+        "ratio": "cpp",
+        "thread": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe"
 }
