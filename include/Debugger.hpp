@@ -6,6 +6,8 @@ class CPU;
 
 class Debugger {
     std::vector<uint32_t> breakpoints;
+    std::vector<uint32_t> loadWatchpoints;
+    std::vector<uint32_t> storeWatchpoints;
 public:
     Debugger();
     ~Debugger();
@@ -14,4 +16,10 @@ public:
     void removeBreakpoint(uint32_t address);
     void inspectCPU(CPU *cpu);
     void debug(CPU *cpu);
+    void addLoadWatchpoint(uint32_t address);
+    void removeLoadWatchpoint(uint32_t address);
+    void inspectMemoryLoad(CPU *cpu, uint32_t address);
+    void addStoreWatchpoint(uint32_t address);
+    void removeStoreWatchpoint(uint32_t address);
+    void inspectMemoryStore(CPU *cpu, uint32_t address);
 };
