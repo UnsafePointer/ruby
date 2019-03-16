@@ -2,5 +2,6 @@ CXX	:= g++
 CROSSTOOL_HOME :=
 SYSROOT :=
 PREPROCESSOR_MACROS :=
+OPENGL_API := 4.5
 
 include shared.mk

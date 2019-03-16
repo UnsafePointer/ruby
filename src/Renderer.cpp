@@ -12,8 +12,13 @@ Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>(
         cout << "Error initializing SDL: " << SDL_GetError() << endl;
         exit(1);
     }
+#ifndef GAMESHELL
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+#else
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
 #ifndef GAMESHELL
