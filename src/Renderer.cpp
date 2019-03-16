@@ -16,7 +16,15 @@ Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>(
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 512, SDL_WINDOW_OPENGL);
+#ifndef GAMESHELL
+    int width = 1024;
+    int height = 512;
+#else
+    int width = 320;
+    int height = 240;
+#endif
+
+    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
 
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
@@ -29,7 +37,11 @@ Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>(
 
     SDL_GL_SwapWindow(window);
 
+#ifndef GAMESHELL
     vertexShader = compileShader("./glsl/vertex.glsl", GL_VERTEX_SHADER);
+#else
+    vertexShader = compileShader("./glsl/vertex-gameshell.glsl", GL_VERTEX_SHADER);
+#endif
     fragmentShader = compileShader("./glsl/fragment.glsl", GL_FRAGMENT_SHADER);
     glProgram = linkProgram();
     glUseProgram(glProgram);

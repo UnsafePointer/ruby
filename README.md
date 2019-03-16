@@ -35,7 +35,15 @@ Ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 #### Compiling
 
 ```
-$ make
+$ make -f x86_64.mk
+```
+
+#### Cross-compiling
+
+Currently targets [ClockworkPi GameShell](https://www.clockworkpi.com/). Depends on a [crosstool-NG](http://crosstool-ng.github.io/) generated toolchain for machine name `arm-linux-gnueabihf`. You can learn more [here](https://github.com/Ruenzuo/gameshell-cross-compile).
+
+```
+$ make -f armv7l.mk
 ```
 
 ### Acknowledgments
