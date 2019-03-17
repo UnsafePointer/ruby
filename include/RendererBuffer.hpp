@@ -12,4 +12,6 @@ public:
     ~RendererBuffer();
 
     void set(uint32_t index, T value);
+    void mapMemory();
+    void unmapMemory();
 };

@@ -155,7 +155,12 @@ void Renderer::pushQuad(std::array<Point, 4> points, std::array<Color, 4> colors
 }
 
 void Renderer::draw() {
+#ifndef GAMESHELL
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
+#else
+    pointsBuffer->unmapMemory();
+    colorsBuffer->unmapMemory();
+#endif
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei)verticesCount);
     GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     while (true) {
@@ -166,6 +171,10 @@ void Renderer::draw() {
     }
     verticesCount = 0;
     debugger->checkForErrors();
+#ifdef GAMESHELL
+    pointsBuffer->mapMemory();
+    colorsBuffer->mapMemory();
+#endif
 }
 
 void Renderer::display() {
