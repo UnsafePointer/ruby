@@ -44,10 +44,12 @@ Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>(
 
 #ifndef GAMESHELL
     vertexShader = compileShader("./glsl/vertex.glsl", GL_VERTEX_SHADER);
+    fragmentShader = compileShader("./glsl/fragment.glsl", GL_FRAGMENT_SHADER);
 #else
     vertexShader = compileShader("./glsl/vertex-gameshell.glsl", GL_VERTEX_SHADER);
+    fragmentShader = compileShader("./glsl/fragment-gameshell.glsl", GL_FRAGMENT_SHADER);
 #endif
-    fragmentShader = compileShader("./glsl/fragment.glsl", GL_FRAGMENT_SHADER);
+
     glProgram = linkProgram();
     glUseProgram(glProgram);
 

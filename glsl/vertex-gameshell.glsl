@@ -1,4 +1,4 @@
-#version 450 core
+#version 330 core
 
 in ivec2 vertex_point;
 in uvec3 vertex_color;
