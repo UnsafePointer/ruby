@@ -31,6 +31,7 @@ Ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 - C++17
 - OpenGL 4.5
 - SDL2
+- [crosstool-NG](http://crosstool-ng.github.io/) (only for cross-compiling)
 
 #### Compiling
 
