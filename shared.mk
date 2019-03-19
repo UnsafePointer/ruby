@@ -1,4 +1,4 @@
-CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb3 `$(SYSROOT)/usr/bin/sdl2-config --cflags`
+CXX_FLAGS := -Wall -Wextra -std=c++17 $(CXX_ARCH_SPECIFIC_FLAGS) `$(SYSROOT)/usr/bin/sdl2-config --cflags`
 
 GLAD_BUILD_DIR := glad
 
