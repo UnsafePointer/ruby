@@ -1,0 +1,3 @@
+[submodule "libHana"]
+	path = libHana
+	url = git@github.com:Ruenzuo/libHana.git
