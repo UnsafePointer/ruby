@@ -1,6 +1,9 @@
 #include "Debugger.hpp"
 #include <algorithm>
 #include "CPU.hpp"
+#ifdef HANA
+#include "libHana.h"
+#endif
 
 using namespace std;
 
@@ -59,5 +62,8 @@ void Debugger::inspectMemoryStore(CPU *cpu, uint32_t address) {
 }
 
 void Debugger::debug(CPU *cpu) {
+#ifdef HANA
+    StartDebugServer(1111);
+#endif
     return;
 }
