@@ -7,10 +7,20 @@
 
 using namespace std;
 
-Debugger::Debugger() : breakpoints() {
+Debugger::Debugger() : breakpoints(), loadWatchpoints(), storeWatchpoints() {
 }
 
-Debugger::~Debugger() {
+Debugger* Debugger::instance = nullptr;
+
+Debugger* Debugger::getInstance() {
+    if (instance == nullptr) {
+        instance = new Debugger();
+    }
+    return instance;
+}
+
+void Debugger::setCPU(CPU *cpu) {
+    this->cpu = cpu;
 }
 
 void Debugger::addBreakpoint(uint32_t address) {
@@ -23,9 +33,9 @@ void Debugger::removeBreakpoint(uint32_t address) {
     breakpoints.erase(remove(breakpoints.begin(), breakpoints.end(), address), breakpoints.end());
 }
 
-void Debugger::inspectCPU(CPU *cpu) {
+void Debugger::inspectCPU() {
     if (find(breakpoints.begin(), breakpoints.end(), cpu->programCounter) != breakpoints.end()) {
-        debug(cpu);
+        debug();
     }
 }
 
@@ -39,9 +49,9 @@ void Debugger::removeLoadWatchpoint(uint32_t address) {
     loadWatchpoints.erase(remove(loadWatchpoints.begin(), loadWatchpoints.end(), address), loadWatchpoints.end());
 }
 
-void Debugger::inspectMemoryLoad(CPU *cpu, uint32_t address) {
+void Debugger::inspectMemoryLoad(uint32_t address) {
     if (find(loadWatchpoints.begin(), loadWatchpoints.end(), address) != loadWatchpoints.end()) {
-        debug(cpu);
+        debug();
     }
 }
 
@@ -55,14 +65,26 @@ void Debugger::removeStoreWatchpoint(uint32_t address) {
     storeWatchpoints.erase(remove(storeWatchpoints.begin(), storeWatchpoints.end(), address), storeWatchpoints.end());
 }
 
-void Debugger::inspectMemoryStore(CPU *cpu, uint32_t address) {
+void Debugger::inspectMemoryStore(uint32_t address) {
     if (find(storeWatchpoints.begin(), storeWatchpoints.end(), address) != storeWatchpoints.end()) {
-        debug(cpu);
+        debug();
     }
 }
 
-void Debugger::debug(CPU *cpu) {
+extern "C" int* globalRegisters() {
+    Debugger *debugger = Debugger::getInstance();
+    debugger->addStoreWatchpoint(0x0);
+    // TODO:
+    int *regs = (int *) malloc(sizeof(int) * 3);
+    regs[0] = 1;
+    regs[1] = 1;
+    regs[2] = 1;
+    return regs;
+}
+
+void Debugger::debug() {
 #ifdef HANA
+    SetGlobalRegistersCallback(&globalRegisters);
     StartDebugServer(1111);
 #endif
     return;

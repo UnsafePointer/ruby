@@ -65,7 +65,6 @@ class CPU {
     uint32_t highRegister;
     uint32_t lowRegister;
     std::unique_ptr<Interconnect> interconnect;
-    std::unique_ptr<Debugger> &debugger;
 
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
@@ -156,7 +155,7 @@ class CPU {
     template <typename T>
     inline void store(uint32_t address, T value) const;
 public:
-    CPU(std::unique_ptr<Debugger> &debugger);
+    CPU();
     ~CPU();
 
     uint32_t programCounter;

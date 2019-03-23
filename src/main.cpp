@@ -4,8 +4,9 @@
 #include "Debugger.hpp"
 
 int main() {
-    std::unique_ptr<Debugger> debugger = std::make_unique<Debugger>();
-    std::unique_ptr<CPU> cpu = std::make_unique<CPU>(debugger);
+    std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
+    Debugger *debugger = Debugger::getInstance();
+    debugger->setCPU(cpu.get());
     bool quit = false;
     while (!quit) {
         SDL_Event event;
@@ -15,7 +16,8 @@ int main() {
             } else if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_BACKSPACE: {
-                        debugger->debug(cpu.get());
+                        Debugger *debugger = Debugger::getInstance();
+                        debugger->debug();
                         break;
                     }
                 }
