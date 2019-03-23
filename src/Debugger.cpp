@@ -1,6 +1,7 @@
 #include "Debugger.hpp"
 #include <algorithm>
 #include "CPU.hpp"
+#include "CPU.tcc"
 #ifdef HANA
 #include "libHana.h"
 #endif
@@ -92,9 +93,19 @@ extern "C" uint32_t* globalRegisters() {
     return regs;
 }
 
+extern "C" uint8_t* readMemory(uint32_t address, uint32_t length) {
+    Debugger *debugger = Debugger::getInstance();
+    uint8_t *memory = (uint8_t *) malloc(sizeof(uint8_t) * length);
+    for (uint8_t i = 0; i < length; i++) {
+        memory[0] = debugger->getCPU()->load<uint8_t>(address + i);
+    }
+    return memory;
+}
+
 void Debugger::debug() {
 #ifdef HANA
     SetGlobalRegistersCallback(&globalRegisters);
+    SetReadMemoryCallback(&readMemory);
     StartDebugServer(1111);
 #endif
     return;

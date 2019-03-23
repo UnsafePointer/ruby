@@ -151,14 +151,14 @@ class CPU {
     void operationLoadByteUnsigned(Instruction instruction);
 
     void operationIllegal(Instruction instruction);
+public:
+    CPU();
+    ~CPU();
 
     template <typename T>
     inline T load(uint32_t address) const;
     template <typename T>
     inline void store(uint32_t address, T value) const;
-public:
-    CPU();
-    ~CPU();
 
     void executeNextInstruction();
     // GDB register naming and order used here:
