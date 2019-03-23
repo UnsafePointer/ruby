@@ -8,19 +8,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "command": "make",
-        },
-        {
-            "label": "Build & run C++ project",
-            "type": "shell",
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            },
-            "command": "make",
-            "args": [
-                "run"
-            ]
+            "command": "make -f x86_64_with_debugger.mk install_hana && make -f x86_64_with_debugger.mk",
         }
     ]
 }
