@@ -18,6 +18,7 @@ public:
     static Debugger* getInstance();
 
     void setCPU(CPU *cpu);
+    CPU* getCPU();
     void addBreakpoint(uint32_t address);
     void removeBreakpoint(uint32_t address);
     void inspectCPU();

@@ -23,6 +23,10 @@ void Debugger::setCPU(CPU *cpu) {
     this->cpu = cpu;
 }
 
+CPU* Debugger::getCPU() {
+    return cpu;
+}
+
 void Debugger::addBreakpoint(uint32_t address) {
     if (find(breakpoints.begin(), breakpoints.end(), address) != breakpoints.end()) {
         breakpoints.push_back(address);
@@ -34,7 +38,7 @@ void Debugger::removeBreakpoint(uint32_t address) {
 }
 
 void Debugger::inspectCPU() {
-    if (find(breakpoints.begin(), breakpoints.end(), cpu->programCounter) != breakpoints.end()) {
+    if (find(breakpoints.begin(), breakpoints.end(), cpu->getProgramCounter()) != breakpoints.end()) {
         debug();
     }
 }
@@ -71,14 +75,20 @@ void Debugger::inspectMemoryStore(uint32_t address) {
     }
 }
 
-extern "C" int* globalRegisters() {
+extern "C" uint32_t* globalRegisters() {
     Debugger *debugger = Debugger::getInstance();
-    debugger->addStoreWatchpoint(0x0);
-    // TODO:
-    int *regs = (int *) malloc(sizeof(int) * 3);
-    regs[0] = 1;
-    regs[1] = 1;
-    regs[2] = 1;
+    debugger->getCPU()->printAllRegisters();
+    uint32_t *regs = (uint32_t *) malloc(sizeof(uint32_t) * 37);
+    array<uint32_t, 32> cpuRegisters = debugger->getCPU()->getRegisters();
+    for (uint8_t i = 0; i < cpuRegisters.size(); i++) {
+        regs[i] = cpuRegisters[i];
+    }
+    regs[32] = debugger->getCPU()->getStatusRegister();
+    regs[33] = debugger->getCPU()->getLowRegister();
+    regs[34] = debugger->getCPU()->getHighRegister();
+    regs[35] = debugger->getCPU()->getReturnAddressFromTrap();
+    regs[36] = debugger->getCPU()->getCauseRegister();
+    regs[37] = debugger->getCPU()->getProgramCounter();
     return regs;
 }
 

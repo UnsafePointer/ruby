@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <array>
 #include "Interconnect.hpp"
 #include "Instruction.hpp"
 #include "RegisterIndex.hpp"
@@ -52,6 +53,7 @@ cop0r16-r31 - Garbage
 cop0r32-r63 - N/A - None such (Control regs)
 */
 class CPU {
+    uint32_t programCounter;
     uint32_t nextProgramCounter;
     uint32_t currentProgramCounter;
     bool isBranching;
@@ -158,6 +160,22 @@ public:
     CPU();
     ~CPU();
 
-    uint32_t programCounter;
     void executeNextInstruction();
+    // GDB register naming and order used here:
+    // r0-r31
+    std::array<uint32_t, 32> getRegisters();
+    // status - 32
+    uint32_t getStatusRegister();
+    // lo - 33
+    uint32_t getLowRegister();
+    // hi- 34
+    uint32_t getHighRegister();
+    // badvaddr - 35
+    uint32_t getReturnAddressFromTrap();
+    // cause - 36
+    uint32_t getCauseRegister();
+    // pc - 37
+    uint32_t getProgramCounter();
+
+    void printAllRegisters();
 };
