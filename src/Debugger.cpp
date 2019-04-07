@@ -35,6 +35,7 @@ bool Debugger::isAttached() {
 void Debugger::addBreakpoint(uint32_t address) {
     if (find(breakpoints.begin(), breakpoints.end(), address) == breakpoints.end()) {
         breakpoints.push_back(address);
+        cout << "Breakpoint added at address 0x" << hex << address << endl;
     }
 }
 
@@ -106,11 +107,18 @@ extern "C" uint8_t* readMemory(uint32_t address, uint32_t length) {
     return memory;
 }
 
+extern "C" void addBreakpointC(uint32_t address) {
+    Debugger *debugger = Debugger::getInstance();
+    debugger->addBreakpoint(address);
+    return;
+}
+
 void Debugger::debug() {
     attached = true;
 #ifdef HANA
     SetGlobalRegistersCallback(&globalRegisters);
     SetReadMemoryCallback(&readMemory);
+    SetAddBreakpointCallback(&addBreakpointC);
     StartDebugServer(1111);
 #endif
     return;
