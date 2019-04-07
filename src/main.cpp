@@ -16,13 +16,15 @@ int main() {
             } else if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_BACKSPACE: {
-                        Debugger *debugger = Debugger::getInstance();
                         debugger->debug();
                         break;
                     }
                 }
             }
 
+        }
+        if (debugger->isStopped()) {
+            continue;
         }
         for (int i = 0; i < 0xFFFF; i++) {
             cpu->executeNextInstruction();

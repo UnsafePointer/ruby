@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Debugger::Debugger() : breakpoints(), loadWatchpoints(), storeWatchpoints(), attached(false) {
+Debugger::Debugger() : breakpoints(), loadWatchpoints(), storeWatchpoints(), stopped(false), attached(false) {
 }
 
 Debugger* Debugger::instance = nullptr;
@@ -30,6 +30,10 @@ CPU* Debugger::getCPU() {
 
 bool Debugger::isAttached() {
     return attached;
+}
+
+bool Debugger::isStopped() {
+    return stopped;
 }
 
 void Debugger::addBreakpoint(uint32_t address) {
@@ -81,6 +85,10 @@ void Debugger::inspectMemoryStore(uint32_t address) {
     }
 }
 
+void Debugger::continueProgram() {
+    stopped = false;
+}
+
 extern "C" uint32_t* globalRegisters() {
     Debugger *debugger = Debugger::getInstance();
     debugger->getCPU()->printAllRegisters();
@@ -113,12 +121,24 @@ extern "C" void addBreakpointC(uint32_t address) {
     return;
 }
 
+extern "C" void continueProgramC() {
+    Debugger *debugger = Debugger::getInstance();
+    debugger->continueProgram();
+}
+
 void Debugger::debug() {
-    attached = true;
 #ifdef HANA
+    stopped = true;
+    if (attached) {
+        NotifyStopped();
+        return;
+    } else {
+        attached = true;
+    }
     SetGlobalRegistersCallback(&globalRegisters);
     SetReadMemoryCallback(&readMemory);
     SetAddBreakpointCallback(&addBreakpointC);
+    SetContinueCallback(&continueProgramC);
     StartDebugServer(1111);
 #endif
     return;

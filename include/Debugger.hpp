@@ -13,6 +13,7 @@ class Debugger {
     std::vector<uint32_t> storeWatchpoints;
 
     CPU *cpu;
+    bool stopped;
     bool attached;
     Debugger();
 public:
@@ -21,6 +22,7 @@ public:
     void setCPU(CPU *cpu);
     CPU* getCPU();
     bool isAttached();
+    bool isStopped();
     void addBreakpoint(uint32_t address);
     void removeBreakpoint(uint32_t address);
     void inspectCPU();
@@ -31,4 +33,5 @@ public:
     void addStoreWatchpoint(uint32_t address);
     void removeStoreWatchpoint(uint32_t address);
     void inspectMemoryStore(uint32_t address);
+    void continueProgram();
 };
