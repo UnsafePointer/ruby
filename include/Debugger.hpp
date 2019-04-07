@@ -13,12 +13,14 @@ class Debugger {
     std::vector<uint32_t> storeWatchpoints;
 
     CPU *cpu;
+    bool attached;
     Debugger();
 public:
     static Debugger* getInstance();
 
     void setCPU(CPU *cpu);
     CPU* getCPU();
+    bool isAttached();
     void addBreakpoint(uint32_t address);
     void removeBreakpoint(uint32_t address);
     void inspectCPU();

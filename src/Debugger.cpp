@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Debugger::Debugger() : breakpoints(), loadWatchpoints(), storeWatchpoints() {
+Debugger::Debugger() : breakpoints(), loadWatchpoints(), storeWatchpoints(), attached(false) {
 }
 
 Debugger* Debugger::instance = nullptr;
@@ -26,6 +26,10 @@ void Debugger::setCPU(CPU *cpu) {
 
 CPU* Debugger::getCPU() {
     return cpu;
+}
+
+bool Debugger::isAttached() {
+    return attached;
 }
 
 void Debugger::addBreakpoint(uint32_t address) {
@@ -103,6 +107,7 @@ extern "C" uint8_t* readMemory(uint32_t address, uint32_t length) {
 }
 
 void Debugger::debug() {
+    attached = true;
 #ifdef HANA
     SetGlobalRegistersCallback(&globalRegisters);
     SetReadMemoryCallback(&readMemory);

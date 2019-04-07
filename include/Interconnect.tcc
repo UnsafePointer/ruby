@@ -5,6 +5,7 @@
 #include "BIOS.tcc"
 #include "GPU.tcc"
 #include "DMA.tcc"
+#include "Debugger.hpp"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -48,6 +49,10 @@ inline T Interconnect::load(uint32_t address) const {
         return 0;
     }
     std::cout << "Unhandled read at: 0x" << std::hex << address << std::endl;
+    Debugger *debugger = Debugger::getInstance();
+    if (debugger->isAttached()) {
+        return 0;
+    }
     exit(1);
 }
 
