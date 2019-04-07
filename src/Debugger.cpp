@@ -33,7 +33,7 @@ bool Debugger::isAttached() {
 }
 
 void Debugger::addBreakpoint(uint32_t address) {
-    if (find(breakpoints.begin(), breakpoints.end(), address) != breakpoints.end()) {
+    if (find(breakpoints.begin(), breakpoints.end(), address) == breakpoints.end()) {
         breakpoints.push_back(address);
     }
 }
@@ -49,7 +49,7 @@ void Debugger::inspectCPU() {
 }
 
 void Debugger::addLoadWatchpoint(uint32_t address) {
-    if (find(loadWatchpoints.begin(), loadWatchpoints.end(), address) != loadWatchpoints.end()) {
+    if (find(loadWatchpoints.begin(), loadWatchpoints.end(), address) == loadWatchpoints.end()) {
         loadWatchpoints.push_back(address);
     }
 }
@@ -65,7 +65,7 @@ void Debugger::inspectMemoryLoad(uint32_t address) {
 }
 
 void Debugger::addStoreWatchpoint(uint32_t address) {
-    if (find(storeWatchpoints.begin(), storeWatchpoints.end(), address) != storeWatchpoints.end()) {
+    if (find(storeWatchpoints.begin(), storeWatchpoints.end(), address) == storeWatchpoints.end()) {
         storeWatchpoints.push_back(address);
     }
 }
