@@ -188,7 +188,7 @@ void Debugger::debug() {
     SetRemoveBreakpointCallback(&removeBreakpointC);
     SetRemoveLoadWatchpointCallback(&removeLoadWatchpointC);
     SetRemoveStoreWatchpointCallback(&removeStoreWatchpointC);
-    StartDebugServer(1111);
+    StartDebugServer(2109);
 #endif
     return;
 }
