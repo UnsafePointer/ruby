@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <tuple>
+#include <iomanip>
 #include "CPU.tcc"
 
 using namespace std;
@@ -25,8 +26,53 @@ CPU::CPU() : programCounter(0xbfc00000),
 CPU::~CPU() {
 }
 
+std::array<uint32_t, 32> CPU::getRegisters() {
+    array<uint32_t, 32> regs;
+    copy(begin(registers), end(registers), begin(regs));
+    return regs;
+}
+
+uint32_t CPU::getStatusRegister() {
+    return statusRegister;
+}
+
+uint32_t CPU::getLowRegister() {
+    return lowRegister;
+}
+
+uint32_t CPU::getHighRegister() {
+    return highRegister;
+}
+
+uint32_t CPU::getReturnAddressFromTrap() {
+    return returnAddressFromTrap;
+}
+
+uint32_t CPU::getCauseRegister() {
+    return causeRegister;
+}
+
+uint32_t CPU::getProgramCounter() {
+    return programCounter;
+}
+
+void CPU::printAllRegisters() {
+    cout << "CPU Registers: " << endl;
+    for (uint i = 0; i < 32; i++) {
+        cout << "r" << i << dec << ": " << registers[i] << endl;
+    }
+    cout << "status: " << dec << statusRegister << endl;
+    cout << "lo: " << dec << lowRegister << endl;
+    cout << "hi: " << dec << highRegister << endl;
+    cout << "badvaddr: " << dec << returnAddressFromTrap << endl;
+    cout << "cause: " << dec << causeRegister << endl;
+    cout << "pc: " << dec << programCounter << endl;
+}
+
 void CPU::executeNextInstruction() {
     currentProgramCounter = programCounter;
+    Debugger *debugger = Debugger::getInstance();
+    debugger->inspectCPU();
     if (currentProgramCounter % 4 != 0) {
         triggerException(ExceptionType::LoadAddress);
         return;

@@ -1,8 +1,10 @@
 #pragma once
 #include <memory>
+#include <array>
 #include "Interconnect.hpp"
 #include "Instruction.hpp"
 #include "RegisterIndex.hpp"
+#include "Debugger.hpp"
 
 enum ExceptionType : uint32_t {
     SysCall = 0x8,
@@ -149,14 +151,31 @@ class CPU {
     void operationLoadByteUnsigned(Instruction instruction);
 
     void operationIllegal(Instruction instruction);
+public:
+    CPU();
+    ~CPU();
 
     template <typename T>
     inline T load(uint32_t address) const;
     template <typename T>
     inline void store(uint32_t address, T value) const;
-public:
-    CPU();
-    ~CPU();
 
     void executeNextInstruction();
+    // GDB register naming and order used here:
+    // r0-r31
+    std::array<uint32_t, 32> getRegisters();
+    // status - 32
+    uint32_t getStatusRegister();
+    // lo - 33
+    uint32_t getLowRegister();
+    // hi- 34
+    uint32_t getHighRegister();
+    // badvaddr - 35
+    uint32_t getReturnAddressFromTrap();
+    // cause - 36
+    uint32_t getCauseRegister();
+    // pc - 37
+    uint32_t getProgramCounter();
+
+    void printAllRegisters();
 };

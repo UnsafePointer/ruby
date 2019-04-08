@@ -11,7 +11,7 @@ SRC		:= src
 INCLUDE	:= include
 LIB		:= lib
 
-LIBRARIES	:= `$(SYSROOT)/usr/bin/sdl2-config --libs` -ldl
+LIBRARIES	:= `$(SYSROOT)/usr/bin/sdl2-config --libs` -ldl $(ARCH_SPECIFIC_LIBS)
 EXECUTABLE	:= ruby
 
 
