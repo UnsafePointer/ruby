@@ -23,7 +23,11 @@ int main() {
             }
 
         }
-        if (debugger->isStopped()) {
+        if (debugger->isAttached() && debugger->shouldStep()) {
+            debugger->doStep();
+            continue;
+        }
+        if (debugger->isAttached() && debugger->isStopped()) {
             continue;
         }
         for (int i = 0; i < 0xFFFF; i++) {

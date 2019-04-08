@@ -36,6 +36,10 @@ bool Debugger::isStopped() {
     return stopped;
 }
 
+bool Debugger::shouldStep() {
+    return step;
+}
+
 void Debugger::addBreakpoint(uint32_t address) {
     if (find(breakpoints.begin(), breakpoints.end(), address) == breakpoints.end()) {
         breakpoints.push_back(address);
@@ -87,6 +91,15 @@ void Debugger::inspectMemoryStore(uint32_t address) {
 
 void Debugger::continueProgram() {
     stopped = false;
+}
+
+void Debugger::prepareStep() {
+    step = true;
+}
+
+void Debugger::doStep() {
+    step = false;
+    cpu->executeNextInstruction();
 }
 
 extern "C" uint32_t* globalRegisters() {

@@ -15,6 +15,7 @@ class Debugger {
     CPU *cpu;
     bool stopped;
     bool attached;
+    bool step;
     Debugger();
 public:
     static Debugger* getInstance();
@@ -23,6 +24,7 @@ public:
     CPU* getCPU();
     bool isAttached();
     bool isStopped();
+    bool shouldStep();
     void addBreakpoint(uint32_t address);
     void removeBreakpoint(uint32_t address);
     void inspectCPU();
@@ -34,4 +36,6 @@ public:
     void removeStoreWatchpoint(uint32_t address);
     void inspectMemoryStore(uint32_t address);
     void continueProgram();
+    void prepareStep();
+    void doStep();
 };
