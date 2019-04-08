@@ -126,6 +126,18 @@ extern "C" void continueProgramC() {
     debugger->continueProgram();
 }
 
+extern "C" void addLoadWatchpointC(uint32_t address) {
+    Debugger *debugger = Debugger::getInstance();
+    debugger->addLoadWatchpoint(address);
+    return;
+}
+
+extern "C" void addStoreWatchpointC(uint32_t address) {
+    Debugger *debugger = Debugger::getInstance();
+    debugger->addStoreWatchpoint(address);
+    return;
+}
+
 void Debugger::debug() {
 #ifdef HANA
     stopped = true;
@@ -139,6 +151,8 @@ void Debugger::debug() {
     SetReadMemoryCallback(&readMemory);
     SetAddBreakpointCallback(&addBreakpointC);
     SetContinueCallback(&continueProgramC);
+    SetAddLoadWatchpointCallback(&addLoadWatchpointC);
+    SetAddStoreWatchpointCallback(&addStoreWatchpointC);
     StartDebugServer(1111);
 #endif
     return;
