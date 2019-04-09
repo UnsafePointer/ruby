@@ -1,8 +1,8 @@
-# Ruby (ルビィ)
+# ruby (ルビィ)
 
 > Waah! Wh-Wh-Wh-What is it?
 
-Ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(console)) emulator written in C++.
+ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(console)) emulator written in C++.
 
 ![current_progress.gif](current_progress.gif)
 
