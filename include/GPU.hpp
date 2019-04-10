@@ -3,6 +3,7 @@
 #include <functional>
 #include "GPUInstructionBuffer.hpp"
 #include "Renderer.hpp"
+#include "GPUImageBuffer.hpp"
 
 enum TexturePageColors {
     T4Bit = 0,
@@ -145,6 +146,8 @@ GP1(07h) - Vertical Display range (on Screen)
     GP0Mode gp0Mode;
 
     Renderer renderer;
+
+    GPUImageBuffer imageBuffer;
 
     void operationGp0Nop();
     void operationGp0DrawMode();

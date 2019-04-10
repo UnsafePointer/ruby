@@ -56,7 +56,8 @@ GPU::GPU() : texturePageBaseX(0),
              gp0WordsRemaining(0),
              gp0InstructionMethod(nullptr),
              gp0Mode(GP0Mode::Command),
-             renderer(Renderer())
+             renderer(Renderer()),
+             imageBuffer(GPUImageBuffer())
 {
 }
 
@@ -229,8 +230,9 @@ void GPU::executeGp0(uint32_t value) {
             gp0InstructionMethod();
         }
     } else if (gp0Mode == GP0Mode::ImageLoad) {
-        // TODO: copy pixel data to VRAM
+        imageBuffer.pushWord(value);
         if (gp0WordsRemaining == 0) {
+            // TODO: load image
             gp0Mode = GP0Mode::Command;
         }
     }
