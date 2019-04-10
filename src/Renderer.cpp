@@ -66,3 +66,7 @@ void Renderer::setDrawingOffset(int16_t x, int16_t y) {
     buffer->draw();
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }
+
+void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
+
+}

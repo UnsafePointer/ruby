@@ -6,6 +6,7 @@
 #include "RendererProgram.hpp"
 #include "RendererBuffer.hpp"
 #include "Vertex.hpp"
+#include "GPUImageBuffer.hpp"
 
 class Renderer {
     SDL_GLContext glContext;
@@ -24,4 +25,5 @@ public:
     void pushQuad(std::array<Vertex, 4> vertices);
     void setDrawingOffset(int16_t x, int16_t y);
     void display();
+    void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);
 };

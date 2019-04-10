@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include "GPUInstructionBuffer.hpp"
 #include "Renderer.hpp"
 #include "GPUImageBuffer.hpp"
@@ -147,7 +148,7 @@ GP1(07h) - Vertical Display range (on Screen)
 
     Renderer renderer;
 
-    GPUImageBuffer imageBuffer;
+    std::unique_ptr<GPUImageBuffer> imageBuffer;
 
     void operationGp0Nop();
     void operationGp0DrawMode();

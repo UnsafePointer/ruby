@@ -57,7 +57,7 @@ GPU::GPU() : texturePageBaseX(0),
              gp0InstructionMethod(nullptr),
              gp0Mode(GP0Mode::Command),
              renderer(Renderer()),
-             imageBuffer(GPUImageBuffer())
+             imageBuffer(make_unique<GPUImageBuffer>())
 {
 }
 
@@ -230,9 +230,9 @@ void GPU::executeGp0(uint32_t value) {
             gp0InstructionMethod();
         }
     } else if (gp0Mode == GP0Mode::ImageLoad) {
-        imageBuffer.pushWord(value);
+        imageBuffer->pushWord(value);
         if (gp0WordsRemaining == 0) {
-            // TODO: load image
+            renderer.loadImage(imageBuffer);
             gp0Mode = GP0Mode::Command;
         }
     }
