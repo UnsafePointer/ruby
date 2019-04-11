@@ -542,6 +542,9 @@ GP0(A0h) - Copy Rectangle (CPU to VRAM)
 ...  Data              (...)      <--- usually transferred via DMA
 */
 void GPU::operationGp0CopyRectangleCPUToVRAM() {
+    uint32_t position = gp0InstructionBuffer[1];
+    uint32_t x = position & 0xffff;
+    uint32_t y = position >> 16;
     uint32_t resolution = gp0InstructionBuffer[2];
     uint32_t width = resolution & 0xffff;
     uint32_t height = resolution >> 16;
@@ -554,6 +557,7 @@ void GPU::operationGp0CopyRectangleCPUToVRAM() {
     }
     gp0WordsRemaining = imageSize / 2;
     gp0Mode = GP0Mode::ImageLoad;
+    imageBuffer->reset(x, y, width, height);
     return;
 }
 

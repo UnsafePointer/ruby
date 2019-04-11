@@ -14,5 +14,6 @@ public:
     GPUImageBuffer();
     ~GPUImageBuffer();
 
+    void reset(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
     void pushWord(uint32_t word);
 };
