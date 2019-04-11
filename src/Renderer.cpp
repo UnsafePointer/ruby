@@ -39,6 +39,10 @@ Renderer::Renderer() {
 
     offsetUniform = program->findProgramAttribute("offset");
     glUniform2i(offsetUniform, 0, 0);
+
+    // TODO: handle resolution for other targets
+    frameBufferTexture = make_unique<Texture>(((GLsizei) width), ((GLsizei) height));
+    checkForOpenGLErrors();
 }
 
 Renderer::~Renderer() {
@@ -68,5 +72,5 @@ void Renderer::setDrawingOffset(int16_t x, int16_t y) {
 }
 
 void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
-
+    frameBufferTexture->setImageFromBuffer(imageBuffer);
 }

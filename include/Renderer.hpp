@@ -7,6 +7,7 @@
 #include "RendererBuffer.hpp"
 #include "Vertex.hpp"
 #include "GPUImageBuffer.hpp"
+#include "Texture.hpp"
 
 class Renderer {
     SDL_GLContext glContext;
@@ -17,6 +18,8 @@ class Renderer {
     GLuint offsetUniform;
 
     std::unique_ptr<RendererBuffer<Vertex>> buffer;
+
+    std::unique_ptr<Texture> frameBufferTexture;
 public:
     Renderer();
     ~Renderer();

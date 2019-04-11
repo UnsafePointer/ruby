@@ -25,3 +25,8 @@ void GPUImageBuffer::pushWord(uint32_t word) {
     buffer[index] = (word >> 16) & 0xffff;
     index++;
 }
+
+bool GPUImageBuffer::isValid() {
+    uint32_t resolution = width * heigth;
+    return resolution == index;
+}
