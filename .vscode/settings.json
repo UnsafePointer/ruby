@@ -48,7 +48,8 @@
         "condition_variable": "cpp",
         "mutex": "cpp",
         "ratio": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "iomanip": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe"
 }

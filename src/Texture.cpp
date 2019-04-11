@@ -18,4 +18,10 @@ void Texture::setImageFromBuffer(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
         cout << "Invalid image buffer" << endl;
         exit(1);
     }
+    uint16_t x, y, width, height;
+    tie(x, y) = imageBuffer->destination();
+    tie(width, height) = imageBuffer->resolution();
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glBindTexture(GL_TEXTURE_2D, object);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, imageBuffer->bufferRef());
 }

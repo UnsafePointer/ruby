@@ -73,4 +73,5 @@ void Renderer::setDrawingOffset(int16_t x, int16_t y) {
 
 void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     frameBufferTexture->setImageFromBuffer(imageBuffer);
+    checkForOpenGLErrors();
 }
