@@ -32,6 +32,8 @@ Renderer::Renderer() {
 
     SDL_GL_SwapWindow(window);
 
+    textureRendererProgram = make_unique<RendererProgram>("./glsl/texture_load_vertex.glsl", "./glsl/texture_load_fragment.glsl");
+
     program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
     program->useProgram();
 
