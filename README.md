@@ -31,7 +31,6 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 - C++17
 - OpenGL 4.5
 - SDL2
-- [crosstool-NG](http://crosstool-ng.github.io/) (only for cross-compiling)
 - Go 1.12 (only for GDB support)
 
 #### Compiling
@@ -46,14 +45,6 @@ $ make -f x86_64.mk
 $ git submodule update --init --recursive
 $ make -f x86_64_with_debugger.mk install_hana
 $ make -f x86_64_with_debugger.mk
-```
-
-#### Cross-compiling
-
-Currently targets [ClockworkPi GameShell](https://www.clockworkpi.com/). Depends on a [crosstool-NG](http://crosstool-ng.github.io/) generated toolchain for machine name `arm-linux-gnueabihf`. You can learn more [here](https://github.com/Ruenzuo/gameshell-cross-compile).
-
-```
-$ make -f armv7l.mk
 ```
 
 #### GDB support
