@@ -11,23 +11,12 @@ Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>(
         cout << "Error initializing SDL: " << SDL_GetError() << endl;
         exit(1);
     }
-#ifndef GAMESHELL
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-#else
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-#endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-#ifndef GAMESHELL
     int width = 1024;
     int height = 512;
-#else
-    int width = 320;
-    int height = 240;
-#endif
-
     window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
 
@@ -41,13 +30,8 @@ Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>(
 
     SDL_GL_SwapWindow(window);
 
-#ifndef GAMESHELL
     vertexShader = compileShader("./glsl/vertex.glsl", GL_VERTEX_SHADER);
     fragmentShader = compileShader("./glsl/fragment.glsl", GL_FRAGMENT_SHADER);
-#else
-    vertexShader = compileShader("./glsl/vertex-gameshell.glsl", GL_VERTEX_SHADER);
-    fragmentShader = compileShader("./glsl/fragment-gameshell.glsl", GL_FRAGMENT_SHADER);
-#endif
 
     glProgram = linkProgram();
     glUseProgram(glProgram);
@@ -156,12 +140,7 @@ void Renderer::pushQuad(std::array<Point, 4> points, std::array<Color, 4> colors
 }
 
 void Renderer::draw() {
-#ifndef GAMESHELL
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
-#else
-    pointsBuffer->unmapMemory();
-    colorsBuffer->unmapMemory();
-#endif
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei)verticesCount);
     GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     while (true) {
@@ -172,10 +151,6 @@ void Renderer::draw() {
     }
     verticesCount = 0;
     debugger->checkForErrors();
-#ifdef GAMESHELL
-    pointsBuffer->mapMemory();
-    colorsBuffer->mapMemory();
-#endif
 }
 
 void Renderer::display() {
