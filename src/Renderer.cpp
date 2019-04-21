@@ -31,11 +31,8 @@ Renderer::Renderer() : verticesCount(0) {
 
     SDL_GL_SwapWindow(window);
 
-    vertexShader = compileShader("./glsl/vertex.glsl", GL_VERTEX_SHADER);
-    fragmentShader = compileShader("./glsl/fragment.glsl", GL_FRAGMENT_SHADER);
-
-    glProgram = linkProgram();
-    glUseProgram(glProgram);
+    program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
+    program->useProgram();
 
     GLuint vertexArrayRef;
     glGenVertexArrays(1, &vertexArrayRef);
@@ -43,67 +40,22 @@ Renderer::Renderer() : verticesCount(0) {
     vertexArrayObject = vertexArrayRef;
 
     pointsBuffer = make_unique<RendererBuffer<Point>>();
-    GLuint pointsIndex = findProgramAttribute("vertex_point");
+    GLuint pointsIndex = program->findProgramAttribute("vertex_point");
     glEnableVertexAttribArray(pointsIndex);
     glVertexAttribIPointer(pointsIndex, 2, GL_SHORT, 0, NULL);
 
     colorsBuffer = make_unique<RendererBuffer<Color>>();
-    GLuint colorIndex = findProgramAttribute("vertex_color");
+    GLuint colorIndex = program->findProgramAttribute("vertex_color");
     glEnableVertexAttribArray(colorIndex);
     glVertexAttribIPointer(colorIndex, 3, GL_UNSIGNED_BYTE, 0, NULL);
 
-    offsetUniform = findProgramAttribute("offset");
+    offsetUniform = program->findProgramAttribute("offset");
     glUniform2i(offsetUniform, 0, 0);
 }
 
 Renderer::~Renderer() {
     glDeleteVertexArrays(1, &vertexArrayObject);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    glDeleteProgram(glProgram);
     SDL_Quit();
-}
-
-string Renderer::openShaderSource(string filePath) const {
-    ifstream file(filePath);
-    string source;
-
-    file.seekg(0, std::ios::end);
-    source.reserve(file.tellg());
-    file.seekg(0, std::ios::beg);
-
-    source.assign((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
-    return source;
-}
-
-GLuint Renderer::compileShader(string filePath, GLenum shaderType) const {
-    string source = openShaderSource(filePath);
-    GLuint shader = glCreateShader(shaderType);
-    const GLchar *src = source.c_str();
-    glShaderSource(shader, 1, &src, NULL);
-    glCompileShader(shader);
-    GLint status = GL_FALSE;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    checkForOpenGLErrors();
-    return shader;
-}
-
-GLuint Renderer::linkProgram() const {
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-    GLint status = GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &status);
-    checkForOpenGLErrors();
-    return program;
-}
-
-GLuint Renderer::findProgramAttribute(string attribute) const {
-    const GLchar *attrib = attribute.c_str();
-    GLint index = glGetAttribLocation(glProgram, attrib);
-    checkForOpenGLErrors();
-    return index;
 }
 
 void Renderer::pushTriangle(array<Point, 3> points, array<Color, 3> colors) {
