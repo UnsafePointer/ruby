@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <fstream>
 #include <streambuf>
+#include <vector>
 #include "RendererDebugger.hpp"
 
 using namespace std;
@@ -37,15 +38,7 @@ Renderer::Renderer() : verticesCount(0) {
     vao = make_unique<VertexArrayObject>();
     vao->bind();
 
-    pointsBuffer = make_unique<RendererBuffer<Point>>();
-    GLuint pointsIndex = program->findProgramAttribute("vertex_point");
-    glEnableVertexAttribArray(pointsIndex);
-    glVertexAttribIPointer(pointsIndex, 2, GL_SHORT, 0, NULL);
-
-    colorsBuffer = make_unique<RendererBuffer<Color>>();
-    GLuint colorIndex = program->findProgramAttribute("vertex_color");
-    glEnableVertexAttribArray(colorIndex);
-    glVertexAttribIPointer(colorIndex, 3, GL_UNSIGNED_BYTE, 0, NULL);
+    buffer = make_unique<RendererBuffer<Vertex>>(program, RENDERER_BUFFER_SIZE);
 
     offsetUniform = program->findProgramAttribute("offset");
     glUniform2i(offsetUniform, 0, 0);
@@ -55,37 +48,29 @@ Renderer::~Renderer() {
     SDL_Quit();
 }
 
-void Renderer::pushTriangle(array<Point, 3> points, array<Color, 3> colors) {
+void Renderer::pushTriangle(std::array<Vertex, 3> vertices) {
     if (verticesCount + 3 > RENDERER_BUFFER_SIZE) {
         cout << "Renderer buffer full, forcing draw!" << endl;
         draw();
     }
 
-    for (uint8_t i = 0; i < 3; i++) {
-        pointsBuffer->set(verticesCount, points[i]);
-        colorsBuffer->set(verticesCount, colors[i]);
-        verticesCount++;
-    }
+    buffer->addData(vector<Vertex>(vertices.begin(), vertices.end()));
+
+    verticesCount += 3;
     return;
 }
 
 
-void Renderer::pushQuad(std::array<Point, 4> points, std::array<Color, 4> colors) {
+void Renderer::pushQuad(std::array<Vertex, 4> vertices) {
     if (verticesCount + 6 > RENDERER_BUFFER_SIZE) {
         cout << "Renderer buffer full, forcing draw!" << endl;
         draw();
     }
 
-    for (uint8_t i = 0; i < 3; i++) {
-        pointsBuffer->set(verticesCount, points[i]);
-        colorsBuffer->set(verticesCount, colors[i]);
-        verticesCount++;
-    }
-    for (uint8_t i = 1; i < 4; i++) {
-        pointsBuffer->set(verticesCount, points[i]);
-        colorsBuffer->set(verticesCount, colors[i]);
-        verticesCount++;
-    }
+    buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
+    buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
+
+    verticesCount += 6;
     return;
 }
 
@@ -100,6 +85,7 @@ void Renderer::draw() {
         }
     }
     verticesCount = 0;
+    buffer->clean();
     checkForOpenGLErrors();
 }
 
