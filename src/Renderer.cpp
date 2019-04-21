@@ -35,9 +35,6 @@ Renderer::Renderer() : verticesCount(0) {
     program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
     program->useProgram();
 
-    vao = make_unique<VertexArrayObject>();
-    vao->bind();
-
     buffer = make_unique<RendererBuffer<Vertex>>(program, RENDERER_BUFFER_SIZE);
 
     offsetUniform = program->findProgramAttribute("offset");

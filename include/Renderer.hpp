@@ -4,7 +4,6 @@
 #include <memory>
 #include <array>
 #include "RendererProgram.hpp"
-#include "VertexArrayObject.hpp"
 #include "RendererBuffer.hpp"
 #include "Vertex.hpp"
 
@@ -13,7 +12,6 @@ class Renderer {
     SDL_Window *window;
 
     std::unique_ptr<RendererProgram> program;
-    std::unique_ptr<VertexArrayObject> vao;
 
     GLuint offsetUniform;
 
