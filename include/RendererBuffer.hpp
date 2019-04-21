@@ -1,15 +1,27 @@
 #pragma once
 #include <glad/glad.h>
+#include <memory>
+#include <vector>
+#include "VertexArrayObject.hpp"
+#include "RendererProgram.hpp"
 
 const uint32_t RENDERER_BUFFER_SIZE = 64*1024;
 
 template <class T>
 class RendererBuffer {
-    GLuint object;
-    T *map;
+    std::unique_ptr<VertexArrayObject> vao;
+    GLuint vbo;
+    std::unique_ptr<RendererProgram> &program;
+    uint capacity;
+    uint size;
+
+    void enableAttributes() const;
 public:
-    RendererBuffer();
+    RendererBuffer(std::unique_ptr<RendererProgram> &program, uint capacity);
     ~RendererBuffer();
 
-    void set(uint32_t index, T value);
+    void bind() const;
+    void clean();
+    void addData(std::vector<T> data);
 };
+

@@ -3,36 +3,30 @@
 #include <string>
 #include <memory>
 #include <array>
-#include "Point.hpp"
-#include "Color.hpp"
+#include "RendererProgram.hpp"
+#include "VertexArrayObject.hpp"
 #include "RendererBuffer.hpp"
-#include "RendererDebugger.hpp"
+#include "Vertex.hpp"
 
 class Renderer {
     SDL_GLContext glContext;
     SDL_Window *window;
 
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    GLuint glProgram;
-    GLuint offsetUniform;
-    GLuint vertexArrayObject;
-    std::unique_ptr<RendererBuffer<Point>> pointsBuffer;
-    std::unique_ptr<RendererBuffer<Color>> colorsBuffer;
-    uint32_t verticesCount;
-    std::unique_ptr<RendererDebugger> debugger;
+    std::unique_ptr<RendererProgram> program;
+    std::unique_ptr<VertexArrayObject> vao;
 
-    std::string openShaderSource(std::string filePath) const;
-    GLuint compileShader(std::string source, GLenum shaderType) const;
-    GLuint linkProgram() const;
-    GLuint findProgramAttribute(std::string attribute) const;
+    GLuint offsetUniform;
+
+    std::unique_ptr<RendererBuffer<Vertex>> buffer;
+    uint32_t verticesCount;
+
     void draw();
 public:
     Renderer();
     ~Renderer();
 
-    void pushTriangle(std::array<Point, 3> points, std::array<Color, 3> colors);
-    void pushQuad(std::array<Point, 4> points, std::array<Color, 4> colors);
+    void pushTriangle(std::array<Vertex, 3> vertices);
+    void pushQuad(std::array<Vertex, 4> vertices);
     void setDrawingOffset(int16_t x, int16_t y);
     void display();
 };

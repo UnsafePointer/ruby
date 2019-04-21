@@ -1,7 +1,6 @@
 #include "GPU.hpp"
 #include <iostream>
-#include "Point.hpp"
-#include "Color.hpp"
+#include "Vertex.hpp"
 
 using namespace std;
 
@@ -513,15 +512,13 @@ void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
 }
 
 void GPU::operationGp0MonochromeQuadOpaque() {
-    array<Point, 4> points = { Point(gp0InstructionBuffer[1]),
-                               Point(gp0InstructionBuffer[2]),
-                               Point(gp0InstructionBuffer[3]),
-                               Point(gp0InstructionBuffer[4])};
-    array<Color, 4> colors = { Color(gp0InstructionBuffer[0]),
-                               Color(gp0InstructionBuffer[0]),
-                               Color(gp0InstructionBuffer[0]),
-                               Color(gp0InstructionBuffer[0])};
-    renderer.pushQuad(points, colors);
+    array<Vertex, 4> vertices = {
+        Vertex(gp0InstructionBuffer[1], gp0InstructionBuffer[0]),
+        Vertex(gp0InstructionBuffer[2], gp0InstructionBuffer[0]),
+        Vertex(gp0InstructionBuffer[3], gp0InstructionBuffer[0]),
+        Vertex(gp0InstructionBuffer[4], gp0InstructionBuffer[0]),
+    };
+    renderer.pushQuad(vertices);
     return;
 }
 
@@ -577,36 +574,34 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
 }
 
 void GPU::operationGp0ShadedQuadOpaque() {
-    array<Point, 4> points = { Point(gp0InstructionBuffer[1]),
-                               Point(gp0InstructionBuffer[3]),
-                               Point(gp0InstructionBuffer[5]),
-                               Point(gp0InstructionBuffer[7])};
-    array<Color, 4> colors = { Color(gp0InstructionBuffer[0]),
-                               Color(gp0InstructionBuffer[2]),
-                               Color(gp0InstructionBuffer[4]),
-                               Color(gp0InstructionBuffer[6])};
-    renderer.pushQuad(points, colors);
+    array<Vertex, 4> vertices = {
+        Vertex(gp0InstructionBuffer[1], gp0InstructionBuffer[0]),
+        Vertex(gp0InstructionBuffer[3], gp0InstructionBuffer[2]),
+        Vertex(gp0InstructionBuffer[5], gp0InstructionBuffer[4]),
+        Vertex(gp0InstructionBuffer[7], gp0InstructionBuffer[6]),
+    };
+    renderer.pushQuad(vertices);
     return;
 }
 
 void GPU::operationGp0ShadedTriangleOpaque() {
-    array<Point, 3> points = { Point(gp0InstructionBuffer[1]), Point(gp0InstructionBuffer[3]), Point(gp0InstructionBuffer[5])};
-    array<Color, 3> colors = { Color(gp0InstructionBuffer[0]), Color(gp0InstructionBuffer[2]), Color(gp0InstructionBuffer[4])};
-
-    renderer.pushTriangle(points, colors);
+    array<Vertex, 3> vertices = {
+        Vertex(gp0InstructionBuffer[1], gp0InstructionBuffer[0]),
+        Vertex(gp0InstructionBuffer[3], gp0InstructionBuffer[2]),
+        Vertex(gp0InstructionBuffer[5], gp0InstructionBuffer[4]),
+    };
+    renderer.pushTriangle(vertices);
     return;
 }
 
 void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
-    array<Point, 4> points = { Point(gp0InstructionBuffer[1]),
-                               Point(gp0InstructionBuffer[3]),
-                               Point(gp0InstructionBuffer[5]),
-                               Point(gp0InstructionBuffer[7])};
-    array<Color, 4> colors = { Color(0xFF,0x00,0xFF),
-                               Color(0xFF,0x00,0xFF),
-                               Color(0xFF,0x00,0xFF),
-                               Color(0xFF,0x00,0xFF)};
-    renderer.pushQuad(points, colors);
+    array<Vertex, 4> vertices = {
+        Vertex(gp0InstructionBuffer[1], 0x00FF00FF),
+        Vertex(gp0InstructionBuffer[3], 0x00FF00FF),
+        Vertex(gp0InstructionBuffer[5], 0x00FF00FF),
+        Vertex(gp0InstructionBuffer[7], 0x00FF00FF),
+    };
+    renderer.pushQuad(vertices);
     return;
 }
 

@@ -1,37 +1,65 @@
 #include "RendererBuffer.hpp"
+#include <stddef.h>
 #include <iostream>
-#include "Point.hpp"
-#include "Color.hpp"
+#include "Vertex.hpp"
 
 using namespace std;
 
 template <class T>
-RendererBuffer<T>::RendererBuffer() {
-    glGenBuffers(1, &object);
-    glBindBuffer(GL_ARRAY_BUFFER, object);
+RendererBuffer<T>::RendererBuffer(unique_ptr<RendererProgram> &program, uint capacity) : vao(make_unique<VertexArrayObject>()), program(program), capacity(capacity), size(0) {
+    glGenBuffers(1, &vbo);
 
-    GLsizeiptr bufferElementSize = sizeof(T);
-    GLsizeiptr bufferSize = bufferElementSize * RENDERER_BUFFER_SIZE;
-    GLbitfield accessFlags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT;
-    glBufferStorage(GL_ARRAY_BUFFER, bufferSize, nullptr, accessFlags);
-    map = (T*)glMapBufferRange(GL_ARRAY_BUFFER, 0, bufferSize, accessFlags);
+    vao->bind();
+    bind();
+
+    GLsizeiptr bufferSize = sizeof(T) * capacity;
+    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+    enableAttributes();
 }
 
 template <class T>
 RendererBuffer<T>::~RendererBuffer() {
-    glBindBuffer(GL_ARRAY_BUFFER, object);
-    glUnmapBuffer(GL_ARRAY_BUFFER);
-    glDeleteBuffers(1, &object);
+    glDeleteBuffers(1, &vbo);
 }
 
 template <class T>
-void RendererBuffer<T>::set(uint32_t index, T value) {
-    if (index >= RENDERER_BUFFER_SIZE) {
-        cout << "Renderer Buffer overflow" << endl;
-    }
-
-    map[index] = value;
+void RendererBuffer<T>::bind() const {
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 }
 
-template class RendererBuffer<Point>;
-template class RendererBuffer<Color>;
+template <class T>
+void RendererBuffer<T>::clean() {
+    bind();
+    GLsizeiptr bufferSize = sizeof(T) * capacity;
+    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+    size = 0;
+}
+
+template <class T>
+void RendererBuffer<T>::addData(vector<T> data) {
+    uint remainingCapacity = capacity - size;
+    if (data.size() > remainingCapacity) {
+        cout << "Renderer buffer out of memory." << endl;
+        exit(1);
+    }
+    bind();
+
+    uint offset = size * sizeof(T);
+    uint dataSize = data.size() * sizeof(T);
+    glBufferSubData(GL_ARRAY_BUFFER, offset, dataSize, data.data());
+
+    size += data.size();
+}
+
+template <>
+void RendererBuffer<Vertex>::enableAttributes() const {
+    GLuint positionIdx = program->findProgramAttribute("vertex_point");
+    glVertexAttribIPointer(positionIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, position));
+    glEnableVertexAttribArray(positionIdx);
+
+    GLuint colorIdx = program->findProgramAttribute("vertex_color");
+    glVertexAttribIPointer(colorIdx, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
+    glEnableVertexAttribArray(colorIdx);
+}
+
+template class RendererBuffer<Vertex>;

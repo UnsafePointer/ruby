@@ -106,13 +106,7 @@ string debugSeverityDescription(DebugSeverity severity) {
     }
 }
 
-RendererDebugger::RendererDebugger() {
-}
-
-RendererDebugger::~RendererDebugger() {
-}
-
-void RendererDebugger::checkForErrors() const {
+void checkForOpenGLErrors() {
     bool highSeverityFound = false;
     while (true) {
         vector<GLchar> buffer(4096);
