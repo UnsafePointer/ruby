@@ -79,4 +79,12 @@ void RendererBuffer<Vertex>::enableAttributes() const {
     glEnableVertexAttribArray(colorIdx);
 }
 
+template <>
+void RendererBuffer<Point>::enableAttributes() const {
+    GLuint positionIdx = program->findProgramAttribute("position");
+    glVertexAttribIPointer(positionIdx, 2, GL_SHORT, 0, NULL);
+    glEnableVertexAttribArray(positionIdx);
+}
+
 template class RendererBuffer<Vertex>;
+template class RendererBuffer<Point>;

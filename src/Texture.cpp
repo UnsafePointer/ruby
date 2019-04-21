@@ -1,5 +1,6 @@
 #include "Texture.hpp"
 #include <iostream>
+#include "RendererDebugger.hpp"
 
 using namespace std;
 
@@ -24,4 +25,5 @@ void Texture::setImageFromBuffer(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glBindTexture(GL_TEXTURE_2D, object);
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, imageBuffer->bufferRef());
+    checkForOpenGLErrors();
 }

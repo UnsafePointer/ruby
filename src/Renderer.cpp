@@ -34,6 +34,8 @@ Renderer::Renderer() {
 
     textureRendererProgram = make_unique<RendererProgram>("./glsl/texture_load_vertex.glsl", "./glsl/texture_load_fragment.glsl");
 
+    textureBuffer = make_unique<RendererBuffer<Point>>(textureRendererProgram, RENDERER_BUFFER_SIZE);
+
     program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
     program->useProgram();
 
@@ -75,5 +77,11 @@ void Renderer::setDrawingOffset(int16_t x, int16_t y) {
 
 void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     frameBufferTexture->setImageFromBuffer(imageBuffer);
-    checkForOpenGLErrors();
+    textureBuffer->clean();
+    uint16_t x, y, width, height;
+    tie(x, y) = imageBuffer->destination();
+    tie(width, height) = imageBuffer->resolution();
+    vector<Point> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
+    textureBuffer->addData(data);
+    textureBuffer->draw();
 }
