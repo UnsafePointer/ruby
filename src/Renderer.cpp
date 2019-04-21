@@ -34,10 +34,8 @@ Renderer::Renderer() : verticesCount(0) {
     program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
     program->useProgram();
 
-    GLuint vertexArrayRef;
-    glGenVertexArrays(1, &vertexArrayRef);
-    glBindVertexArray(vertexArrayRef);
-    vertexArrayObject = vertexArrayRef;
+    vao = make_unique<VertexArrayObject>();
+    vao->bind();
 
     pointsBuffer = make_unique<RendererBuffer<Point>>();
     GLuint pointsIndex = program->findProgramAttribute("vertex_point");
@@ -54,7 +52,6 @@ Renderer::Renderer() : verticesCount(0) {
 }
 
 Renderer::~Renderer() {
-    glDeleteVertexArrays(1, &vertexArrayObject);
     SDL_Quit();
 }
 

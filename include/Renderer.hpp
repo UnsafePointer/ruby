@@ -6,6 +6,7 @@
 #include "Point.hpp"
 #include "Color.hpp"
 #include "RendererProgram.hpp"
+#include "VertexArrayObject.hpp"
 #include "RendererBuffer.hpp"
 
 class Renderer {
@@ -13,9 +14,10 @@ class Renderer {
     SDL_Window *window;
 
     std::unique_ptr<RendererProgram> program;
+    std::unique_ptr<VertexArrayObject> vao;
 
     GLuint offsetUniform;
-    GLuint vertexArrayObject;
+
     std::unique_ptr<RendererBuffer<Point>> pointsBuffer;
     std::unique_ptr<RendererBuffer<Color>> colorsBuffer;
     uint32_t verticesCount;
