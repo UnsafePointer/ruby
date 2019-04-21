@@ -3,10 +3,11 @@
 #include <glad/glad.h>
 #include <fstream>
 #include <streambuf>
+#include "RendererDebugger.hpp"
 
 using namespace std;
 
-Renderer::Renderer() : verticesCount(0), debugger(make_unique<RendererDebugger>()) {
+Renderer::Renderer() : verticesCount(0) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         cout << "Error initializing SDL: " << SDL_GetError() << endl;
         exit(1);
@@ -83,7 +84,7 @@ GLuint Renderer::compileShader(string filePath, GLenum shaderType) const {
     glCompileShader(shader);
     GLint status = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    debugger->checkForErrors();
+    checkForOpenGLErrors();
     return shader;
 }
 
@@ -94,14 +95,14 @@ GLuint Renderer::linkProgram() const {
     glLinkProgram(program);
     GLint status = GL_FALSE;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
-    debugger->checkForErrors();
+    checkForOpenGLErrors();
     return program;
 }
 
 GLuint Renderer::findProgramAttribute(string attribute) const {
     const GLchar *attrib = attribute.c_str();
     GLint index = glGetAttribLocation(glProgram, attrib);
-    debugger->checkForErrors();
+    checkForOpenGLErrors();
     return index;
 }
 
@@ -150,7 +151,7 @@ void Renderer::draw() {
         }
     }
     verticesCount = 0;
-    debugger->checkForErrors();
+    checkForOpenGLErrors();
 }
 
 void Renderer::display() {
