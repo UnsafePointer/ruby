@@ -22,6 +22,7 @@ public:
 
     void bind() const;
     void clean();
+    void draw();
     void addData(std::vector<T> data);
 };
 

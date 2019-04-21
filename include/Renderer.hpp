@@ -16,9 +16,6 @@ class Renderer {
     GLuint offsetUniform;
 
     std::unique_ptr<RendererBuffer<Vertex>> buffer;
-    uint32_t verticesCount;
-
-    void draw();
 public:
     Renderer();
     ~Renderer();

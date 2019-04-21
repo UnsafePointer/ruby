@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Renderer::Renderer() : verticesCount(0) {
+Renderer::Renderer() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         cout << "Error initializing SDL: " << SDL_GetError() << endl;
         exit(1);
@@ -46,52 +46,23 @@ Renderer::~Renderer() {
 }
 
 void Renderer::pushTriangle(std::array<Vertex, 3> vertices) {
-    if (verticesCount + 3 > RENDERER_BUFFER_SIZE) {
-        cout << "Renderer buffer full, forcing draw!" << endl;
-        draw();
-    }
-
     buffer->addData(vector<Vertex>(vertices.begin(), vertices.end()));
-
-    verticesCount += 3;
     return;
 }
 
 
 void Renderer::pushQuad(std::array<Vertex, 4> vertices) {
-    if (verticesCount + 6 > RENDERER_BUFFER_SIZE) {
-        cout << "Renderer buffer full, forcing draw!" << endl;
-        draw();
-    }
-
     buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
     buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
-
-    verticesCount += 6;
     return;
 }
 
-void Renderer::draw() {
-    glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)verticesCount);
-    GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-    while (true) {
-        GLenum result = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 10000000);
-        if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
-            break;
-        }
-    }
-    verticesCount = 0;
-    buffer->clean();
-    checkForOpenGLErrors();
-}
-
 void Renderer::display() {
-    draw();
+    buffer->draw();
     SDL_GL_SwapWindow(window);
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
-    draw();
+    buffer->draw();
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }

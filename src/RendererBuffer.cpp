@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <iostream>
 #include "Vertex.hpp"
+#include "RendererDebugger.hpp"
 
 using namespace std;
 
@@ -33,6 +34,22 @@ void RendererBuffer<T>::clean() {
     GLsizeiptr bufferSize = sizeof(T) * capacity;
     glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
     size = 0;
+}
+
+template <class T>
+void RendererBuffer<T>::draw() {
+    program->useProgram();
+    glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)size);
+    GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    while (true) {
+        GLenum result = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 10000000);
+        if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
+            break;
+        }
+    }
+    clean();
+    checkForOpenGLErrors();
 }
 
 template <class T>
