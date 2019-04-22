@@ -81,3 +81,6 @@ glad/
 # hana
 include/libHana.h
 lib/libHana
+
+# CPU tests
+tests.exe

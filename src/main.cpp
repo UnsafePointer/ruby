@@ -2,11 +2,14 @@
 #include <memory>
 #include "CPU.hpp"
 #include "Debugger.hpp"
+#include "TestRunner.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
     std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
+    TestRunner testRunner = TestRunner(argc, argv, cpu);
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(cpu.get());
+    testRunner.setup();
     bool quit = false;
     while (!quit) {
         SDL_Event event;
