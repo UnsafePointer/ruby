@@ -33,6 +33,26 @@ string TestRunner::id() {
     return string(reinterpret_cast<char *>(header), 8);
 }
 
+uint32_t TestRunner::loadWord(uint32_t offset) {
+    uint32_t value = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        value |= (((uint32_t)header[offset + i]) << (i * 8));
+    }
+    return value;
+}
+
+uint32_t TestRunner::programCounter() {
+    return loadWord(0x10);
+}
+
+uint32_t TestRunner::destinationAddress() {
+    return loadWord(0x18);
+}
+
+uint32_t TestRunner::fileSize() {
+    return loadWord(0x1C);
+}
+
 void TestRunner::setup() {
     if (!runTests) {
         return;
@@ -41,5 +61,11 @@ void TestRunner::setup() {
     string identifier = id();
     if (identifier.compare("PS-X EXE") != 0) {
         printError("Invalid identifier found in file header");
+    }
+    uint32_t programCounter = this->programCounter();
+    uint32_t destinationAddress = this->destinationAddress();
+    uint32_t fileSize = this->fileSize();
+    if (fileSize % 0x800 != 0) {
+        printError("Invalid file size found in file header");
     }
 }
