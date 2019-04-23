@@ -6,6 +6,7 @@
 #include "GPU.tcc"
 #include "DMA.tcc"
 #include "Debugger.hpp"
+#include "Scratchpad.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -47,6 +48,10 @@ inline T Interconnect::load(uint32_t address) const {
     if (offset) {
         std::cout << "Unhandled Sound Processing Unit read at offset: 0x" << std::hex << *offset << std::endl;
         return 0;
+    }
+    offset = scratchpadRange.contains(absoluteAddress);
+    if (offset) {
+        return scratchpad->load<T>(*offset);
     }
     std::cout << "Unhandled read at: 0x" << std::hex << address << std::endl;
     Debugger *debugger = Debugger::getInstance();
@@ -131,6 +136,11 @@ inline void Interconnect::store(uint32_t address, T value) const {
     offset = expansion2Range.contains(absoluteAddress);
     if (offset) {
         std::cout << "Unhandled Expansion 2 write at offset: 0x" << std::hex << *offset << std::endl;
+        return;
+    }
+    offset = scratchpadRange.contains(absoluteAddress);
+    if (offset) {
+        scratchpad->store<T>(*offset, value);
         return;
     }
     std::cout << "Unhandled write at: 0x" << std::hex << address << std::endl;

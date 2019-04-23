@@ -21,6 +21,7 @@ Interconnect::Interconnect() {
     ram = make_unique<RAM>();
     gpu = make_unique<GPU>();
     dma = make_unique<DMA>(ram, gpu);
+    scratchpad = make_unique<Scratchpad>();
 }
 
 Interconnect::~Interconnect() {
