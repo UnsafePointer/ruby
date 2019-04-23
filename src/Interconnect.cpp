@@ -36,4 +36,8 @@ void Interconnect::transferToRAM(string path, uint32_t origin, uint32_t size, ui
     ram->receiveTransfer(path, origin, size, maskedDestination);
 }
 
+void Interconnect::dumpRAM() {
+    ram->dump();
+}
+
 

@@ -16,4 +16,5 @@ public:
     inline void store(uint32_t offset, T value);
 
     void receiveTransfer(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
+    void dump();
 };

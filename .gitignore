@@ -84,3 +84,6 @@ lib/libHana
 
 # CPU tests
 tests.exe
+
+# RAM dump
+ram.bin
