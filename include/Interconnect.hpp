@@ -5,8 +5,10 @@
 #include "DMA.hpp"
 #include "GPU.hpp"
 #include "Range.hpp"
+#include "Scratchpad.hpp"
 
 const Range ramRange = Range(0x00000000, RAM_SIZE);
+const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
 const Range biosRange = Range(0x1fc00000, 512 * 1024);
 const Range memoryControlRange = Range(0x1f801000, 36);
 const Range ramSizeRange = Range(0x1f801060, 4);
@@ -38,6 +40,7 @@ class Interconnect {
     std::unique_ptr<RAM> ram;
     std::unique_ptr<GPU> gpu;
     std::unique_ptr<DMA> dma;
+    std::unique_ptr<Scratchpad> scratchpad;
     uint32_t maskRegion(uint32_t address) const;
 public:
     Interconnect();
