@@ -689,6 +689,10 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             value = returnAddressFromTrap;
             break;
         }
+        case 15: {
+            value = 0x2;
+            break;
+        }
         default: {
             printError("Unhandled MFC0 at index %#x", copRegisterIndex.idx());
         }
