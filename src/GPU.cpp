@@ -44,6 +44,8 @@ GPU::GPU() : texturePageBaseX(0),
              drawingAreaLeft(0),
              drawingAreaBottom(0),
              drawingAreaRight(0),
+             drawingOffsetX(0),
+             drawingOffsetY(0),
              displayVRAMStartX(0),
              displayVRAMStartY(0),
              displayHorizontalStart(0),
@@ -273,6 +275,10 @@ void GPU::executeGp1(uint32_t value) {
             operationGp1DisplayMode(value);
             break;
         }
+        case 0x10: {
+            operationGp1GetGPUInfo(value);
+            break;
+        }
         default: {
             cout << "Unhandled gp1 instruction 0x" << hex << opCode << endl;
             exit(1);
@@ -370,7 +376,7 @@ void GPU::operationGp1Reset(uint32_t value) {
 }
 
 uint32_t GPU::readRegister() const {
-    return 0;
+    return gpuRead;
 }
 
 /*
@@ -615,4 +621,64 @@ void GPU::operationGp1ResetCommandBuffer(uint32_t value) {
     gp0WordsRemaining = 0;
     gp0Mode = GP0Mode::Command;
     // TODO: clear the command FIFO
+}
+
+/*
+GP1(10h) - Get GPU Info
+GP1(11h..1Fh) - Mirrors of GP1(10h), Get GPU Info
+On New 208pin GPUs, following values can be selected:
+00h-01h = Returns Nothing (old value in GPUREAD remains unchanged)
+02h     = Read Texture Window setting  ;GP0(E2h) ;20bit/MSBs=Nothing
+03h     = Read Draw area top left      ;GP0(E3h) ;20bit/MSBs=Nothing
+04h     = Read Draw area bottom right  ;GP0(E4h) ;20bit/MSBs=Nothing
+05h     = Read Draw offset             ;GP0(E5h) ;22bit
+06h     = Returns Nothing (old value in GPUREAD remains unchanged)
+07h     = Read GPU Type (usually 2)    ;see "GPU Versions" chapter
+08h     = Unknown (Returns 00000000h) (lightgun on some GPUs?)
+09h-0Fh = Returns Nothing (old value in GPUREAD remains unchanged)
+10h-FFFFFFh = Mirrors of 00h..0Fh
+*/
+void GPU::operationGp1GetGPUInfo(uint32_t value) {
+    switch (value & 0xf) {
+        case 0x0:
+        case 0x1:
+        case 0x2: {
+            gpuRead = ((uint32_t) textureWindowOffsetY) << 15 | ((uint32_t) textureWindowOffsetX) << 10 | ((uint32_t) textureWindowMaskY) << 5 | ((uint32_t) textureWindowMaskX);
+            break;
+        }
+        case 0x3: {
+            gpuRead = ((uint32_t) drawingAreaTop) << 10 | ((uint32_t) drawingAreaLeft);
+            break;
+        }
+        case 0x4: {
+            gpuRead = ((uint32_t) drawingAreaBottom) << 10 | ((uint32_t) drawingAreaRight);
+            break;
+        }
+        case 0x5: {
+            uint32_t x = ((uint32_t)drawingOffsetX) & 0x7ff;
+            uint32_t y = ((uint32_t)drawingOffsetY) & 0x7ff;
+            gpuRead = y << 11 | x;
+            break;
+        }
+        case 0x6: {
+            break;
+        }
+        case 0x7: {
+            gpuRead = 0x2;
+            break;
+        }
+        case 0x8: {
+            gpuRead = 0x0;
+            break;
+        }
+        case 0x9:
+        case 0x0a:
+        case 0x0b:
+        case 0x0c:
+        case 0x0d:
+        case 0x0e:
+        case 0x0f: {
+            break;
+        }
+    }
 }

@@ -116,6 +116,11 @@ GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
     uint16_t drawingAreaBottom;
     uint16_t drawingAreaRight;
 /*
+GP0(E5h) - Set Drawing Offset (X,Y)
+*/
+    int16_t drawingOffsetX;
+    int16_t drawingOffsetY;
+/*
 GP1(05h) - Start of Display area (in VRAM)
 */
     uint16_t displayVRAMStartX;
@@ -134,6 +139,8 @@ GP1(07h) - Vertical Display range (on Screen)
     GPUInstructionBuffer gp0InstructionBuffer;
     uint32_t gp0WordsRemaining;
     std::function<void(void)> gp0InstructionMethod;
+
+    uint32_t gpuRead;
 
     GP0Mode gp0Mode;
 
@@ -163,6 +170,7 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp1DisplayEnable(uint32_t value);
     void operationGp1AcknowledgeGPUInterrupt(uint32_t value);
     void operationGp1ResetCommandBuffer(uint32_t value);
+    void operationGp1GetGPUInfo(uint32_t value);
 
     uint32_t statusRegister() const;
     uint32_t readRegister() const;
