@@ -26,6 +26,11 @@ CPU::CPU() : programCounter(0xbfc00000),
 CPU::~CPU() {
 }
 
+void CPU::setProgramCounter(uint32_t address) {
+    programCounter = address;
+    nextProgramCounter = programCounter + 4;
+}
+
 std::array<uint32_t, 32> CPU::getRegisters() {
     array<uint32_t, 32> regs;
     copy(begin(registers), end(registers), begin(regs));

@@ -180,4 +180,5 @@ public:
     void printAllRegisters();
 
     void transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
+    void setProgramCounter(uint32_t address);
 };
