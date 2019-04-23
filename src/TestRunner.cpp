@@ -62,10 +62,10 @@ void TestRunner::setup() {
     if (identifier.compare("PS-X EXE") != 0) {
         printError("Invalid identifier found in file header");
     }
-    uint32_t programCounter = this->programCounter();
     uint32_t destinationAddress = this->destinationAddress();
     uint32_t fileSize = this->fileSize();
     if (fileSize % 0x800 != 0) {
         printError("Invalid file size found in file header");
     }
+    cpu->transferToRAM("tests.exe", 0x800, fileSize, destinationAddress);
 }

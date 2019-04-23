@@ -1270,3 +1270,7 @@ void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
 void CPU::operationIllegal(Instruction instruction) {
     triggerException(ExceptionType::Illegal);
 }
+
+void CPU::transferToRAM(string path, uint32_t origin, uint32_t size, uint32_t destination) {
+    interconnect->transferToRAM(path, origin, size, destination);
+}
