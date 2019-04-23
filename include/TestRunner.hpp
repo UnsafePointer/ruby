@@ -38,12 +38,13 @@ class TestRunner {
     void readHeader();
     std::string id();
     uint32_t loadWord(uint32_t offset);
-    uint32_t programCounter();
     uint32_t destinationAddress();
     uint32_t fileSize();
 public:
     TestRunner(int argc, char* argv[], std::unique_ptr<CPU> &cpu);
     ~TestRunner();
 
+    uint32_t programCounter();
     void setup();
+    void setupMidBootHook();
 };

@@ -1,8 +1,11 @@
 #include <SDL2/SDL.h>
 #include <memory>
+#include <cstdint>
 #include "CPU.hpp"
 #include "Debugger.hpp"
 #include "TestRunner.hpp"
+
+const uint32_t MID_BOOT_HOOK = 0x80030000;
 
 int main(int argc, char* argv[]) {
     std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
@@ -34,6 +37,9 @@ int main(int argc, char* argv[]) {
             continue;
         }
         for (int i = 0; i < 0xFFFF; i++) {
+            if (cpu->getProgramCounter() == MID_BOOT_HOOK) {
+                testRunner.setupMidBootHook();
+            }
             cpu->executeNextInstruction();
         }
     }
