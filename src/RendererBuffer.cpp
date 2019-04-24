@@ -38,6 +38,7 @@ void RendererBuffer<T>::clean() {
 
 template <class T>
 void RendererBuffer<T>::draw(GLenum mode) {
+    vao->bind();
     program->useProgram();
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
     glDrawArrays(mode, 0, (GLsizei)size);
