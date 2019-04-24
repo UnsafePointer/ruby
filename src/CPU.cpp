@@ -954,7 +954,7 @@ void CPU::operationReturnFromException(Instruction instruction) {
     }
 
     uint32_t mode = statusRegister & 0x3f;
-    statusRegister &= !0x3f;
+    statusRegister &= ~0x3f;
     statusRegister |= mode >> 2;
 }
 
@@ -1008,7 +1008,7 @@ void CPU::operationBitwiseNotOr(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
     RegisterIndex rt = instruction.rt();
 
-    uint32_t value = !(registerAtIndex(rs) | registerAtIndex(rt));
+    uint32_t value = ~(registerAtIndex(rs) | registerAtIndex(rt));
     setRegisterAtIndex(rd, value);
 }
 
@@ -1113,7 +1113,7 @@ void CPU::operationLoadWordLeft(Instruction instruction) {
     uint32_t address = registerAtIndex(rs) + imm;
     uint32_t currentValue = outputRegisters[rt.idx()];
 
-    uint32_t alignedAddress = address & !3;
+    uint32_t alignedAddress = address & ~3;
     uint32_t alignedWord = load<uint32_t>(alignedAddress);
 
     uint32_t value;
@@ -1147,7 +1147,7 @@ void CPU::operationLoadWordRight(Instruction instruction) {
     uint32_t address = registerAtIndex(rs) + imm;
     uint32_t currentValue = outputRegisters[rt.idx()];
 
-    uint32_t alignedAddress = address & !3;
+    uint32_t alignedAddress = address & ~3;
     uint32_t alignedWord = load<uint32_t>(alignedAddress);
 
     uint32_t value;
@@ -1181,7 +1181,7 @@ void CPU::operationStoreWordLeft(Instruction instruction) {
     uint32_t address = registerAtIndex(rs) + imm;
     uint32_t value = registerAtIndex(rt);
 
-    uint32_t alignedAddress = address & !3;
+    uint32_t alignedAddress = address & ~3;
     uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
 
     uint32_t memoryValue;
@@ -1215,7 +1215,7 @@ void CPU::operationStoreWordRight(Instruction instruction) {
     uint32_t address = registerAtIndex(rs) + imm;
     uint32_t value = registerAtIndex(rt);
 
-    uint32_t alignedAddress = address & !3;
+    uint32_t alignedAddress = address & ~3;
     uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
 
     uint32_t memoryValue;
