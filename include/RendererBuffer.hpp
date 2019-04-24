@@ -22,7 +22,7 @@ public:
 
     void bind() const;
     void clean();
-    void draw();
+    void draw(GLenum mode);
     void addData(std::vector<T> data);
 };
 

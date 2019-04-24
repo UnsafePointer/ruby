@@ -37,10 +37,10 @@ void RendererBuffer<T>::clean() {
 }
 
 template <class T>
-void RendererBuffer<T>::draw() {
+void RendererBuffer<T>::draw(GLenum mode) {
     program->useProgram();
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)size);
+    glDrawArrays(mode, 0, (GLsizei)size);
     GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     while (true) {
         GLenum result = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 10000000);
