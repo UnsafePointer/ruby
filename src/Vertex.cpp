@@ -1,7 +1,7 @@
 #include "Vertex.hpp"
 #include "GPU.hpp"
 
-Vertex::Vertex(uint32_t position, uint32_t color) : texturePosition(), textureBlendMode(), texturePage(), textureDepthShift() {
+Vertex::Vertex(uint32_t position, uint32_t color) : texturePosition(), textureBlendMode(), texturePage(), textureDepthShift(), clut() {
     GLshort x = ((GLshort)(position & 0xffff));
     GLshort y = ((GLshort)((position >> 16) & 0xffff));
     this->position = {x, y};
@@ -17,8 +17,13 @@ Texture page:
 4     Texture page Y Base   (N*256) (ie. 0 or 256)               ;GPUSTAT.4
 5-6   Semi Transparency     (0=B/2+F/2, 1=B+F, 2=B-F, 3=B+F/4)   ;GPUSTAT.5-6
 7-8   Texture page colors   (0=4bit, 1=8bit, 2=15bit, 3=Reserved);GPUSTAT.7-8
+
+CLUT:
+0-5      X coordinate X/16  (ie. in 16-halfword steps)
+6-14     Y coordinate 0-511 (ie. in 1-line steps)
+15       Unknown/unused (should be 0)
 */
-Vertex::Vertex(uint32_t position, uint32_t color, uint16_t texturePosition, TextureBlendMode textureBlendMode, uint32_t texturePage) {
+Vertex::Vertex(uint32_t position, uint32_t color, uint16_t texturePosition, TextureBlendMode textureBlendMode, uint32_t texturePage, uint16_t clutData) {
     GLshort x = ((GLshort)(position & 0xffff));
     GLshort y = ((GLshort)((position >> 16) & 0xffff));
     this->position = {x, y};
@@ -48,6 +53,7 @@ Vertex::Vertex(uint32_t position, uint32_t color, uint16_t texturePosition, Text
             break;
         }
     }
+    this->clut = { ((GLshort)((clutData & 0x3f) << 4)), ((GLshort)((clutData >> 6) & 0x1ff)) };
 }
 
 Vertex::~Vertex() {

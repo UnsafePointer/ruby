@@ -620,11 +620,12 @@ void GPU::operationGp0ShadedTriangleOpaque() {
 void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
     uint32_t color = gp0InstructionBuffer[0] & 0x00ffffff;
     uint32_t texturePage = gp0InstructionBuffer[4] >> 16;
+    uint16_t clutData = gp0InstructionBuffer[2] >> 16;
     array<Vertex, 4> vertices = {
-        Vertex(gp0InstructionBuffer[1], color, gp0InstructionBuffer[2] & 0xffff, TextureBlendModeTextureBlend, texturePage),
-        Vertex(gp0InstructionBuffer[3], color, gp0InstructionBuffer[4] & 0xffff, TextureBlendModeTextureBlend, texturePage),
-        Vertex(gp0InstructionBuffer[5], color, gp0InstructionBuffer[6] & 0xffff, TextureBlendModeTextureBlend, texturePage),
-        Vertex(gp0InstructionBuffer[7], color, gp0InstructionBuffer[8] & 0xffff, TextureBlendModeTextureBlend, texturePage),
+        Vertex(gp0InstructionBuffer[1], color, gp0InstructionBuffer[2] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
+        Vertex(gp0InstructionBuffer[3], color, gp0InstructionBuffer[4] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
+        Vertex(gp0InstructionBuffer[5], color, gp0InstructionBuffer[6] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
+        Vertex(gp0InstructionBuffer[7], color, gp0InstructionBuffer[8] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
     };
     renderer.pushQuad(vertices);
     return;
