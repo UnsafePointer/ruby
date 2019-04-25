@@ -90,6 +90,10 @@ void RendererBuffer<Vertex>::enableAttributes() const {
     GLuint texturePageIdx = program->findProgramAttribute("texture_page");
     glVertexAttribIPointer(texturePageIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, texturePage));
     glEnableVertexAttribArray(texturePageIdx);
+
+    GLuint textureDepthShiftIdx = program->findProgramAttribute("texture_depth_shift");
+    glVertexAttribIPointer(textureDepthShiftIdx, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void*)offsetof(struct Vertex, textureDepthShift));
+    glEnableVertexAttribArray(textureDepthShiftIdx);
 }
 
 template <>

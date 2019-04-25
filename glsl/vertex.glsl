@@ -5,11 +5,13 @@ in uvec3 vertex_color;
 in ivec2 texture_point;
 in uint texture_blend_mode;
 in uvec2 texture_page;
+in uint texture_depth_shift;
 
 out vec3 color;
 out vec2 fragment_texture_point;
 flat out uint fragment_texture_blend_mode;
 flat out uvec2 fragment_texture_page;
+flat out uint fragment_texture_depth_shift;
 
 uniform ivec2 offset;
 
@@ -24,4 +26,5 @@ void main() {
     fragment_texture_point = vec2(texture_point);
     fragment_texture_blend_mode = texture_blend_mode;
     fragment_texture_page = texture_page;
+    fragment_texture_depth_shift = texture_depth_shift;
 }

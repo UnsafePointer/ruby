@@ -1,6 +1,7 @@
 #include "Vertex.hpp"
+#include "GPU.hpp"
 
-Vertex::Vertex(uint32_t position, uint32_t color) : texturePosition(), textureBlendMode(), texturePage() {
+Vertex::Vertex(uint32_t position, uint32_t color) : texturePosition(), textureBlendMode(), texturePage(), textureDepthShift() {
     GLshort x = ((GLshort)(position & 0xffff));
     GLshort y = ((GLshort)((position >> 16) & 0xffff));
     this->position = {x, y};
@@ -32,6 +33,21 @@ Vertex::Vertex(uint32_t position, uint32_t color, uint16_t texturePosition, Text
     GLshort texturePageX = ((GLshort)((texturePage & 0xf) << 6));
     GLshort texturePageY = ((GLshort)(((texturePage >> 4) & 0x1) << 8));
     this->texturePage = {texturePageX, texturePageY};
+    TexturePageColors texturePageColors = texturePageColorsWithValue((texturePage >> 7) & 0x3);
+    switch (texturePageColors) {
+        case T4Bit: {
+            this->textureDepthShift = 2;
+            break;
+        }
+        case T8Bit: {
+            this->textureDepthShift = 1;
+            break;
+        }
+        case T15Bit: {
+            this->textureDepthShift = 0;
+            break;
+        }
+    }
 }
 
 Vertex::~Vertex() {

@@ -21,6 +21,7 @@ struct Vertex {
     Point texturePosition;
     GLuint textureBlendMode;
     Point texturePage;
+    GLuint textureDepthShift;
 public:
     Vertex(uint32_t position, uint32_t color);
     Vertex(uint32_t position, uint32_t color, uint16_t texturePosition, TextureBlendMode textureBlendMode, uint32_t texturePage);

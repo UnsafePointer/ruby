@@ -191,3 +191,5 @@ public:
     // TODO: should be private
     void executeGp0(uint32_t value);
 };
+
+TexturePageColors texturePageColorsWithValue(uint32_t value);
