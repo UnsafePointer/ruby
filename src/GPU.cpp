@@ -606,12 +606,25 @@ void GPU::operationGp0ShadedTriangleOpaque() {
     return;
 }
 
+/*
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+(8th) Vertex4           (YyyyXxxxh) (if any)
+(9th) Texcoord4         (0000YyXxh) (if any)
+*/
 void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
+    uint32_t color = gp0InstructionBuffer[0] & 0x00ffffff;
+    uint32_t texturePage = gp0InstructionBuffer[4] >> 16;
     array<Vertex, 4> vertices = {
-        Vertex(gp0InstructionBuffer[1], 0x00FF00FF),
-        Vertex(gp0InstructionBuffer[3], 0x00FF00FF),
-        Vertex(gp0InstructionBuffer[5], 0x00FF00FF),
-        Vertex(gp0InstructionBuffer[7], 0x00FF00FF),
+        Vertex(gp0InstructionBuffer[1], color, gp0InstructionBuffer[2] & 0xffff, TextureBlendModeTextureBlend, texturePage),
+        Vertex(gp0InstructionBuffer[3], color, gp0InstructionBuffer[4] & 0xffff, TextureBlendModeTextureBlend, texturePage),
+        Vertex(gp0InstructionBuffer[5], color, gp0InstructionBuffer[6] & 0xffff, TextureBlendModeTextureBlend, texturePage),
+        Vertex(gp0InstructionBuffer[7], color, gp0InstructionBuffer[8] & 0xffff, TextureBlendModeTextureBlend, texturePage),
     };
     renderer.pushQuad(vertices);
     return;

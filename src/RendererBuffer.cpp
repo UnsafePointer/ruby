@@ -78,6 +78,18 @@ void RendererBuffer<Vertex>::enableAttributes() const {
     GLuint colorIdx = program->findProgramAttribute("vertex_color");
     glVertexAttribIPointer(colorIdx, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
     glEnableVertexAttribArray(colorIdx);
+
+    GLuint texturePositionIdx = program->findProgramAttribute("texture_point");
+    glVertexAttribIPointer(texturePositionIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, texturePosition));
+    glEnableVertexAttribArray(texturePositionIdx);
+
+    GLuint textureBlendModePositionIdx = program->findProgramAttribute("texture_blend_mode");
+    glVertexAttribIPointer(textureBlendModePositionIdx, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void*)offsetof(struct Vertex, textureBlendMode));
+    glEnableVertexAttribArray(textureBlendModePositionIdx);
+
+    GLuint texturePageIdx = program->findProgramAttribute("texture_page");
+    glVertexAttribIPointer(texturePageIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, texturePage));
+    glEnableVertexAttribArray(texturePageIdx);
 }
 
 template <>
