@@ -1,13 +1,12 @@
 #pragma once
 #include "DMA.hpp"
-#include <iostream>
+#include "Output.hpp"
 
 template <typename T>
 inline T DMA::load(uint32_t offset) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (sizeof(T) != 4) {
-        std::cout << "Unsupported DMA read with size: " << std::dec << sizeof(T) << std::endl;
-        exit(1);
+        printError("Unsupported DMA read with size: %d", sizeof(T));
     }
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
@@ -32,8 +31,8 @@ inline T DMA::load(uint32_t offset) {
                     return channel.controlRegister();
                 }
                 default: {
-                    std::cout << "Unhandled DMA access at offset: 0x" << std::hex << offset << std::endl;
-                    exit(1);
+                    printError("Unhandled DMA read at offset: %#x", offset);
+                    return 0;
                 }
             }
         }
@@ -46,14 +45,14 @@ inline T DMA::load(uint32_t offset) {
                     return interruptRegister();
                 }
                 default: {
-                    std::cout << "Unhandled DMA access at offset: 0x" << std::hex << offset << std::endl;
-                    exit(1);
+                    printError("Unhandled DMA read at offset: %#x", offset);
+                    return 0;
                 }
             }
         }
         default: {
-            std::cout << "Unhandled DMA access at offset: 0x" << std::hex << offset << std::endl;
-            exit(1);
+            printError("Unhandled DMA read at offset: %#x", offset);
+            return 0;
         }
     }
 }
@@ -62,8 +61,7 @@ template <typename T>
 inline void DMA::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (sizeof(T) != 4) {
-        std::cout << "Unsupported DMA write with size: " << std::dec << sizeof(T) << std::endl;
-        exit(1);
+        printError("Unsupported DMA write with size: %d", sizeof(T));
     }
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
@@ -92,8 +90,8 @@ inline void DMA::store(uint32_t offset, T value) {
                     break;
                 }
                 default: {
-                    std::cout << "Unhandled DMA write access at offset: 0x" << std::hex << offset << std::endl;
-                    exit(1);
+                    printError("Unhandled DMA write at offset: %#x", offset);
+                    return;
                 }
             }
             if (channel.isActive()) {
@@ -112,15 +110,15 @@ inline void DMA::store(uint32_t offset, T value) {
                     break;
                 }
                 default: {
-                    std::cout << "Unhandled DMA write access at offset: 0x" << std::hex << offset << std::endl;
-                    exit(1);
+                    printError("Unhandled DMA write at offset: %#x", offset);
+                    return;
                 }
             }
             break;
         }
         default: {
-            std::cout << "Unhandled DMA write access at offset: 0x" << std::hex << offset << std::endl;
-            exit(1);
+            printError("Unhandled DMA write at offset: %#x", offset);
+            return;
         }
     }
     if (activePort != Port::None) {

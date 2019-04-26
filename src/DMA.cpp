@@ -1,13 +1,12 @@
 #include "DMA.hpp"
-#include <iostream>
+#include "Output.hpp"
 #include "RAM.tcc"
 
 using namespace std;
 
 Port portWithIndex(uint32_t index) {
     if (index > Port::OTC) {
-        cout << "Attempting to get port with out-of-bounds index: " << dec << index << endl;
-        exit(1);
+        printError("Attempting to get port with out-of-bounds index: %d", index);
     }
     return Port(index);
 }
@@ -73,12 +72,10 @@ void DMA::execute(Port port) {
 void DMA::executeLinkedList(Port port, Channel& channel) {
     uint32_t address = channel.baseAddressRegister() & 0x1ffffc;
     if (channel.dir() == Direction::ToRam) {
-        cout << "Unhandled DMA direction" << endl;
-        exit(1);
+        printError("Unhandled DMA direction");
     }
     if (port != Port::GPUP) {
-        cout << "Unhandled DMA port" << endl;
-        exit(1);
+        printError("Unhandled DMA port");
     }
     while (true) {
         uint32_t header = ram->load<uint32_t>(address);
@@ -106,8 +103,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
     uint32_t address = channel.baseAddressRegister();
     optional<uint32_t> transferSize = channel.transferSize();
     if (!transferSize) {
-        cout << "Unknown DMA transfer size" << endl;
-        exit(1);
+        printError("Unknown DMA transfer size");
     }
     uint32_t remainingTransferSize = *transferSize;
     while (remainingTransferSize > 0) {
@@ -121,8 +117,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                     default: {
-                        cout << "Unhandled DMA source port" << endl;
-                        exit(1);
+                        printError("Unhandled DMA source port");
                         break;
                     }
                 }
@@ -145,8 +140,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                     default: {
-                        cout << "Unhandled DMA source port" << endl;
-                        exit(1);
+                        printError("Unhandled DMA source port");
                         break;
                     }
                 }

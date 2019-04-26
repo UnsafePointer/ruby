@@ -1,6 +1,6 @@
 #include "Texture.hpp"
-#include <iostream>
 #include "RendererDebugger.hpp"
+#include "Output.hpp"
 
 using namespace std;
 
@@ -16,8 +16,7 @@ Texture::~Texture() {
 
 void Texture::setImageFromBuffer(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     if (!imageBuffer->isValid()) {
-        cout << "Invalid image buffer" << endl;
-        exit(1);
+        printError("Invalid image buffer");
     }
     uint16_t x, y, width, height;
     tie(x, y) = imageBuffer->destination();

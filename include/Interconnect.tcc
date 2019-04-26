@@ -1,6 +1,6 @@
 #pragma once
 #include "Interconnect.hpp"
-#include <iostream>
+#include "Output.hpp"
 #include "RAM.tcc"
 #include "BIOS.tcc"
 #include "GPU.tcc"
@@ -23,7 +23,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Interrupt Request Control read at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Interrupt Request Control read at offset: %#x", *offset);
         return 0;
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
@@ -36,7 +36,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = timerRegisterRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Timer Register read at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Timer Register read at offset: %#x", *offset);
         return 0;
     }
     offset = expansion1Range.contains(absoluteAddress);
@@ -46,14 +46,14 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Sound Processing Unit read at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Sound Processing Unit read at offset: %#x", *offset);
         return 0;
     }
     offset = scratchpadRange.contains(absoluteAddress);
     if (offset) {
         return scratchpad->load<T>(*offset);
     }
-    std::cout << "Unhandled read at: 0x" << std::hex << address << std::endl;
+    printWarning("Unhandled read at offset: %#x", *offset);
     Debugger *debugger = Debugger::getInstance();
     if (debugger->isAttached()) {
         return 0;
@@ -65,7 +65,7 @@ template <typename T>
 inline void Interconnect::store(uint32_t address, T value) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (address % sizeof(T) != 0) {
-        std::cout << "Unaligned memory store" << std::endl;
+        printError("Unaligned memory store");
         exit(1);
     }
     uint32_t absoluteAddress = maskRegion(address);
@@ -87,7 +87,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
                 break;
             }
             default: {
-                std::cout << "Unhandled Memory Control write at offset: 0x" << std::hex << *offset << std::endl;
+                printWarning("Unhandled Memory Control write at offset: %#x", *offset);
                 break;
             }
         }
@@ -95,12 +95,12 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = ramSizeRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled RAM Control write at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled RAM Control write at offset: %#x", *offset);
         return;
     }
     offset = cacheControlRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Cache Control write at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Cache Control write at offset: %#x", *offset);
         return;
     }
     offset = ramRange.contains(absoluteAddress);
@@ -110,7 +110,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Interrupt Request Control write at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Interrupt Request Control write at offset: %#x", *offset);
         return;
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
@@ -125,17 +125,17 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = timerRegisterRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Timer Register write at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Timer Register write at offset: %#x", *offset);
         return;
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Sound Processing Unit write at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Sound Processing Unit write at offset: %#x", *offset);
         return;
     }
     offset = expansion2Range.contains(absoluteAddress);
     if (offset) {
-        std::cout << "Unhandled Expansion 2 write at offset: 0x" << std::hex << *offset << std::endl;
+        printWarning("Unhandled Expansion 2 write at offset: %#x", *offset);
         return;
     }
     offset = scratchpadRange.contains(absoluteAddress);
@@ -143,6 +143,5 @@ inline void Interconnect::store(uint32_t address, T value) const {
         scratchpad->store<T>(*offset, value);
         return;
     }
-    std::cout << "Unhandled write at: 0x" << std::hex << address << std::endl;
-    exit(1);
+    printError("Unhandled write at: %#x", address);
 }

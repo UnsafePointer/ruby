@@ -1,9 +1,9 @@
 #include "CPU.hpp"
 #include <algorithm>
-#include <iostream>
 #include <tuple>
 #include <iomanip>
 #include "CPU.tcc"
+#include "Output.hpp"
 
 using namespace std;
 
@@ -57,16 +57,16 @@ uint32_t CPU::getProgramCounter() {
 }
 
 void CPU::printAllRegisters() {
-    cout << "CPU Registers: " << endl;
+    printWarning("CPU Registers: ");
     for (uint i = 0; i < 32; i++) {
-        cout << "r" << i << dec << ": " << registers[i] << endl;
+        printWarning("r%02d: %#x", i, registers[i]);
     }
-    cout << "status: " << dec << statusRegister << endl;
-    cout << "lo: " << dec << lowRegister << endl;
-    cout << "hi: " << dec << highRegister << endl;
-    cout << "badvaddr: " << dec << returnAddressFromTrap << endl;
-    cout << "cause: " << dec << causeRegister << endl;
-    cout << "pc: " << dec << programCounter << endl;
+    printWarning("status: %#x", statusRegister);
+    printWarning("lo: %#x", lowRegister);
+    printWarning("hi: %#x", highRegister);
+    printWarning("badvaddr: %#x", returnAddressFromTrap);
+    printWarning("cause: %#x", causeRegister);
+    printWarning("pc: %#x", programCounter);
 }
 
 void CPU::executeNextInstruction() {
@@ -414,8 +414,7 @@ void CPU::operationCoprocessor0(Instruction instruction) {
             break;
         }
         default: {
-            cout << "Unhandled coprocessor0 instruction 0x" << hex << instruction.dat() << endl;
-            exit(1);
+            printError("Unhandled coprocessor0 instruction %#x", instruction.dat());
         }
     }
 }
@@ -435,8 +434,7 @@ void CPU::operationMoveToCoprocessor0(Instruction instruction) {
         case 9:
         case 11: {
             if (value != 0) {
-                cout << "Unhandled MTC0 at index " << copRegisterIndex.idx() << endl;
-                exit(1);
+                printError("Unhandled MTC0 at index %d", copRegisterIndex.idx());
             }
             break;
         }
@@ -453,8 +451,7 @@ void CPU::operationMoveToCoprocessor0(Instruction instruction) {
             break;
         }
         default: {
-            cout << "Unhandled MTC0 at index " << copRegisterIndex.idx() << endl;
-            exit(1);
+            printError("Unhandled MTC0 at index %d", copRegisterIndex.idx());
         }
     }
 }
@@ -484,7 +481,7 @@ void CPU::operationStoreWord(Instruction instruction) {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
     if (address % 4 != 0) {
@@ -560,7 +557,7 @@ void CPU::operationLoadWord(Instruction instruction) {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
     if (address % 4 != 0) {
@@ -596,7 +593,7 @@ void CPU::operationStoreHalfWord(Instruction instruction) {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
     if (address % 2 != 0) {
@@ -631,7 +628,7 @@ void CPU::operationStoreByte(Instruction instruction) const {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
 
@@ -652,7 +649,7 @@ void CPU::operationLoadByte(Instruction instruction) {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
     uint32_t value = (int8_t)load<uint8_t>(address);
@@ -688,8 +685,7 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             break;
         }
         default: {
-            cout << "Unhandled MFC0 at index " << copRegisterIndex.idx() << endl;
-            exit(1);
+            printError("Unhandled MFC0 at index %#x", copRegisterIndex.idx());
         }
     }
     loadPair = {cpuRegisterIndex, value};
@@ -747,7 +743,7 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring store at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
     uint32_t value = load<uint8_t>(address);
@@ -949,8 +945,7 @@ void CPU::operationMoveToHighRegister(Instruction instruction) {
 
 void CPU::operationReturnFromException(Instruction instruction) {
     if (instruction.subfunct() != 0b010000) {
-        cout << "Unhandled cop0 instruction (0b010000) with last 6 bits: 0x" << hex << instruction.subfunct() << endl;
-        exit(1);
+        printError("Unhandled cop0 instruction (0b010000) with last 6 bits: %#x", instruction.subfunct());
     }
 
     uint32_t mode = statusRegister & 0x3f;
@@ -965,7 +960,7 @@ void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring load at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring load at address: %#x", address);
         return;
     }
     if (address % 2 != 0) {
@@ -992,7 +987,7 @@ void CPU::operationLoadHalfWord(Instruction instruction) {
 
     uint32_t address = registerAtIndex(rs) + imm;
     if ((statusRegister & 0x10000) != 0) {
-        cout << "Cache is isolated, ignoring load at address: 0x" << hex << address << endl;
+        printWarning("Cache is isolated, ignoring load at address: %#x", address);
         return;
     }
     if (address % 2 != 0) {
@@ -1097,8 +1092,7 @@ void CPU::operationCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationCoprocessor2(Instruction instruction) {
-    cout << "Unhandled Geometry Translation Engine instruction: 0x" << hex << instruction.dat() << endl;
-    exit(1);
+    printError("Unhandled Geometry Translation Engine instruction: %#x", instruction.dat());
 }
 
 void CPU::operationCoprocessor3(Instruction instruction) {
@@ -1250,8 +1244,7 @@ void CPU::operationLoadWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationLoadWordCoprocessor2(Instruction instruction) {
-    cout << "Unhandled GTE LWC" << hex << instruction.dat() << endl;
-    exit(1);
+    printError("Unhandled GTE LWC: %#x", instruction.dat());
 }
 
 void CPU::operationLoadWordCoprocessor3(Instruction instruction) {
@@ -1267,8 +1260,7 @@ void CPU::operationStoreWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
-    cout << "Unhandled GTE SWC" << hex << instruction.dat() << endl;
-    exit(1);
+    printError("Unhandled GTE SWC: %#x", instruction.dat());
 }
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {

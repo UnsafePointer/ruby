@@ -1,5 +1,5 @@
 #include "GPU.hpp"
-#include <iostream>
+#include "Output.hpp"
 #include "Vertex.hpp"
 
 using namespace std;
@@ -10,8 +10,7 @@ uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) {
 
 TexturePageColors texturePageColorsWithValue(uint32_t value) {
     if (value > TexturePageColors::T15Bit) {
-        cout << "Attempting to create Texture Page Colors out-of-bounds value: " << dec << value << endl;
-        exit(1);
+        printError("Attempting to create Texture Page Colors out-of-bounds value: %#x", value);
     }
     return TexturePageColors(value);
 }
@@ -216,8 +215,7 @@ void GPU::executeGp0(uint32_t value) {
                 break;
             }
             default: {
-                cout << "Unhandled gp0 instruction 0x" << hex << opCode << endl;
-                exit(1);
+                printError("Unhandled gp0 instruction %#x", opCode);
             }
         }
         gp0InstructionBuffer.clear();
@@ -282,8 +280,7 @@ void GPU::executeGp1(uint32_t value) {
             break;
         }
         default: {
-            cout << "Unhandled gp1 instruction 0x" << hex << opCode << endl;
-            exit(1);
+            printError("Unhandled gp1 instruction %#x", opCode);
         }
     }
 }
@@ -402,8 +399,7 @@ void GPU::operationGp1DisplayMode(uint32_t value) {
     verticalInterlaceEnable = (value >> 5) & 0x1;
     if ((value & 0x80) != 0) {
         // This is supposed to be bit 14 on GPUSTAT
-        cout << "Unsupported display mode: distorted" << endl;
-        exit(1);
+        printError("Unsupported display mode: distorted");
     }
 }
 
@@ -582,7 +578,7 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
     uint32_t width = resolution & 0xffff;
     uint32_t height = resolution >> 16;
 
-    cout << "Unhandled GP0 Copy Rectangle VRAM to CPU with with: " << dec << width << "x" << dec << height << endl;
+    printWarning("Unhandled GP0 Copy Rectangle VRAM to CPU with with resolution: %d x %d", width, height);
 }
 
 void GPU::operationGp0ShadedQuadOpaque() {
