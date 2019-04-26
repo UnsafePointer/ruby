@@ -5,6 +5,9 @@
 
 using namespace std;
 
+const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
+const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
+
 TestRunner::TestRunner(int argc, char* argv[], std::unique_ptr<CPU> &cpu) : cpu(cpu), header() {
     runTests = false;
     if (argc > 1) {
@@ -75,4 +78,14 @@ void TestRunner::setupMidBootHook() {
         return;
     }
     cpu->setProgramCounter(programCounter());
+}
+
+void TestRunner::checkTTY() {
+    if (cpu->getProgramCounter() == BIOS_A_FUNCTIONS_STEP) {
+        array<uint32_t, 32> registers = cpu->getRegisters();
+        uint32_t function = registers[9];
+        if (function == BIOS_STD_OUT_PUT_CHAR) {
+            printf("%c", registers[4]);
+        }
+    }
 }

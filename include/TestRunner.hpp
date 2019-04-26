@@ -47,4 +47,5 @@ public:
     uint32_t programCounter();
     void setup();
     void setupMidBootHook();
+    void checkTTY();
 };

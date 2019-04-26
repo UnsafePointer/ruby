@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
             if (cpu->getProgramCounter() == MID_BOOT_HOOK) {
                 testRunner.setupMidBootHook();
             }
+            testRunner.checkTTY();
             cpu->executeNextInstruction();
         }
     }
