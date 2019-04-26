@@ -2,8 +2,18 @@
 
 in ivec2 vertex_point;
 in uvec3 vertex_color;
+in ivec2 texture_point;
+in uint texture_blend_mode;
+in uvec2 texture_page;
+in uint texture_depth_shift;
+in uvec2 clut;
 
 out vec3 color;
+out vec2 fragment_texture_point;
+flat out uint fragment_texture_blend_mode;
+flat out uvec2 fragment_texture_page;
+flat out uint fragment_texture_depth_shift;
+flat out uvec2 fragment_clut;
 
 uniform ivec2 offset;
 
@@ -15,4 +25,9 @@ void main() {
 
     gl_Position.xyzw = vec4(x_pos, y_pos, 0.0, 1.0);
     color = vec3(float(vertex_color.r) / 255, float(vertex_color.g) / 255, float(vertex_color.b) / 255);
+    fragment_texture_point = vec2(texture_point);
+    fragment_texture_blend_mode = texture_blend_mode;
+    fragment_texture_page = texture_page;
+    fragment_texture_depth_shift = texture_depth_shift;
+    fragment_clut = clut;
 }

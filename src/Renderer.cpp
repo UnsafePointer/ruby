@@ -32,6 +32,10 @@ Renderer::Renderer() {
 
     SDL_GL_SwapWindow(window);
 
+    textureRendererProgram = make_unique<RendererProgram>("./glsl/texture_load_vertex.glsl", "./glsl/texture_load_fragment.glsl");
+
+    textureBuffer = make_unique<RendererBuffer<Point>>(textureRendererProgram, RENDERER_BUFFER_SIZE);
+
     program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
     program->useProgram();
 
@@ -39,6 +43,10 @@ Renderer::Renderer() {
 
     offsetUniform = program->findProgramAttribute("offset");
     glUniform2i(offsetUniform, 0, 0);
+
+    // TODO: handle resolution for other targets
+    frameBufferTexture = make_unique<Texture>(((GLsizei) width), ((GLsizei) height));
+    checkForOpenGLErrors();
 }
 
 Renderer::~Renderer() {
@@ -58,11 +66,22 @@ void Renderer::pushQuad(std::array<Vertex, 4> vertices) {
 }
 
 void Renderer::display() {
-    buffer->draw();
+    buffer->draw(GL_TRIANGLES);
     SDL_GL_SwapWindow(window);
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
-    buffer->draw();
+    buffer->draw(GL_TRIANGLES);
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
+}
+
+void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
+    frameBufferTexture->setImageFromBuffer(imageBuffer);
+    textureBuffer->clean();
+    uint16_t x, y, width, height;
+    tie(x, y) = imageBuffer->destination();
+    tie(width, height) = imageBuffer->resolution();
+    vector<Point> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
+    textureBuffer->addData(data);
+    textureBuffer->draw(GL_TRIANGLE_STRIP);
 }

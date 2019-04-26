@@ -9,10 +9,22 @@ struct Color {
     GLubyte r, g, b;
 };
 
+enum TextureBlendMode {
+    TextureBlendModeNoTexture = 0,
+    TextureBlendModeRawTexture,
+    TextureBlendModeTextureBlend
+};
+
 struct Vertex {
     Point position;
     Color color;
+    Point texturePosition;
+    GLuint textureBlendMode;
+    Point texturePage;
+    GLuint textureDepthShift;
+    Point clut;
 public:
     Vertex(uint32_t position, uint32_t color);
+    Vertex(uint32_t position, uint32_t color, uint16_t texturePosition, TextureBlendMode textureBlendMode, uint32_t texturePage, uint16_t clutData);
     ~Vertex();
 };

@@ -1,8 +1,10 @@
 #pragma once
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include "GPUInstructionBuffer.hpp"
 #include "Renderer.hpp"
+#include "GPUImageBuffer.hpp"
 
 enum TexturePageColors {
     T4Bit = 0,
@@ -146,6 +148,8 @@ GP1(07h) - Vertical Display range (on Screen)
 
     Renderer renderer;
 
+    std::unique_ptr<GPUImageBuffer> imageBuffer;
+
     void operationGp0Nop();
     void operationGp0DrawMode();
     void operationGp0SetDrawingAreaTopLeft();
@@ -187,3 +191,5 @@ public:
     // TODO: should be private
     void executeGp0(uint32_t value);
 };
+
+TexturePageColors texturePageColorsWithValue(uint32_t value);

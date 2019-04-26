@@ -37,10 +37,11 @@ void RendererBuffer<T>::clean() {
 }
 
 template <class T>
-void RendererBuffer<T>::draw() {
+void RendererBuffer<T>::draw(GLenum mode) {
+    vao->bind();
     program->useProgram();
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)size);
+    glDrawArrays(mode, 0, (GLsizei)size);
     GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     while (true) {
         GLenum result = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 10000000);
@@ -77,6 +78,34 @@ void RendererBuffer<Vertex>::enableAttributes() const {
     GLuint colorIdx = program->findProgramAttribute("vertex_color");
     glVertexAttribIPointer(colorIdx, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
     glEnableVertexAttribArray(colorIdx);
+
+    GLuint texturePositionIdx = program->findProgramAttribute("texture_point");
+    glVertexAttribIPointer(texturePositionIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, texturePosition));
+    glEnableVertexAttribArray(texturePositionIdx);
+
+    GLuint textureBlendModePositionIdx = program->findProgramAttribute("texture_blend_mode");
+    glVertexAttribIPointer(textureBlendModePositionIdx, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void*)offsetof(struct Vertex, textureBlendMode));
+    glEnableVertexAttribArray(textureBlendModePositionIdx);
+
+    GLuint texturePageIdx = program->findProgramAttribute("texture_page");
+    glVertexAttribIPointer(texturePageIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, texturePage));
+    glEnableVertexAttribArray(texturePageIdx);
+
+    GLuint textureDepthShiftIdx = program->findProgramAttribute("texture_depth_shift");
+    glVertexAttribIPointer(textureDepthShiftIdx, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void*)offsetof(struct Vertex, textureDepthShift));
+    glEnableVertexAttribArray(textureDepthShiftIdx);
+
+    GLuint clutIdx = program->findProgramAttribute("clut");
+    glVertexAttribIPointer(clutIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, clut));
+    glEnableVertexAttribArray(clutIdx);
+}
+
+template <>
+void RendererBuffer<Point>::enableAttributes() const {
+    GLuint positionIdx = program->findProgramAttribute("position");
+    glVertexAttribIPointer(positionIdx, 2, GL_SHORT, 0, NULL);
+    glEnableVertexAttribArray(positionIdx);
 }
 
 template class RendererBuffer<Vertex>;
+template class RendererBuffer<Point>;

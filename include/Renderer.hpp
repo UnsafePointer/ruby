@@ -6,6 +6,8 @@
 #include "RendererProgram.hpp"
 #include "RendererBuffer.hpp"
 #include "Vertex.hpp"
+#include "GPUImageBuffer.hpp"
+#include "Texture.hpp"
 
 class Renderer {
     SDL_GLContext glContext;
@@ -16,6 +18,10 @@ class Renderer {
     GLuint offsetUniform;
 
     std::unique_ptr<RendererBuffer<Vertex>> buffer;
+
+    std::unique_ptr<Texture> frameBufferTexture;
+    std::unique_ptr<RendererProgram> textureRendererProgram;
+    std::unique_ptr<RendererBuffer<Point>> textureBuffer;
 public:
     Renderer();
     ~Renderer();
@@ -24,4 +30,5 @@ public:
     void pushQuad(std::array<Vertex, 4> vertices);
     void setDrawingOffset(int16_t x, int16_t y);
     void display();
+    void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);
 };
