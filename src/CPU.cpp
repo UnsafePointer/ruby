@@ -677,6 +677,21 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
 
     uint32_t value;
     switch (copRegisterIndex.idx()) {
+        case 6: {
+            printWarning("Unhandled MFC0 with register JUMPDEST");
+            value = 0;
+            break;
+        }
+        case 7: {
+            printWarning("Unhandled MFC0 with register DCIC");
+            value = 0;
+            break;
+        }
+        case 8: {
+            printWarning("Unhandled MFC0 with register BadVaddr");
+            value = 0;
+            break;
+        }
         case 12: {
             value = statusRegister;
             break;
