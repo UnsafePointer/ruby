@@ -1,13 +1,12 @@
 #pragma once
 #include "GPU.hpp"
-#include <iostream>
+#include "Output.hpp"
 
 template <typename T>
 inline T GPU::load(uint32_t offset) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (sizeof(T) != 4) {
-        std::cout << "Unsupported GPU read with size: " << std::dec << sizeof(T) << std::endl;
-        exit(1);
+        printError("Unsupported GPU read with size: %d", sizeof(T));
     }
     switch (offset) {
         case 0: {
@@ -17,8 +16,7 @@ inline T GPU::load(uint32_t offset) const {
             return statusRegister();
         }
         default: {
-            std::cout << "Unhandled GPU read at offset: 0x" << std::hex << offset << std::endl;
-            exit(1);
+            printError("Unhandled GPU read at offset: %#x", offset);
             return 0;
         }
     }
@@ -28,8 +26,7 @@ template <typename T>
 inline void GPU::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (sizeof(T) != 4) {
-        std::cout << "Unsupported GPU write with size: " << std::dec << sizeof(T) << std::endl;
-        exit(1);
+        printError("Unsupported GPU write with size: %d", sizeof(T));
     }
     switch (offset) {
         case 0: {
@@ -41,8 +38,8 @@ inline void GPU::store(uint32_t offset, T value) {
             break;
         }
         default: {
-            std::cout << "Unhandled GPU write at offset: 0x" << std::hex << offset << std::endl;
-            exit(1);
+            printError("Unhandled GPU write at offset: %#x", offset);
+            return;
         }
     }
 }

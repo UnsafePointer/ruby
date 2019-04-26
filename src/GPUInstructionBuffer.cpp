@@ -1,6 +1,6 @@
 #include "GPUInstructionBuffer.hpp"
-#include <iostream>
 #include <algorithm>
+#include "Output.hpp"
 
 using namespace std;
 
@@ -14,7 +14,7 @@ GPUInstructionBuffer::~GPUInstructionBuffer() {
 
 uint32_t& GPUInstructionBuffer::operator[] (const uint8_t index) {
     if (index >= length) {
-        cout << "GPU Instruction Buffer index-out-of-bounds: " << dec << index << endl;
+        printError("GPU Instruction Buffer index-out-of-bounds: %d", index);
     }
     return buffer[index];
 }

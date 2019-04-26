@@ -1,5 +1,5 @@
 #include "Channel.hpp"
-#include <iostream>
+#include "Output.hpp"
 
 using namespace std;
 
@@ -38,18 +38,22 @@ void Channel::setControlRegister(uint32_t value) {
     }
     chop = ((value >> 8) & 1) != 0;
     switch ((value >> 9) & 3) {
-        case 0:
+        case 0: {
             sync = Sync::Manual;
             break;
-        case 1:
+        }
+        case 1: {
             sync = Sync::Request;
             break;
-        case 2:
+        }
+        case 2: {
             sync = Sync::LinkedList;
             break;
-        default:
-            cout << "Unknown DMA sync mode" << endl;
-            exit(1);
+        }
+        default: {
+            printError("Unknown DMA sync mode");
+            break;
+        }
     }
     chopDMAWindowSize = ((value >> 16) & 7);
     chopCPUWindowSize = ((value >> 20) & 7);
@@ -109,8 +113,8 @@ optional<uint32_t> Channel::transferSize() const {
             return { blockSize * blockCount };
         }
         default: {
-            cout << "Unknown DMA sync mode" << endl;
-            exit(1);
+            printError("Unknown DMA sync mode");
+            return {0};
         }
     }
 }

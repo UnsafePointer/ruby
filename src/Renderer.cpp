@@ -1,17 +1,16 @@
 #include "Renderer.hpp"
-#include <iostream>
 #include <glad/glad.h>
 #include <fstream>
 #include <streambuf>
 #include <vector>
 #include "RendererDebugger.hpp"
+#include "Output.hpp"
 
 using namespace std;
 
 Renderer::Renderer() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        cout << "Error initializing SDL: " << SDL_GetError() << endl;
-        exit(1);
+        printError("Error initializing SDL: %s", SDL_GetError());
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
@@ -23,8 +22,7 @@ Renderer::Renderer() {
     glContext = SDL_GL_CreateContext(window);
 
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
-        cout << "Failed to initialize the OpenGL context." << std::endl;
-        exit(1);
+        printError("Failed to initialize the OpenGL context.");
     }
 
     glClearColor(0.0, 0.0, 0.0, 1.0);

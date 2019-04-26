@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <vector>
 #include <string>
-#include <iostream>
+#include "Output.hpp"
 
 using namespace std;
 
@@ -36,8 +36,8 @@ string debugSourceDescription(DebugSource source) {
             return "Other";
         }
         default: {
-            cout << "Invalid source" << endl;
-            exit(1);
+            printError("Invalid source");
+            return "";
         }
     }
 }
@@ -72,8 +72,8 @@ string debugTypeDescription(DebugType type) {
             return "Other";
         }
         default: {
-            cout << "Invalid type" << endl;
-            exit(1);
+            printError("Invalid type");
+            return "";
         }
     }
 }
@@ -100,8 +100,8 @@ string debugSeverityDescription(DebugSeverity severity) {
             return "Notification";
         }
         default: {
-            cout << "Invalid severity" << endl;
-            exit(1);
+            printError("Invalid severity");
+            return "";
         }
     }
 }
@@ -125,17 +125,18 @@ void checkForOpenGLErrors() {
         DebugType debugType = DebugType(type);
         DebugSeverity debugSeverity = DebugSeverity(severity);
 
-        cout << "OpenGL: [" << debugSeverityDescription(debugSeverity)
+        ostringstream stream;
+        stream << "OpenGL: [" << debugSeverityDescription(debugSeverity)
              << "|" << debugSourceDescription(debugSource)
              << "|" << debugTypeDescription(debugType)
              << "|0x" << hex << id << "|"
-             << message << endl;
+             << message;
+        printWarning(stream.str().c_str());
         if (debugSeverity == DebugSeverity::High) {
             highSeverityFound = true;
         }
     }
     if (highSeverityFound) {
-        cout << "Encountered high severity OpenGL error" << endl;
-        exit(1);
+        printError("Encountered high severity OpenGL error");
     }
 }

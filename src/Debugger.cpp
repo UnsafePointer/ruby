@@ -43,7 +43,6 @@ bool Debugger::shouldStep() {
 void Debugger::addBreakpoint(uint32_t address) {
     if (find(breakpoints.begin(), breakpoints.end(), address) == breakpoints.end()) {
         breakpoints.push_back(address);
-        cout << "Breakpoint added at address 0x" << hex << address << endl;
     }
 }
 

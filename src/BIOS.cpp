@@ -1,6 +1,6 @@
 #include "BIOS.hpp"
 #include <fstream>
-#include <iostream>
+#include "Output.hpp"
 
 using namespace std;
 
@@ -15,8 +15,7 @@ BIOS::~BIOS() {
 void BIOS::loadBin(const string& path) {
     ifstream file (path, ios::in|ios::binary|ios::ate);
     if (!file.is_open()) {
-        cout << "Unable to load BIOS" << endl;
-        exit(1);
+        printError("Unable to load BIOS");
     }
     streampos size = file.tellg();
     file.seekg(0, ios::beg);

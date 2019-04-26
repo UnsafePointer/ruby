@@ -1,8 +1,8 @@
 #include "RendererBuffer.hpp"
 #include <stddef.h>
-#include <iostream>
 #include "Vertex.hpp"
 #include "RendererDebugger.hpp"
+#include "Output.hpp"
 
 using namespace std;
 
@@ -57,8 +57,7 @@ template <class T>
 void RendererBuffer<T>::addData(vector<T> data) {
     uint remainingCapacity = capacity - size;
     if (data.size() > remainingCapacity) {
-        cout << "Renderer buffer out of memory." << endl;
-        exit(1);
+        printError("Renderer buffer out of memory.");
     }
     bind();
 
