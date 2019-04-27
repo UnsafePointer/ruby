@@ -26,6 +26,11 @@ CPU::CPU() : programCounter(0xbfc00000),
 CPU::~CPU() {
 }
 
+void CPU::setProgramCounter(uint32_t address) {
+    programCounter = address;
+    nextProgramCounter = programCounter + 4;
+}
+
 std::array<uint32_t, 32> CPU::getRegisters() {
     array<uint32_t, 32> regs;
     copy(begin(registers), end(registers), begin(regs));
@@ -672,6 +677,21 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
 
     uint32_t value;
     switch (copRegisterIndex.idx()) {
+        case 6: {
+            printWarning("Unhandled MFC0 with register JUMPDEST");
+            value = 0;
+            break;
+        }
+        case 7: {
+            printWarning("Unhandled MFC0 with register DCIC");
+            value = 0;
+            break;
+        }
+        case 8: {
+            printWarning("Unhandled MFC0 with register BadVaddr");
+            value = 0;
+            break;
+        }
         case 12: {
             value = statusRegister;
             break;
@@ -682,6 +702,10 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
         }
         case 14: {
             value = returnAddressFromTrap;
+            break;
+        }
+        case 15: {
+            value = 0x2;
             break;
         }
         default: {
@@ -1269,4 +1293,12 @@ void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
 
 void CPU::operationIllegal(Instruction instruction) {
     triggerException(ExceptionType::Illegal);
+}
+
+void CPU::transferToRAM(string path, uint32_t origin, uint32_t size, uint32_t destination) {
+    interconnect->transferToRAM(path, origin, size, destination);
+}
+
+void CPU::dumpRAM() {
+    interconnect->dumpRAM();
 }

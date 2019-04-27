@@ -1,6 +1,7 @@
 #include "Output.hpp"
 #include <cstdarg>
 #include <iostream>
+#include "TestRunner.hpp"
 
 using namespace std;
 
@@ -29,6 +30,10 @@ void printMessage(string message) {
 }
 
 void printWarning(const char *fmt, ...) {
+    TestRunner *testRunner = TestRunner::getInstance();
+    if (testRunner->shouldRunTests()) {
+        return;
+    }
     va_list args;
     va_start(args, fmt);
     string formatted = format(fmt, args);

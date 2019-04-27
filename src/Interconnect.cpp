@@ -31,4 +31,13 @@ uint32_t Interconnect::maskRegion(uint32_t address) const {
     return address & regionMask[index];
 }
 
+void Interconnect::transferToRAM(string path, uint32_t origin, uint32_t size, uint32_t destination) {
+    uint32_t maskedDestination = maskRegion(destination);
+    ram->receiveTransfer(path, origin, size, maskedDestination);
+}
+
+void Interconnect::dumpRAM() {
+    ram->dump();
+}
+
 
