@@ -8,18 +8,25 @@ using namespace std;
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
 const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
 
-TestRunner::TestRunner(int argc, char* argv[], std::unique_ptr<CPU> &cpu) : cpu(cpu), header() {
-    runTests = false;
+TestRunner::TestRunner() : cpu(nullptr), runTests(false), header() {}
+
+TestRunner* TestRunner::instance = nullptr;
+
+TestRunner* TestRunner::getInstance() {
+    if (instance == nullptr) {
+        instance = new TestRunner();
+    }
+    return instance;
+}
+
+void TestRunner::configure(int argc, char* argv[], CPU *cpu) {
     if (argc > 1) {
         string argument = string(argv[1]);
         if (argument.compare("--run-tests") == 0) {
             runTests = true;
         }
     }
-}
-
-TestRunner::~TestRunner() {
-
+    this->cpu = cpu;
 }
 
 void TestRunner::readHeader() {
@@ -44,6 +51,10 @@ uint32_t TestRunner::loadWord(uint32_t offset) {
     return value;
 }
 
+bool TestRunner::shouldRunTests() {
+    return runTests;
+}
+
 uint32_t TestRunner::programCounter() {
     return loadWord(0x10);
 }
@@ -57,7 +68,7 @@ uint32_t TestRunner::fileSize() {
 }
 
 void TestRunner::setup() {
-    if (!runTests) {
+    if (!shouldRunTests()) {
         return;
     }
     readHeader();
@@ -74,7 +85,7 @@ void TestRunner::setup() {
 }
 
 void TestRunner::setupMidBootHook() {
-    if (!runTests) {
+    if (!shouldRunTests()) {
         return;
     }
     cpu->setProgramCounter(programCounter());

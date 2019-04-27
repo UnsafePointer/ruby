@@ -31,7 +31,9 @@
 const uint32_t TEST_HEADER_SIZE = 2048;
 
 class TestRunner {
-    std::unique_ptr<CPU> &cpu;
+    static TestRunner* instance;
+
+    CPU *cpu;
     bool runTests;
     uint8_t header[TEST_HEADER_SIZE];
 
@@ -40,10 +42,13 @@ class TestRunner {
     uint32_t loadWord(uint32_t offset);
     uint32_t destinationAddress();
     uint32_t fileSize();
-public:
-    TestRunner(int argc, char* argv[], std::unique_ptr<CPU> &cpu);
-    ~TestRunner();
 
+    TestRunner();
+public:
+    static TestRunner* getInstance();
+
+    void configure(int argc, char* argv[], CPU *cpu);
+    bool shouldRunTests();
     uint32_t programCounter();
     void setup();
     void setupMidBootHook();
