@@ -71,6 +71,20 @@ $ (gdb) info registers
 
 For a comprehensive list of supported GDB features, see [libHana](https://github.com/Ruenzuo/libHana).
 
+### Tests
+
+#### Prerequisites
+
+- [amidog CPU tests](https://psx.amidog.se/doku.php?id=psx:download:cpu#CPU_Test): psxtest_cpu.exe (SHA1: 023aec8c92aaaf4d3b07956e26dd6c77ff397456)
+
+#### Running
+
+The emulator expects a `tests.exe` file at the root.
+
+```
+./bin/ruby --run-tests
+```
+
 ### Acknowledgments
 
 This emulator, like many others, is based on the [Nocash PSX Specifications](http://problemkaputt.de/psx-spx.htm). For ease of access and review purposes, relevant parts of the specification are pasted before the implementation.
