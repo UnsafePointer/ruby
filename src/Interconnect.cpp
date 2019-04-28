@@ -22,6 +22,7 @@ Interconnect::Interconnect() {
     dma = make_unique<DMA>(ram, gpu);
     scratchpad = make_unique<Scratchpad>();
     cdrom = make_unique<CDROM>();
+    interruptController = make_unique<InterruptController>();
 }
 
 Interconnect::~Interconnect() {

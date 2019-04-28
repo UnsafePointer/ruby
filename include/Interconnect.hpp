@@ -7,6 +7,7 @@
 #include "Range.hpp"
 #include "Scratchpad.hpp"
 #include "CDROM.hpp"
+#include "InterruptController.hpp"
 
 const Range ramRange = Range(0x00000000, RAM_SIZE);
 const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
@@ -44,6 +45,7 @@ class Interconnect {
     std::unique_ptr<DMA> dma;
     std::unique_ptr<Scratchpad> scratchpad;
     std::unique_ptr<CDROM> cdrom;
+    std::unique_ptr<InterruptController> interruptController;
     uint32_t maskRegion(uint32_t address) const;
 public:
     Interconnect();

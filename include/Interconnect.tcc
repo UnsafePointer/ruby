@@ -8,6 +8,7 @@
 #include "Debugger.hpp"
 #include "Scratchpad.tcc"
 #include "CDROM.tcc"
+#include "InterruptController.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -24,8 +25,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Interrupt Request Control read at offset: %#x", *offset);
-        return 0;
+        return interruptController->load<T>(*offset);
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
     if (offset) {
@@ -115,7 +115,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = interruptRequestControlRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Interrupt Request Control write at offset: %#x", *offset);
+        interruptController->store<T>(*offset, value);
         return;
     }
     offset = dmaRegisterRange.contains(absoluteAddress);
