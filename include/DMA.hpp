@@ -20,7 +20,7 @@ enum Port {
     MDECin = 0,
     MDECout = 1,
     GPUP = 2,
-    CDROM = 3,
+    CDROMP = 3,
     SPU = 4,
     PIO = 5,
     OTC = 6,
