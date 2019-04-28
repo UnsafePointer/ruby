@@ -735,6 +735,7 @@ void CPU::operationAdd(Instruction instruction) {
     int64_t result = s + t;
     if (result < INT32_MIN || result > INT32_MAX) {
         triggerException(ExceptionType::Overflow);
+        return;
     }
 
     setRegisterAtIndex(rd, result);
