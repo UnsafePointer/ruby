@@ -12,11 +12,11 @@ CPU::CPU() : programCounter(0xbfc00000),
              isBranching(false),
              isDelaySlot(false),
              loadPair({RegisterIndex(), 0}),
-             statusRegister(0),
              highRegister(0xdeadbeef),
              lowRegister(0xdeadbeef)
 {
     interconnect = make_unique<Interconnect>();
+    cop0 = make_unique<COP0>();
     nextProgramCounter = programCounter + 4;
     fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
@@ -38,7 +38,7 @@ std::array<uint32_t, 32> CPU::getRegisters() {
 }
 
 uint32_t CPU::getStatusRegister() {
-    return statusRegister;
+    return cop0->getStatusRegister();
 }
 
 uint32_t CPU::getLowRegister() {
@@ -50,11 +50,11 @@ uint32_t CPU::getHighRegister() {
 }
 
 uint32_t CPU::getReturnAddressFromTrap() {
-    return returnAddressFromTrap;
+    return cop0->getReturnAddressFromTrap();
 }
 
 uint32_t CPU::getCauseRegister() {
-    return causeRegister;
+    return cop0->getCauseRegister();
 }
 
 uint32_t CPU::getProgramCounter() {
@@ -66,11 +66,11 @@ void CPU::printAllRegisters() {
     for (uint i = 0; i < 32; i++) {
         printWarning("r%02d: %#x", i, registers[i]);
     }
-    printWarning("status: %#x", statusRegister);
+    printWarning("status: %#x", getStatusRegister());
     printWarning("lo: %#x", lowRegister);
     printWarning("hi: %#x", highRegister);
-    printWarning("badvaddr: %#x", returnAddressFromTrap);
-    printWarning("cause: %#x", causeRegister);
+    printWarning("badvaddr: %#x", getReturnAddressFromTrap());
+    printWarning("cause: %#x", getCauseRegister());
     printWarning("pc: %#x", programCounter);
 }
 
@@ -444,15 +444,15 @@ void CPU::operationMoveToCoprocessor0(Instruction instruction) {
             break;
         }
         case 12: {
-            statusRegister = value;
+            cop0->setStatusRegister(value);
             break;
         }
         case 13: {
-            causeRegister = value;
+            cop0->setCauseRegister(value);
             break;
         }
         case 14: {
-            returnAddressFromTrap = value;
+            cop0->setReturnAddressFromTrap(value);
             break;
         }
         default: {
@@ -485,7 +485,7 @@ void CPU::operationStoreWord(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
@@ -561,7 +561,7 @@ void CPU::operationLoadWord(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
@@ -597,7 +597,7 @@ void CPU::operationStoreHalfWord(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
@@ -632,7 +632,7 @@ void CPU::operationStoreByte(Instruction instruction) const {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
@@ -653,7 +653,7 @@ void CPU::operationLoadByte(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
@@ -693,15 +693,15 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             break;
         }
         case 12: {
-            value = statusRegister;
+            value = cop0->getStatusRegister();
             break;
         }
         case 13: {
-            value = causeRegister;
+            value = cop0->getCauseRegister();
             break;
         }
         case 14: {
-            value = returnAddressFromTrap;
+            value = cop0->getReturnAddressFromTrap();
             break;
         }
         case 15: {
@@ -767,7 +767,7 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
@@ -928,25 +928,7 @@ void CPU::operationSetOnLessThan(Instruction instruction) {
 }
 
 void CPU::triggerException(ExceptionType exceptionType) {
-    uint32_t handlerAddress = 0x80000000;
-    if ((statusRegister & (1 << 2)) != 0) {
-        handlerAddress = 0xbfc00180;
-    }
-
-    // Grab the last 6 bits of SR
-    // Shift the result two spaces to the left, padded with zeroes
-    // This is the Interrupt Enable/User Mode mask
-    uint32_t mode = statusRegister & 0x3f;
-    statusRegister &= ~0x3f;
-    statusRegister |= ((mode << 2) & 0x3f);
-
-    causeRegister = exceptionType << 2;
-
-    returnAddressFromTrap = currentProgramCounter;
-    if (isDelaySlot) {
-        returnAddressFromTrap = returnAddressFromTrap - 4;
-        causeRegister |= 1 << 31;
-    }
+    uint32_t handlerAddress = cop0->updateRegistersWithException(exceptionType, currentProgramCounter, isDelaySlot);
 
     programCounter = handlerAddress;
     nextProgramCounter = programCounter + 4;
@@ -973,9 +955,7 @@ void CPU::operationReturnFromException(Instruction instruction) {
         printError("Unhandled cop0 instruction (0b010000) with last 6 bits: %#x", instruction.subfunct());
     }
 
-    uint32_t mode = statusRegister & 0x3f;
-    statusRegister &= ~0x3f;
-    statusRegister |= mode >> 2;
+
 }
 
 void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
@@ -984,7 +964,7 @@ void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring load at address: %#x", address);
         return;
     }
@@ -1011,7 +991,7 @@ void CPU::operationLoadHalfWord(Instruction instruction) {
     RegisterIndex rs = instruction.rs();
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if ((statusRegister & 0x10000) != 0) {
+    if (cop0->isCacheIsolated()) {
         printWarning("Cache is isolated, ignoring load at address: %#x", address);
         return;
     }

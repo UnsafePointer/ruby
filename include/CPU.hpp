@@ -5,16 +5,7 @@
 #include "Instruction.hpp"
 #include "RegisterIndex.hpp"
 #include "Debugger.hpp"
-
-enum ExceptionType : uint32_t {
-    SysCall = 0x8,
-    Overflow = 0xc,
-    LoadAddress = 0x4,
-    StoreAddress = 0x5,
-    Break = 0x9,
-    Coprocessor = 0xb,
-    Illegal = 0xa
-};
+#include "COP0.hpp"
 
 /*
 CPU Register Summary
@@ -33,24 +24,6 @@ R30        fp(s8)   Frame Pointer, or 9th Static variable, must be saved
 R31        ra       Return address (used so by JAL,BLTZAL,BGEZAL opcodes)
 -          pc       Program counter
 -          hi,lo    Multiply/divide results, may be changed by subroutines
-
-COP0 Register Summary
-cop0r0-r2   - N/A
-cop0r3      - BPC - Breakpoint on execute (R/W)
-cop0r4      - N/A
-cop0r5      - BDA - Breakpoint on data access (R/W)
-cop0r6      - JUMPDEST - Randomly memorized jump address (R)
-cop0r7      - DCIC - Breakpoint control (R/W)
-cop0r8      - BadVaddr - Bad Virtual Address (R)
-cop0r9      - BDAM - Data Access breakpoint mask (R/W)
-cop0r10     - N/A
-cop0r11     - BPCM - Execute breakpoint mask (R/W)
-cop0r12     - SR - System status register (R/W)
-cop0r13     - CAUSE - (R)  Describes the most recently recognised exception
-cop0r14     - EPC - Return Address from Trap (R)
-cop0r15     - PRID - Processor ID (R)
-cop0r16-r31 - Garbage
-cop0r32-r63 - N/A - None such (Control regs)
 */
 class CPU {
     uint32_t programCounter;
@@ -61,12 +34,10 @@ class CPU {
     uint32_t registers[32];
     uint32_t outputRegisters[32];
     std::pair<RegisterIndex, uint32_t> loadPair;
-    uint32_t statusRegister; // cop0r12
-    uint32_t causeRegister; // cop0r13
-    uint32_t returnAddressFromTrap; // cop0r14
     uint32_t highRegister;
     uint32_t lowRegister;
     std::unique_ptr<Interconnect> interconnect;
+    std::unique_ptr<COP0> cop0;
 
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
