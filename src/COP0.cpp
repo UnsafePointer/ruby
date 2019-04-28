@@ -1,5 +1,7 @@
 #include "COP0.hpp"
 
+using namespace std;
+
 COP0::COP0() : statusRegister(), causeRegister(), returnAddressFromTrap() {
 
 }
@@ -10,6 +12,17 @@ COP0::~COP0() {
 
 bool COP0::isCacheIsolated() {
     return (statusRegister & 0x10000) != 0;
+}
+
+bool COP0::areInterruptsEnabled() {
+    return (statusRegister & 0x1) != 0;
+}
+
+bool COP0::areInterruptsPending(unique_ptr<InterruptController> &interruptController) {
+    uint32_t cause = getCauseRegister(interruptController);
+    uint32_t pendingInterrupts = (cause & statusRegister) & 0x700;
+
+    return (areInterruptsEnabled() && pendingInterrupts) != 0;
 }
 
 uint32_t COP0::getStatusRegister() {
@@ -28,8 +41,10 @@ void COP0::setReturnAddressFromTrap(uint32_t value) {
     returnAddressFromTrap = value;
 }
 
-uint32_t COP0::getCauseRegister() {
-    return causeRegister;
+uint32_t COP0::getCauseRegister(std::unique_ptr<InterruptController> &interruptController) {
+    uint32_t activeMask = interruptController->isActive();
+    activeMask <<= 10;
+    return (causeRegister | activeMask);
 }
 
 void COP0::setCauseRegister(uint32_t value) {

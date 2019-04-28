@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include <memory>
+#include "InterruptController.hpp"
 
 enum ExceptionType : uint32_t {
     SysCall = 0x8,
@@ -8,7 +10,8 @@ enum ExceptionType : uint32_t {
     StoreAddress = 0x5,
     Break = 0x9,
     Coprocessor = 0xb,
-    Illegal = 0xa
+    Illegal = 0xa,
+    Interrupt = 0x0
 };
 
 /*
@@ -34,11 +37,14 @@ class COP0 {
     uint32_t statusRegister;
     uint32_t causeRegister;
     uint32_t returnAddressFromTrap;
+
+    bool areInterruptsEnabled();
 public:
     COP0();
     ~COP0();
 
     bool isCacheIsolated();
+    bool areInterruptsPending(std::unique_ptr<InterruptController> &interruptController);
 
     // GDB register naming and order used here:
     // status - 32
@@ -48,7 +54,7 @@ public:
     uint32_t getReturnAddressFromTrap();
     void setReturnAddressFromTrap(uint32_t value);
     // cause - 36
-    uint32_t getCauseRegister();
+    uint32_t getCauseRegister(std::unique_ptr<InterruptController> &interruptController);
     void setCauseRegister(uint32_t value);
 
     uint32_t updateRegistersWithException(ExceptionType exceptionType, uint32_t programCounter, bool isDelaySlot);

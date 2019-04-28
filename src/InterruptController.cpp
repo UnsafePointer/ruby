@@ -8,6 +8,10 @@ InterruptController::~InterruptController() {
 
 }
 
+bool InterruptController::isActive() {
+    return (status & mask) != 0;
+}
+
 void InterruptController::setStatus(uint16_t status) {
     this->status &= status;
 }

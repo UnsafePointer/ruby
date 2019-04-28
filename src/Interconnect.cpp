@@ -42,4 +42,6 @@ void Interconnect::dumpRAM() {
     ram->dump();
 }
 
-
+unique_ptr<InterruptController>& Interconnect::interruptControllerRef() {
+    return interruptController;
+}

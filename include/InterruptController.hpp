@@ -11,6 +11,8 @@ public:
     InterruptController();
     ~InterruptController();
 
+    bool isActive();
+
     template <typename T>
     inline T load(uint32_t offset) const;
     template <typename T>

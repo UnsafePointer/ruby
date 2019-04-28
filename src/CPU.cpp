@@ -54,7 +54,7 @@ uint32_t CPU::getReturnAddressFromTrap() {
 }
 
 uint32_t CPU::getCauseRegister() {
-    return cop0->getCauseRegister();
+    return cop0->getCauseRegister(interconnect->interruptControllerRef());
 }
 
 uint32_t CPU::getProgramCounter() {
@@ -96,7 +96,12 @@ void CPU::executeNextInstruction() {
     setRegisterAtIndex(loadRegisterIndex, value);
     loadPair = {RegisterIndex(), 0};
 
-    decodeAndExecuteInstruction(instruction);
+    if (cop0->areInterruptsPending(interconnect->interruptControllerRef())) {
+        triggerException(ExceptionType::Break);
+    } else {
+        decodeAndExecuteInstruction(instruction);
+    }
+
     copy(begin(outputRegisters), end(outputRegisters), begin(registers));
 }
 
@@ -697,7 +702,7 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             break;
         }
         case 13: {
-            value = cop0->getCauseRegister();
+            value = cop0->getCauseRegister(interconnect->interruptControllerRef());
             break;
         }
         case 14: {
