@@ -6,6 +6,7 @@
 #include "GPU.hpp"
 #include "Range.hpp"
 #include "Scratchpad.hpp"
+#include "CDROM.hpp"
 
 const Range ramRange = Range(0x00000000, RAM_SIZE);
 const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
@@ -20,6 +21,7 @@ const Range interruptRequestControlRange = Range(0x1f801070, 8);
 const Range timerRegisterRange = Range(0x1f801100, 48);
 const Range dmaRegisterRange = Range(0x1f801080, 0x80);
 const Range gpuRegisterRange = Range(0x1f801810, 8);
+const Range cdromRegisterRange = Range(0x1f801800, 4);
 
 /*
 Memory Map
@@ -41,6 +43,7 @@ class Interconnect {
     std::unique_ptr<GPU> gpu;
     std::unique_ptr<DMA> dma;
     std::unique_ptr<Scratchpad> scratchpad;
+    std::unique_ptr<CDROM> cdrom;
     uint32_t maskRegion(uint32_t address) const;
 public:
     Interconnect();

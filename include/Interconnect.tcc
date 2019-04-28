@@ -7,6 +7,7 @@
 #include "DMA.tcc"
 #include "Debugger.hpp"
 #include "Scratchpad.tcc"
+#include "CDROM.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -52,6 +53,10 @@ inline T Interconnect::load(uint32_t address) const {
     offset = scratchpadRange.contains(absoluteAddress);
     if (offset) {
         return scratchpad->load<T>(*offset);
+    }
+    offset = cdromRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        return cdrom->load<T>(*offset);
     }
     printWarning("Unhandled read at offset: %#x", *offset);
     Debugger *debugger = Debugger::getInstance();
@@ -141,6 +146,11 @@ inline void Interconnect::store(uint32_t address, T value) const {
     offset = scratchpadRange.contains(absoluteAddress);
     if (offset) {
         scratchpad->store<T>(*offset, value);
+        return;
+    }
+    offset = cdromRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        cdrom->store<T>(*offset, value);
         return;
     }
     printError("Unhandled write at: %#x", address);
