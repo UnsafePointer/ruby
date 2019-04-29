@@ -8,7 +8,15 @@ inline T CDROM::load(uint32_t offset) const {
     if (sizeof(T) != 1) {
         printError("Unsupported CDROM read with size: %d", sizeof(T));
     }
-    printError("Unhandled CDROM read at offset: %#x", offset);
+    switch (offset) {
+        case 0: {
+            printWarning("Unhandled CDROM Status Register");
+            return 0;
+        }
+        default: {
+            printError("Unhandled CDROM read at offset: %#x", offset);
+        }
+    }
     return 0;
 }
 
