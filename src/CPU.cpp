@@ -31,6 +31,11 @@ void CPU::setProgramCounter(uint32_t address) {
     nextProgramCounter = programCounter + 4;
 }
 
+void CPU::setGlobalPointer(uint32_t address) {
+    registers[28] = address;
+    outputRegisters[28] = address;
+}
+
 std::array<uint32_t, 32> CPU::getRegisters() {
     array<uint32_t, 32> regs;
     copy(begin(registers), end(registers), begin(regs));

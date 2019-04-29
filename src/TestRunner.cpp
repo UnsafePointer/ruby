@@ -59,6 +59,10 @@ uint32_t TestRunner::programCounter() {
     return loadWord(0x10);
 }
 
+uint32_t TestRunner::globalPointer() {
+    return loadWord(0x14);
+}
+
 uint32_t TestRunner::destinationAddress() {
     return loadWord(0x18);
 }
@@ -89,6 +93,7 @@ void TestRunner::setupMidBootHook() {
         return;
     }
     cpu->setProgramCounter(programCounter());
+    cpu->setGlobalPointer(globalPointer());
 }
 
 void TestRunner::checkTTY() {

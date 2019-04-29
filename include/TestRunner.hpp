@@ -50,6 +50,7 @@ public:
     void configure(int argc, char* argv[], CPU *cpu);
     bool shouldRunTests();
     uint32_t programCounter();
+    uint32_t globalPointer();
     void setup();
     void setupMidBootHook();
     void checkTTY();
