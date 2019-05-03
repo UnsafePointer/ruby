@@ -16,8 +16,8 @@ CPU::CPU() : programCounter(0xbfc00000),
              lowRegister(0xdeadbeef),
              currentInstruction(Instruction(0x0))
 {
-    interconnect = make_unique<Interconnect>();
     cop0 = make_unique<COP0>();
+    interconnect = make_unique<Interconnect>(cop0);
     nextProgramCounter = programCounter + 4;
     fill_n(registers, 32, 0xDEADBEEF);
     registers[0] = 0;
@@ -25,6 +25,10 @@ CPU::CPU() : programCounter(0xbfc00000),
 }
 
 CPU::~CPU() {
+}
+
+unique_ptr<COP0>& CPU::cop0Ref() {
+    return cop0;
 }
 
 void CPU::setProgramCounter(uint32_t address) {
@@ -989,7 +993,7 @@ void CPU::triggerException(ExceptionType exceptionType) {
     }
 
     uint32_t handlerAddress;
-    if (cop0->status.bootExceptionVectors() == BootExceptionVectors::ROM) {
+    if (cop0->status.bootExceptionVectors() == BootExceptionVectors::ROMV) {
         handlerAddress = 0xbfc00180;
     } else {
         handlerAddress = 0x80000080;
@@ -1019,8 +1023,11 @@ void CPU::operationReturnFromException(Instruction instruction) {
     if (instruction.subfunct() != 0b010000) {
         printError("Unhandled cop0 instruction (0b010000) with last 6 bits: %#x", instruction.subfunct());
     }
+    cop0->status.currentInterruptEnable = cop0->status.previousInterruptEnable;
+    cop0->status._currentOperationMode = cop0->status._previousOperationMode;
 
-
+    cop0->status.previousInterruptEnable = cop0->status.oldInterruptEnable;
+    cop0->status._previousOperationMode = cop0->status._oldOperationMode;
 }
 
 void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {

@@ -127,6 +127,8 @@ public:
     CPU();
     ~CPU();
 
+    std::unique_ptr<COP0>& cop0Ref();
+
     template <typename T>
     inline T load(uint32_t address) const;
     template <typename T>

@@ -8,6 +8,7 @@
 #include "Scratchpad.hpp"
 #include "CDROM.hpp"
 #include "InterruptController.hpp"
+#include "COP0.hpp"
 
 const Range ramRange = Range(0x00000000, RAM_SIZE);
 const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
@@ -48,7 +49,7 @@ class Interconnect {
     std::unique_ptr<InterruptController> interruptController;
     uint32_t maskRegion(uint32_t address) const;
 public:
-    Interconnect();
+    Interconnect(std::unique_ptr<COP0> &cop0);
     ~Interconnect();
 
     template <typename T>
@@ -58,6 +59,4 @@ public:
 
     void transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
     void dumpRAM();
-
-    std::unique_ptr<InterruptController>& interruptControllerRef();
 };

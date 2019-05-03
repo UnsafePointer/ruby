@@ -6,10 +6,10 @@ inline T InterruptController::load(uint32_t offset) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     switch (offset) {
         case 0: {
-            return status;
+            return status.value;
         }
         case 4: {
-            return mask;
+            return mask.value;
         }
         default: {
             printError("Unhandled Interrupt Request Control read at offset: %#x", offset);

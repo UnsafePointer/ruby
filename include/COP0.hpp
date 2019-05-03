@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <memory>
-#include "InterruptController.hpp"
 
 enum ExceptionType : uint32_t {
     Interrupt = 0x0,
@@ -77,8 +76,8 @@ enum OperationMode : uint32_t {
 };
 
 enum BootExceptionVectors : uint32_t {
-    RAM = 0,
-    ROM = 1,
+    RAMV = 0,
+    ROMV = 1,
 };
 
 /*
