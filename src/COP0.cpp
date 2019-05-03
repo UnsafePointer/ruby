@@ -48,7 +48,8 @@ uint32_t COP0::getCauseRegister(std::unique_ptr<InterruptController> &interruptC
 }
 
 void COP0::setCauseRegister(uint32_t value) {
-    causeRegister = value;
+    causeRegister &= ~0x300;
+    causeRegister |= (value & 0x300);
 }
 
 uint32_t COP0::updateRegistersWithException(ExceptionType exceptionType, uint32_t programCounter, bool isDelaySlot) {
