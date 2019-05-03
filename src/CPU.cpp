@@ -102,7 +102,7 @@ void CPU::executeNextInstruction() {
     loadPair = {RegisterIndex(), 0};
 
     if (cop0->areInterruptsPending(interconnect->interruptControllerRef())) {
-        triggerException(ExceptionType::Break);
+        triggerException(ExceptionType::Interrupt);
     } else {
         decodeAndExecuteInstruction(instruction);
     }
