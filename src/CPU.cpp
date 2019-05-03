@@ -13,7 +13,8 @@ CPU::CPU() : programCounter(0xbfc00000),
              isDelaySlot(false),
              loadPair({RegisterIndex(), 0}),
              highRegister(0xdeadbeef),
-             lowRegister(0xdeadbeef)
+             lowRegister(0xdeadbeef),
+             currentInstruction(Instruction(0x0))
 {
     interconnect = make_unique<Interconnect>();
     cop0 = make_unique<COP0>();
@@ -43,7 +44,7 @@ std::array<uint32_t, 32> CPU::getRegisters() {
 }
 
 uint32_t CPU::getStatusRegister() {
-    return cop0->getStatusRegister();
+    return cop0->status.value;
 }
 
 uint32_t CPU::getLowRegister() {
@@ -55,11 +56,11 @@ uint32_t CPU::getHighRegister() {
 }
 
 uint32_t CPU::getReturnAddressFromTrap() {
-    return cop0->getReturnAddressFromTrap();
+    return cop0->returnAddressFromTrap;
 }
 
 uint32_t CPU::getCauseRegister() {
-    return cop0->getCauseRegister(interconnect->interruptControllerRef());
+    return cop0->cause.value;
 }
 
 uint32_t CPU::getProgramCounter() {
@@ -87,7 +88,7 @@ void CPU::executeNextInstruction() {
         triggerException(ExceptionType::LoadAddress);
         return;
     }
-    Instruction instruction = Instruction(load<uint32_t>(programCounter));
+    currentInstruction = Instruction(load<uint32_t>(programCounter));
 
     isDelaySlot = isBranching;
     isBranching = false;
@@ -101,10 +102,10 @@ void CPU::executeNextInstruction() {
     setRegisterAtIndex(loadRegisterIndex, value);
     loadPair = {RegisterIndex(), 0};
 
-    if (cop0->areInterruptsPending(interconnect->interruptControllerRef())) {
+    if (cop0->areInterruptsPending()) {
         triggerException(ExceptionType::Interrupt);
     } else {
-        decodeAndExecuteInstruction(instruction);
+        decodeAndExecuteInstruction(currentInstruction);
     }
 
     copy(begin(outputRegisters), end(outputRegisters), begin(registers));
@@ -442,27 +443,40 @@ void CPU::operationMoveToCoprocessor0(Instruction instruction) {
     uint32_t value = registerAtIndex(cpuRegisterIndex);
 
     switch (copRegisterIndex.idx()) {
-        case 3:
-        case 5:
-        case 6:
-        case 7:
-        case 9:
+        case 3: {
+            cop0->breakPointOnExecute = value;
+            break;
+        }
+        case 5: {
+            cop0->breakPointOnDataAccess = value;
+            break;
+        }
+        case 6: {
+            // No idea why this happens, this isn't R/W accoring to no$. According to EmuDev Discord:
+            // "JUMPDEST is somewhat of a name no$ just gave, the PS devkit describes that as PIDMASK"
+            cop0->jumpDestination = value;
+            break;
+        }
+        case 7: {
+            cop0->breakPointControl = value;
+            break;
+        }
+        case 9: {
+            cop0->dataAccessBreakpointMask = value;
+            break;
+        }
         case 11: {
-            if (value != 0) {
-                printError("Unhandled MTC0 at index %d", copRegisterIndex.idx());
-            }
+            cop0->executeBreakpointMask = value;
             break;
         }
         case 12: {
-            cop0->setStatusRegister(value);
+            cop0->status.value = value;
             break;
         }
         case 13: {
-            cop0->setCauseRegister(value);
-            break;
-        }
-        case 14: {
-            cop0->setReturnAddressFromTrap(value);
+            // Only bit 8 and 9 can be written. See COP0.hpp
+            cop0->cause.value &= ~0x300;
+            cop0->cause.value |= (value & 0x300);
             break;
         }
         default: {
@@ -687,35 +701,48 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
 
     uint32_t value;
     switch (copRegisterIndex.idx()) {
+        case 3: {
+            value = cop0->breakPointOnExecute;
+            break;
+        }
+        case 5: {
+            value = cop0->breakPointOnDataAccess;
+            break;
+        }
         case 6: {
-            printWarning("Unhandled MFC0 with register JUMPDEST");
-            value = 0;
+            value = cop0->jumpDestination;
             break;
         }
         case 7: {
-            printWarning("Unhandled MFC0 with register DCIC");
-            value = 0;
+            value = cop0->breakPointControl;
             break;
         }
         case 8: {
-            printWarning("Unhandled MFC0 with register BadVaddr");
-            value = 0;
+            value = cop0->badVirtualAddress;
+            break;
+        }
+        case 9: {
+            value = cop0->dataAccessBreakpointMask;
+            break;
+        }
+        case 11: {
+            value = cop0->executeBreakpointMask;
             break;
         }
         case 12: {
-            value = cop0->getStatusRegister();
+            value = cop0->status.value;
             break;
         }
         case 13: {
-            value = cop0->getCauseRegister(interconnect->interruptControllerRef());
+            value = cop0->cause.value;
             break;
         }
         case 14: {
-            value = cop0->getReturnAddressFromTrap();
+            value = cop0->returnAddressFromTrap;
             break;
         }
         case 15: {
-            value = 0x2;
+            value = cop0->processorID;
             break;
         }
         default: {
@@ -938,7 +965,35 @@ void CPU::operationSetOnLessThan(Instruction instruction) {
 }
 
 void CPU::triggerException(ExceptionType exceptionType) {
-    uint32_t handlerAddress = cop0->updateRegistersWithException(exceptionType, currentProgramCounter, isDelaySlot);
+    cop0->cause._exception = exceptionType;
+
+    if (exceptionType != BusErrorOnInstruction) {
+        cop0->cause.coprocessorNumber = currentInstruction.funct() & 0x3;
+    }
+
+    cop0->status.oldInterruptEnable = cop0->status.previousInterruptEnable;
+    cop0->status._oldOperationMode = cop0->status._previousOperationMode;
+
+    cop0->status.previousInterruptEnable = cop0->status.currentInterruptEnable;
+    cop0->status._previousOperationMode = cop0->status._currentOperationMode;
+
+    cop0->status.currentInterruptEnable = false;
+    cop0->status._currentOperationMode = Kernel;
+
+    if (isDelaySlot) {
+        cop0->returnAddressFromTrap = currentProgramCounter - 4;
+        cop0->cause.branchDelay = true;
+    } else {
+        cop0->returnAddressFromTrap = currentProgramCounter;
+        cop0->cause.branchDelay = false;
+    }
+
+    uint32_t handlerAddress;
+    if (cop0->status.bootExceptionVectors() == BootExceptionVectors::ROM) {
+        handlerAddress = 0xbfc00180;
+    } else {
+        handlerAddress = 0x80000080;
+    }
 
     programCounter = handlerAddress;
     nextProgramCounter = programCounter + 4;
@@ -1062,7 +1117,7 @@ void CPU::operationBitwiseExclusiveOr(Instruction instruction) {
 }
 
 void CPU::operationBreak(Instruction instruction) {
-    triggerException(ExceptionType::Break);
+    triggerException(ExceptionType::Breakpoint);
 }
 
 void CPU::operationMultiply(Instruction instruction) {

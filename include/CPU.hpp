@@ -38,6 +38,7 @@ class CPU {
     uint32_t lowRegister;
     std::unique_ptr<Interconnect> interconnect;
     std::unique_ptr<COP0> cop0;
+    Instruction currentInstruction;
 
     uint32_t registerAtIndex(RegisterIndex index) const;
     void setRegisterAtIndex(RegisterIndex index, uint32_t value);
