@@ -657,7 +657,9 @@ On New 208pin GPUs, following values can be selected:
 void GPU::operationGp1GetGPUInfo(uint32_t value) {
     switch (value & 0xf) {
         case 0x0:
-        case 0x1:
+        case 0x1: {
+            break;
+        }
         case 0x2: {
             gpuRead = ((uint32_t) textureWindowOffsetY) << 15 | ((uint32_t) textureWindowOffsetX) << 10 | ((uint32_t) textureWindowMaskY) << 5 | ((uint32_t) textureWindowMaskX);
             break;
