@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include "RegisterIndex.hpp"
 
 /*
 Primary opcode field (Bit 26..31)
@@ -68,20 +67,22 @@ Coprocessor Opcode/Parameter Encoding
 1100nn | rs   | rt   | <--immediate16bit--> | LWCn rt_dat,[rs+imm]
 1110nn | rs   | rt   | <--immediate16bit--> | SWCn rt_dat,[rs+imm]
 */
-struct Instruction {
-    Instruction(uint32_t data);
-    ~Instruction();
-    uint32_t dat() const;
-    uint32_t funct() const;
-    uint32_t subfunct() const;
-    RegisterIndex rs() const;
-    RegisterIndex rt() const;
-    RegisterIndex rd() const;
+union Instruction {
+    struct {
+        uint32_t subfunct : 6;
+        uint32_t shiftimm : 5;
+        uint32_t rd : 5;
+        uint32_t rt : 5;
+        uint32_t rs : 5;
+        uint32_t funct : 6;
+    };
+    uint32_t value;
+
+    Instruction() : value(0) {}
+    Instruction(uint32_t value);
+
     uint32_t imm() const;
     uint32_t immSE() const;
-    uint32_t shiftimm() const;
     uint32_t immjump() const;
     uint32_t copcode() const;
-private:
-    uint32_t data;
 };
