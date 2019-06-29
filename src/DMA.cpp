@@ -61,7 +61,7 @@ Channel& DMA::channelForPort(Port port) {
 
 void DMA::execute(Port port) {
     Channel& channel = channels[port];
-    if (channel.snc() == Sync::LinkedList) {
+    if (channel.sync() == Sync::LinkedList) {
         executeLinkedList(port, channel);
     } else {
         executeBlock(port, channel);
@@ -71,7 +71,7 @@ void DMA::execute(Port port) {
 
 void DMA::executeLinkedList(Port port, Channel& channel) {
     uint32_t address = channel.baseAddressRegister() & 0x1ffffc;
-    if (channel.dir() == Direction::ToRam) {
+    if (channel.direction() == Direction::ToRam) {
         printError("Unhandled DMA direction");
     }
     if (port != Port::GPUP) {
@@ -97,7 +97,7 @@ void DMA::executeLinkedList(Port port, Channel& channel) {
 
 void DMA::executeBlock(Port port, Channel& channel) {
     int8_t step = 4;
-    if (channel.stp() == Step::Decrement) {
+    if (channel.step() == Step::Decrement) {
         step *= -1;
     }
     uint32_t address = channel.baseAddressRegister();
@@ -108,7 +108,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
     uint32_t remainingTransferSize = *transferSize;
     while (remainingTransferSize > 0) {
         uint32_t currentAddress = address & 0x1ffffc;
-        switch (channel.dir()) {
+        switch (channel.direction()) {
             case Direction::FromRam: {
                 uint32_t source = ram->load<uint32_t>(currentAddress);
                 switch (port) {
