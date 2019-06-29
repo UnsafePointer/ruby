@@ -31,7 +31,7 @@ void DMA::setControlRegister(uint32_t value) {
 
 bool DMA::interruptRequestStatus() const {
     uint8_t channelStatus = interrupt.IRQFlagsStatus().value & interrupt.IRQEnableStatus().value;
-    return interrupt.forceIRQ || (interrupt.IRQEnableStatus().value && channelStatus != 0);
+    return interrupt.masterIRQFlag || (interrupt.IRQEnableStatus().value && channelStatus != 0);
 }
 
 uint32_t DMA::interruptRegister() const {
@@ -49,6 +49,9 @@ void DMA::setInterruptRegister(uint32_t value) {
     value &= ~(1UL << 13);
     value &= ~(1UL << 14);
     interrupt.value = value;
+    if (interrupt.forceIRQ) {
+        interrupt.masterIRQFlag = 1;
+    }
 }
 
 Channel& DMA::channelForPort(Port port) {
