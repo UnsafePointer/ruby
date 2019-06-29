@@ -39,7 +39,7 @@ inline T DMA::load(uint32_t offset) {
         case 7: {
             switch (lower) {
                 case 0: {
-                    return ctrlRegister();
+                    return controlRegister();
                 }
                 case 4: {
                     return interruptRegister();
