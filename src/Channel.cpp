@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Channel::Channel() : enable(false), direction(Direction::ToRam), step(Step::Increment), sync(Sync::Manual), trigger(false), chop(false), chopDMAWindowSize(0), chopCPUWindowSize(0), unknown(0), baseAddress(0), blockSize(0), blockCount(0)  {
+Channel::Channel() {
 
 }
 
@@ -12,105 +12,83 @@ Channel::~Channel() {
 }
 
 uint32_t Channel::controlRegister() const {
-    uint32_t value = 0;
-    value |= ((uint32_t)direction) << 0;
-    value |= ((uint32_t)step) << 1;
-    value |= ((uint32_t)chop) << 8;
-    value |= ((uint32_t)sync) << 9;
-    value |= ((uint32_t)chopDMAWindowSize) << 16;
-    value |= ((uint32_t)chopCPUWindowSize) << 20;
-    value |= ((uint32_t)enable) << 24;
-    value |= ((uint32_t)trigger) << 28;
-    value |= ((uint32_t)unknown) << 29;
-    return value;
+    return control.value;
 }
 
 void Channel::setControlRegister(uint32_t value) {
-    if ((value & 1) != 0) {
-        direction = Direction::FromRam;
-    } else {
-        direction = Direction::ToRam;
-    }
-    if (((value >> 1) & 1) != 0) {
-        step = Step::Decrement;
-    } else {
-        step = Step::Increment;
-    }
-    chop = ((value >> 8) & 1) != 0;
-    switch ((value >> 9) & 3) {
-        case 0: {
-            sync = Sync::Manual;
-            break;
-        }
-        case 1: {
-            sync = Sync::Request;
-            break;
-        }
-        case 2: {
-            sync = Sync::LinkedList;
-            break;
-        }
-        default: {
-            printError("Unknown DMA sync mode");
-            break;
-        }
-    }
-    chopDMAWindowSize = ((value >> 16) & 7);
-    chopCPUWindowSize = ((value >> 20) & 7);
-    enable = ((value >> 24) & 1) != 0;
-    trigger = ((value >> 28) & 1) != 0;
-    unknown = ((value >> 29) & 3) != 0;
+    value &= ~(1UL << 2);
+    value &= ~(1UL << 3);
+    value &= ~(1UL << 4);
+    value &= ~(1UL << 5);
+    value &= ~(1UL << 6);
+    value &= ~(1UL << 7);
+    value &= ~(1UL << 11);
+    value &= ~(1UL << 12);
+    value &= ~(1UL << 13);
+    value &= ~(1UL << 14);
+    value &= ~(1UL << 15);
+    value &= ~(1UL << 19);
+    value &= ~(1UL << 23);
+    value &= ~(1UL << 25);
+    value &= ~(1UL << 26);
+    value &= ~(1UL << 27);
+    value &= ~(1UL << 31);
+    control.value = value;
 }
 
 uint32_t Channel::baseAddressRegister() const {
-    return baseAddress;
+    return baseAddress.value;
 }
 
 void Channel::setBaseAddressRegister(uint32_t value) {
-    baseAddress = (value & 0xffffff);
+    value &= ~(1UL << 24);
+    value &= ~(1UL << 25);
+    value &= ~(1UL << 26);
+    value &= ~(1UL << 27);
+    value &= ~(1UL << 28);
+    value &= ~(1UL << 29);
+    value &= ~(1UL << 30);
+    value &= ~(1UL << 31);
+    baseAddress.value = value;
 }
 
 uint32_t Channel::blockControlRegister() const {
-    uint32_t blockSizeData = blockSize;
-    uint32_t blockCountData = blockCount;
-
-    return (blockCountData << 16) | blockSizeData;
+    return blockControl.value;
 }
 
 void Channel::setBlockControlRegister(uint32_t value) {
-    blockSize = value & 0xffff;
-    blockCount = (value >> 16) & 0xffff;
+    blockControl.value = value;
 }
 
 bool Channel::isActive() const {
-    if (sync == Sync::Manual) {
-        return enable && trigger;
+    if (control.sync() == Sync::Manual) {
+        return control.enable && control.trigger;
     }
-    return enable;
+    return control.enable;
 }
 
-Sync Channel::snc() const {
-    return sync;
+Sync Channel::sync() const {
+    return control.sync();
 }
 
-Direction Channel::dir() const {
-    return direction;
+Direction Channel::direction() const {
+    return control.direction();
 }
 
-Step Channel::stp() const {
-    return step;
+Step Channel::step() const {
+    return control.step();
 }
 
 optional<uint32_t> Channel::transferSize() const {
-    switch (sync) {
+    switch (control.sync()) {
         case Sync::LinkedList: {
             return nullopt;
         }
         case Sync::Manual: {
-            return { blockSize };
+            return { blockControl.blockSize };
         }
         case Sync::Request: {
-            return { blockSize * blockCount };
+            return { blockControl.blockSize * blockControl.blockCount };
         }
         default: {
             printError("Unknown DMA sync mode");
@@ -120,6 +98,6 @@ optional<uint32_t> Channel::transferSize() const {
 }
 
 void Channel::done() {
-    enable = false;
-    trigger = false;
+    control.enable = false;
+    control.trigger = false;
 }

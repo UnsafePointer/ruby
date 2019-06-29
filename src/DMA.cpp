@@ -11,7 +11,7 @@ Port portWithIndex(uint32_t index) {
     return Port(index);
 }
 
-DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu) : ram(ram), gpu(gpu), controlRegister(0x07654321) {
+DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu) : ram(ram), gpu(gpu) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel();
     }
@@ -21,38 +21,37 @@ DMA::~DMA() {
 
 }
 
-uint32_t DMA::ctrlRegister() const {
-    return controlRegister;
+uint32_t DMA::controlRegister() const {
+    return control.value;
 }
 
 void DMA::setControlRegister(uint32_t value) {
-    controlRegister = value;
+    control.value = value;
 }
 
 bool DMA::interruptRequestStatus() const {
-    uint8_t channelStatus = interruptRequestChannelFlags & interruptRequestChannelEnable;
-    return forceInterruptRequest || (interruptRequestChannelEnable && channelStatus != 0);
+    uint8_t channelStatus = interrupt.IRQFlagsStatus().value & interrupt.IRQEnableStatus().value;
+    return interrupt.masterIRQFlag || (interrupt.IRQEnableStatus().value && channelStatus != 0);
 }
 
 uint32_t DMA::interruptRegister() const {
-    uint32_t value = 0;
-    value |= interruptRequestUnknown;
-    value |= ((uint32_t)forceInterruptRequest) << 15;
-    value |= ((uint32_t)interruptRequestChannelEnable) << 16;
-    value |= ((uint32_t)interruptRequestEnable) << 23;
-    value |= ((uint32_t)interruptRequestChannelFlags) << 24;
-    value |= ((uint32_t)interruptRequestStatus()) << 31;
-    return value;
+    return interrupt.value;
 }
 
 void DMA::setInterruptRegister(uint32_t value) {
-    interruptRequestUnknown = (value & 0x3f);
-    forceInterruptRequest = (value >> 15) & 1;
-    interruptRequestChannelEnable = ((value >> 16) & 0x7f);
-    interruptRequestEnable = (value >> 23) & 1;
-
-    uint8_t flagReset = ((value >> 24) & 0x3f);
-    interruptRequestChannelFlags &= !flagReset;
+    value &= ~(1UL << 6);
+    value &= ~(1UL << 7);
+    value &= ~(1UL << 8);
+    value &= ~(1UL << 9);
+    value &= ~(1UL << 10);
+    value &= ~(1UL << 11);
+    value &= ~(1UL << 12);
+    value &= ~(1UL << 13);
+    value &= ~(1UL << 14);
+    interrupt.value = value;
+    if (interrupt.forceIRQ) {
+        interrupt.masterIRQFlag = 1;
+    }
 }
 
 Channel& DMA::channelForPort(Port port) {
@@ -61,7 +60,7 @@ Channel& DMA::channelForPort(Port port) {
 
 void DMA::execute(Port port) {
     Channel& channel = channels[port];
-    if (channel.snc() == Sync::LinkedList) {
+    if (channel.sync() == Sync::LinkedList) {
         executeLinkedList(port, channel);
     } else {
         executeBlock(port, channel);
@@ -71,7 +70,7 @@ void DMA::execute(Port port) {
 
 void DMA::executeLinkedList(Port port, Channel& channel) {
     uint32_t address = channel.baseAddressRegister() & 0x1ffffc;
-    if (channel.dir() == Direction::ToRam) {
+    if (channel.direction() == Direction::ToRam) {
         printError("Unhandled DMA direction");
     }
     if (port != Port::GPUP) {
@@ -97,7 +96,7 @@ void DMA::executeLinkedList(Port port, Channel& channel) {
 
 void DMA::executeBlock(Port port, Channel& channel) {
     int8_t step = 4;
-    if (channel.stp() == Step::Decrement) {
+    if (channel.step() == Step::Decrement) {
         step *= -1;
     }
     uint32_t address = channel.baseAddressRegister();
@@ -108,7 +107,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
     uint32_t remainingTransferSize = *transferSize;
     while (remainingTransferSize > 0) {
         uint32_t currentAddress = address & 0x1ffffc;
-        switch (channel.dir()) {
+        switch (channel.direction()) {
             case Direction::FromRam: {
                 uint32_t source = ram->load<uint32_t>(currentAddress);
                 switch (port) {

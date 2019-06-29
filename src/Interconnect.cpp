@@ -14,7 +14,7 @@ const uint32_t regionMask[8] = {
     0xffffffff, 0xffffffff,
 };
 
-Interconnect::Interconnect() {
+Interconnect::Interconnect(std::unique_ptr<COP0> &cop0) {
     bios = make_unique<BIOS>();
     bios->loadBin("SCPH1001.BIN");
     ram = make_unique<RAM>();
@@ -22,7 +22,7 @@ Interconnect::Interconnect() {
     dma = make_unique<DMA>(ram, gpu);
     scratchpad = make_unique<Scratchpad>();
     cdrom = make_unique<CDROM>();
-    interruptController = make_unique<InterruptController>();
+    interruptController = make_unique<InterruptController>(cop0);
 }
 
 Interconnect::~Interconnect() {
@@ -40,8 +40,4 @@ void Interconnect::transferToRAM(string path, uint32_t origin, uint32_t size, ui
 
 void Interconnect::dumpRAM() {
     ram->dump();
-}
-
-unique_ptr<InterruptController>& Interconnect::interruptControllerRef() {
-    return interruptController;
 }

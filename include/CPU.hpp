@@ -3,7 +3,6 @@
 #include <array>
 #include "Interconnect.hpp"
 #include "Instruction.hpp"
-#include "RegisterIndex.hpp"
 #include "Debugger.hpp"
 #include "COP0.hpp"
 
@@ -33,14 +32,15 @@ class CPU {
     bool isDelaySlot;
     uint32_t registers[32];
     uint32_t outputRegisters[32];
-    std::pair<RegisterIndex, uint32_t> loadPair;
+    std::pair<uint32_t, uint32_t> loadPair;
     uint32_t highRegister;
     uint32_t lowRegister;
     std::unique_ptr<Interconnect> interconnect;
     std::unique_ptr<COP0> cop0;
+    Instruction currentInstruction;
 
-    uint32_t registerAtIndex(RegisterIndex index) const;
-    void setRegisterAtIndex(RegisterIndex index, uint32_t value);
+    uint32_t registerAtIndex(uint32_t index) const;
+    void setRegisterAtIndex(uint32_t index, uint32_t value);
 
     void decodeAndExecuteInstruction(Instruction instruction);
     void branch(uint32_t offset);
@@ -125,6 +125,8 @@ class CPU {
 public:
     CPU();
     ~CPU();
+
+    std::unique_ptr<COP0>& cop0Ref();
 
     template <typename T>
     inline T load(uint32_t address) const;
