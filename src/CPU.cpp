@@ -412,120 +412,6 @@ void CPU::decodeAndExecuteInstruction(Instruction instruction) {
     }
 }
 
-void CPU::branch(uint32_t offset) {
-    // Align to 32 bits
-    offset <<= 2;
-    nextProgramCounter = programCounter + offset;
-    isBranching = true;
-}
-
-void CPU::operationCoprocessor0(Instruction instruction) {
-    switch (instruction.copcode()) {
-        case 0b00100: {
-            operationMoveToCoprocessor0(instruction);
-            break;
-        }
-        case 0b00000: {
-            operationMoveFromCoprocessor0(instruction);
-            break;
-        }
-        case 0b10000: {
-            operationReturnFromException(instruction);
-            break;
-        }
-        default: {
-            printError("Unhandled coprocessor0 instruction %#x", instruction.value);
-        }
-    }
-}
-
-
-void CPU::operationMoveToCoprocessor0(Instruction instruction) {
-    uint32_t cpuRegisterIndex = instruction.rt;
-    uint32_t copRegisterIndex = instruction.rd;
-
-    uint32_t value = registerAtIndex(cpuRegisterIndex);
-
-    switch (copRegisterIndex) {
-        case 3: {
-            cop0->breakPointOnExecute = value;
-            break;
-        }
-        case 5: {
-            cop0->breakPointOnDataAccess = value;
-            break;
-        }
-        case 6: {
-            // No idea why this happens, this isn't R/W accoring to no$. According to EmuDev Discord:
-            // "JUMPDEST is somewhat of a name no$ just gave, the PS devkit describes that as PIDMASK"
-            cop0->jumpDestination = value;
-            break;
-        }
-        case 7: {
-            cop0->breakPointControl = value;
-            break;
-        }
-        case 9: {
-            cop0->dataAccessBreakpointMask = value;
-            break;
-        }
-        case 11: {
-            cop0->executeBreakpointMask = value;
-            break;
-        }
-        case 12: {
-            cop0->status.value = value;
-            break;
-        }
-        case 13: {
-            // Only bit 8 and 9 can be written. See COP0.hpp
-            cop0->cause.value &= ~0x300;
-            cop0->cause.value |= (value & 0x300);
-            break;
-        }
-        default: {
-            printError("Unhandled MTC0 at index %d", copRegisterIndex);
-        }
-    }
-}
-
-void CPU::operationLoadUpperImmediate(Instruction instruction) {
-    uint32_t imm = instruction.imm();
-    uint32_t rt = instruction.rt;
-
-    uint32_t value = imm << 16;
-    setRegisterAtIndex(rt, value);
-}
-
-void CPU::operationBitwiseOrImmediate(Instruction instruction) {
-    uint32_t imm = instruction.imm();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t value = registerAtIndex(rs) | imm;
-
-    setRegisterAtIndex(rt, value);
-}
-
-void CPU::operationStoreWord(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
-    if (address % 4 != 0) {
-        triggerException(ExceptionType::StoreAddress);
-        return;
-    }
-
-    uint32_t value = registerAtIndex(rt);
-    store<uint32_t>(address, value);
-}
-
 void CPU::operationShiftLeftLogical(Instruction instruction) {
     uint32_t imm = instruction.shiftimm;
     uint32_t rt = instruction.rt;
@@ -535,19 +421,225 @@ void CPU::operationShiftLeftLogical(Instruction instruction) {
     setRegisterAtIndex(rd, value);
 }
 
-void CPU::operationAddImmediateUnsigned(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
+void CPU::operationShiftRightLogical(Instruction instruction) {
+    uint32_t imm = instruction.shiftimm;
     uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
+    uint32_t rd = instruction.rd;
 
-    uint32_t value = registerAtIndex(rs) + imm;
-    setRegisterAtIndex(rt, value);
+    uint32_t value = registerAtIndex(rt) >> imm;
+    setRegisterAtIndex(rd, value);
 }
 
-void CPU::operationJump(Instruction instruction) {
-    uint32_t imm = instruction.immjump();
-    nextProgramCounter = (programCounter & 0xF0000000) | (imm << 2);
+void CPU::operationShiftRightArithmetic(Instruction instruction) {
+    uint32_t imm = instruction.shiftimm;
+    uint32_t rt = instruction.rt;
+    uint32_t rd = instruction.rd;
+
+    uint32_t value = ((int32_t)registerAtIndex(rt)) >> imm;
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationShiftLeftLogicalVariable(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = registerAtIndex(rt) << (registerAtIndex(rs) & 0x1f);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationShiftRightLogicalVariable(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = registerAtIndex(rt) >> (registerAtIndex(rs) & 0x1f);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationShiftRightArithmeticVariable(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = ((int32_t)registerAtIndex(rt)) >> (registerAtIndex(rs) & 0x1f);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationJumpRegister(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+    // TODO: validate alignment
+    nextProgramCounter = registerAtIndex(rs);
     isBranching = true;
+}
+
+void CPU::operationJumpAndLinkRegister(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+
+    uint32_t returnAddress = nextProgramCounter;
+
+    setRegisterAtIndex(rd, returnAddress);
+    // TODO: validate alignment
+    nextProgramCounter = registerAtIndex(rs);
+    isBranching = true;
+}
+
+void CPU::operationSystemCall(Instruction instruction) {
+    triggerException(ExceptionType::SysCall);
+}
+
+void CPU::operationBreak(Instruction instruction) {
+    triggerException(ExceptionType::Breakpoint);
+}
+
+void CPU::operationMoveFromHighRegister(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t high = highRegister;
+
+    setRegisterAtIndex(rd, high);
+}
+
+void CPU::operationMoveToHighRegister(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+
+    highRegister = registerAtIndex(rs);
+}
+
+void CPU::operationMoveFromLowRegister(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t low = lowRegister;
+
+    setRegisterAtIndex(rd, low);
+}
+
+void CPU::operationMoveToLowRegister(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+
+    lowRegister = registerAtIndex(rs);
+}
+
+void CPU::operationMultiply(Instruction instruction) {
+    int32_t rs = instruction.rs;
+    int32_t rt = instruction.rt;
+
+    int64_t s = ((int64_t)registerAtIndex(rs));
+    int64_t t = ((int64_t)registerAtIndex(rt));
+
+    uint64_t result = s * t;
+    highRegister = ((uint32_t)(result >> 32));
+    lowRegister = ((uint32_t)result & 0xFFFFFFFF);
+}
+
+void CPU::operationMultiplyUnsigned(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint64_t s = registerAtIndex(rs);
+    uint64_t t = registerAtIndex(rt);
+
+    uint64_t result = s * t;
+    highRegister = ((uint32_t)(result >> 32));
+    lowRegister = ((uint32_t)result & 0xFFFFFFFF);
+}
+
+void CPU::operationDivision(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    int32_t n = registerAtIndex(rs);
+    int32_t d = registerAtIndex(rt);
+
+    if (d == 0) {
+        highRegister = (uint32_t)n;
+        if (n >= 0) {
+            lowRegister = 0xffffffff;
+        } else {
+            lowRegister = 0x1;
+        }
+    } else if (((uint32_t)n) == 0x80000000 && ((uint32_t)d) == 0xffffffff) {
+        highRegister = 0;
+        lowRegister = 0x80000000;
+    } else {
+        highRegister = ((uint32_t)(n % d));
+        lowRegister = ((uint32_t)(n / d));
+    }
+}
+
+void CPU::operationDivisionUnsigned(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t n = registerAtIndex(rs);
+    uint32_t d = registerAtIndex(rt);
+
+    if (d == 0) {
+        highRegister = n;
+        lowRegister = 0xffffffff;
+    } else {
+        highRegister = n % d;
+        lowRegister = n / d;
+    }
+}
+
+void CPU::operationAdd(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t s = registerAtIndex(rs);
+    uint32_t t = registerAtIndex(rt);
+
+    uint32_t result = s + t;
+    if (!((s ^ t) & 0x80000000) && ((result ^ s) & 0x80000000)) {
+        triggerException(ExceptionType::Overflow);
+        return;
+    }
+
+    setRegisterAtIndex(rd, result);
+}
+
+void CPU::operationAddUnsigned(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+    uint32_t rd = instruction.rd;
+
+    uint32_t value = registerAtIndex(rs) + registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationSubstract(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+    uint32_t rd = instruction.rd;
+
+    uint32_t s = registerAtIndex(rs);
+    uint32_t t = registerAtIndex(rt);
+    uint32_t result = s - t;
+    if (((s ^ t) & 0x80000000) && ((result ^ s) & 0x80000000)) {
+        triggerException(ExceptionType::Overflow);
+        return;
+    } else {
+        setRegisterAtIndex(rd, result);
+    }
+}
+
+void CPU::operationSubstractUnsigned(Instruction instruction) {
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+    uint32_t rd = instruction.rd;
+
+    uint32_t value = registerAtIndex(rs) - registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationBitwiseAnd(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = registerAtIndex(rs) & registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
 }
 
 void CPU::operationBitwiseOr(Instruction instruction) {
@@ -559,12 +651,125 @@ void CPU::operationBitwiseOr(Instruction instruction) {
     setRegisterAtIndex(rd, value);
 }
 
+void CPU::operationBitwiseExclusiveOr(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = registerAtIndex(rs) ^ registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationBitwiseNotOr(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = ~(registerAtIndex(rs) | registerAtIndex(rt));
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationSetOnLessThan(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    int32_t s = (int32_t)registerAtIndex(rs);
+    int32_t t = (int32_t)registerAtIndex(rt);
+    uint32_t value = s < t;
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationSetOnLessThanUnsigned(Instruction instruction) {
+    uint32_t rd = instruction.rd;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = registerAtIndex(rs) < registerAtIndex(rt);
+    setRegisterAtIndex(rd, value);
+}
+
+void CPU::operationIllegal(Instruction instruction) {
+    triggerException(ExceptionType::Illegal);
+}
+
+// Multipe branch-if instructions
+// 000001 | rs   | 00000| <--immediate16bit--> | bltz
+// 000001 | rs   | 00001| <--immediate16bit--> | bgez
+// 000001 | rs   | 10000| <--immediate16bit--> | bltzal
+// 000001 | rs   | 10001| <--immediate16bit--> | bgezal
+void CPU::operationsMultipleBranchIf(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rs = instruction.rs;
+
+    bool isGreatherThanOrEqualToZero = instruction.rt & 0x01;
+    bool shouldLink = (instruction.rt & 0x1e) == 0x10;
+
+    int32_t value = registerAtIndex(rs);
+    bool result;
+    if (isGreatherThanOrEqualToZero) {
+        result = value >= 0;
+    } else {
+        result = value < 0;
+    }
+
+    if (shouldLink) {
+        setRegisterAtIndex(31, nextProgramCounter);
+    }
+
+    if (result) {
+        branch(imm);
+    }
+}
+
+void CPU::operationJump(Instruction instruction) {
+    uint32_t imm = instruction.immjump();
+    nextProgramCounter = (programCounter & 0xF0000000) | (imm << 2);
+    isBranching = true;
+}
+
+void CPU::operationJumpAndLink(Instruction instruction) {
+    uint32_t returnAddress = nextProgramCounter;
+    operationJump(instruction);
+    setRegisterAtIndex(31, returnAddress);
+}
+
+void CPU::operationBranchIfEqual(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
+
+    if (registerAtIndex(rs) == registerAtIndex(rt)) {
+        branch(imm);
+    }
+}
+
 void CPU::operationBranchIfNotEqual(Instruction instruction) {
     uint32_t imm = instruction.immSE();
     uint32_t rs = instruction.rs;
     uint32_t rt = instruction.rt;
 
     if (registerAtIndex(rs) != registerAtIndex(rt)) {
+        branch(imm);
+    }
+}
+
+void CPU::operationBranchIfLessThanOrEqualToZero(Instruction instruction) {
+    uint32_t imm =  instruction.immSE();
+    uint32_t rs = instruction.rs;
+
+    int32_t value = registerAtIndex(rs);
+    if (value <= 0) {
+        branch(imm);
+    }
+}
+
+void CPU::operationBranchIfGreaterThanZero(Instruction instruction) {
+    uint32_t imm =  instruction.immSE();
+    uint32_t rs = instruction.rs;
+
+    int32_t value = registerAtIndex(rs);
+    if (value > 0) {
         branch(imm);
     }
 }
@@ -583,65 +788,31 @@ void CPU::operationAddImmediate(Instruction instruction) {
     }
 }
 
-void CPU::operationLoadWord(Instruction instruction) {
+void CPU::operationAddImmediateUnsigned(Instruction instruction) {
     uint32_t imm = instruction.immSE();
     uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
 
-    uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
-    if (address % 4 != 0) {
-        triggerException(ExceptionType::LoadAddress);
-        return;
-    }
-    uint32_t value = load<uint32_t>(address);
-    loadPair = {rt, value};
+    uint32_t value = registerAtIndex(rs) + imm;
+    setRegisterAtIndex(rt, value);
 }
 
-void CPU::operationSetOnLessThanUnsigned(Instruction instruction) {
-    uint32_t rd = instruction.rd;
+void CPU::operationSetIfLessThanImmediate(Instruction instruction) {
+    int32_t imm = instruction.immSE();
     uint32_t rs = instruction.rs;
     uint32_t rt = instruction.rt;
 
-    uint32_t value = registerAtIndex(rs) < registerAtIndex(rt);
-    setRegisterAtIndex(rd, value);
+    uint32_t value = ((int32_t)registerAtIndex(rs)) < imm;
+    setRegisterAtIndex(rt, value);
 }
 
-void CPU::operationAddUnsigned(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-    uint32_t rd = instruction.rd;
-
-    uint32_t value = registerAtIndex(rs) + registerAtIndex(rt);
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationStoreHalfWord(Instruction instruction) {
+void CPU::operationSetIfLessThanImmediateUnsigned(Instruction instruction) {
     uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
 
-    uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
-    if (address % 2 != 0) {
-        triggerException(ExceptionType::StoreAddress);
-        return;
-    }
-
-    uint32_t value = registerAtIndex(rt);
-    store<uint16_t>(address, value);
-}
-
-void CPU::operationJumpAndLink(Instruction instruction) {
-    uint32_t returnAddress = nextProgramCounter;
-    operationJump(instruction);
-    setRegisterAtIndex(31, returnAddress);
+    uint32_t value = registerAtIndex(rs) < imm;
+    setRegisterAtIndex(rt, value);
 }
 
 void CPU::operationBitwiseAndImmediate(Instruction instruction) {
@@ -654,48 +825,57 @@ void CPU::operationBitwiseAndImmediate(Instruction instruction) {
     setRegisterAtIndex(rt, value);
 }
 
-void CPU::operationStoreByte(Instruction instruction) const {
-    uint32_t imm = instruction.immSE();
+void CPU::operationBitwiseOrImmediate(Instruction instruction) {
+    uint32_t imm = instruction.imm();
     uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
 
-    uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
+    uint32_t value = registerAtIndex(rs) | imm;
 
-    uint32_t value = registerAtIndex(rt);
-    store<uint8_t>(address, value);
+    setRegisterAtIndex(rt, value);
 }
 
-void CPU::operationJumpRegister(Instruction instruction) {
+void CPU::operationBitwiseExclusiveOrImmediate(Instruction instruction) {
+    uint32_t imm = instruction.imm();
+    uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
-    nextProgramCounter = registerAtIndex(rs);
+
+    uint32_t value = registerAtIndex(rs) ^ imm;
+    setRegisterAtIndex(rt, value);
+}
+
+void CPU::operationLoadUpperImmediate(Instruction instruction) {
+    uint32_t imm = instruction.imm();
+    uint32_t rt = instruction.rt;
+
+    uint32_t value = imm << 16;
+    setRegisterAtIndex(rt, value);
+}
+
+void CPU::branch(uint32_t offset) {
+    // Align to 32 bits
+    offset <<= 2;
+    nextProgramCounter = (int32_t)(programCounter + offset);
     isBranching = true;
 }
 
-void CPU::operationLoadByte(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
-    uint32_t value = (int8_t)load<uint8_t>(address);
-    loadPair = {rt, value};
-}
-
-void CPU::operationBranchIfEqual(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    if (registerAtIndex(rs) == registerAtIndex(rt)) {
-        branch(imm);
+void CPU::operationCoprocessor0(Instruction instruction) {
+    switch (instruction.copcode()) {
+        case 0b00000: {
+            operationMoveFromCoprocessor0(instruction);
+            break;
+        }
+        case 0b00100: {
+            operationMoveToCoprocessor0(instruction);
+            break;
+        }
+        case 0b10000: {
+            operationReturnFromException(instruction);
+            break;
+        }
+        default: {
+            printError("Unhandled coprocessor0 instruction %#x", instruction.value);
+        }
     }
 }
 
@@ -756,50 +936,162 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
     loadPair = {cpuRegisterIndex, value};
 }
 
-void CPU::operationBitwiseAnd(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
+void CPU::operationMoveToCoprocessor0(Instruction instruction) {
+    uint32_t cpuRegisterIndex = instruction.rt;
+    uint32_t copRegisterIndex = instruction.rd;
 
-    uint32_t value = registerAtIndex(rs) & registerAtIndex(rt);
-    setRegisterAtIndex(rd, value);
+    uint32_t value = registerAtIndex(cpuRegisterIndex);
+
+    switch (copRegisterIndex) {
+        case 3: {
+            cop0->breakPointOnExecute = value;
+            break;
+        }
+        case 5: {
+            cop0->breakPointOnDataAccess = value;
+            break;
+        }
+        case 6: {
+            // No idea why this happens, this isn't R/W accoring to no$. According to EmuDev Discord:
+            // "JUMPDEST is somewhat of a name no$ just gave, the PS devkit describes that as PIDMASK"
+            cop0->jumpDestination = value;
+            break;
+        }
+        case 7: {
+            cop0->breakPointControl = value;
+            break;
+        }
+        case 9: {
+            cop0->dataAccessBreakpointMask = value;
+            break;
+        }
+        case 11: {
+            cop0->executeBreakpointMask = value;
+            break;
+        }
+        case 12: {
+            cop0->status.value = value;
+            break;
+        }
+        case 13: {
+            // Only bit 8 and 9 can be written. See COP0.hpp
+            cop0->cause.value &= ~0x300;
+            cop0->cause.value |= (value & 0x300);
+            break;
+        }
+        default: {
+            printError("Unhandled MTC0 at index %d", copRegisterIndex);
+        }
+    }
 }
 
-void CPU::operationAdd(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
+void CPU::operationReturnFromException(Instruction instruction) {
+    if (instruction.subfunct != 0b010000) {
+        printError("Unhandled cop0 instruction (0b010000) with last 6 bits: %#x", instruction.subfunct);
+    }
+    cop0->status.currentInterruptEnable = cop0->status.previousInterruptEnable;
+    cop0->status._currentOperationMode = cop0->status._previousOperationMode;
+
+    cop0->status.previousInterruptEnable = cop0->status.oldInterruptEnable;
+    cop0->status._previousOperationMode = cop0->status._oldOperationMode;
+}
+
+void CPU::operationCoprocessor1(Instruction instruction) {
+    triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationCoprocessor2(Instruction instruction) {
+    printError("Unhandled Geometry Translation Engine instruction: %#x", instruction.value);
+}
+
+void CPU::operationCoprocessor3(Instruction instruction) {
+    triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationLoadByte(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
     uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
 
-    int64_t s = (int32_t)registerAtIndex(rs);
-    int64_t t = (int32_t)registerAtIndex(rt);
-
-    int64_t result = s + t;
-    if (result < INT32_MIN || result > INT32_MAX) {
-        triggerException(ExceptionType::Overflow);
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (cop0->isCacheIsolated()) {
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
         return;
     }
-
-    setRegisterAtIndex(rd, result);
+    uint32_t value = ((int32_t)(load<uint8_t>(address) << 24)) >> 24;
+    loadPair = {rt, value};
 }
 
-void CPU::operationBranchIfGreaterThanZero(Instruction instruction) {
-    uint32_t imm =  instruction.immSE();
+void CPU::operationLoadHalfWord(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
 
-    int32_t value = registerAtIndex(rs);
-    if (value > 0) {
-        branch(imm);
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (cop0->isCacheIsolated()) {
+        printWarning("Cache is isolated, ignoring load at address: %#x", address);
+        return;
     }
+    if (address % 2 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::LoadAddress);
+        return;
+    }
+    uint32_t value = ((int16_t)load<uint16_t>(address));
+    loadPair = {rt, value};
 }
 
-void CPU::operationBranchIfLessThanOrEqualToZero(Instruction instruction) {
-    uint32_t imm =  instruction.immSE();
+void CPU::operationLoadWordLeft(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
 
-    int32_t value = registerAtIndex(rs);
-    if (value <= 0) {
-        branch(imm);
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t currentValue = outputRegisters[rt];
+
+    uint32_t alignedAddress = address & 0xfffffffc;
+    uint32_t alignedWord = load<uint32_t>(alignedAddress);
+
+    uint32_t value;
+    switch (address & 3) {
+        case 0: {
+            value = (currentValue & 0x00ffffff) | (alignedWord << 24);
+            break;
+        }
+        case 1: {
+            value = (currentValue & 0x0000ffff) | (alignedWord << 16);
+            break;
+        }
+        case 2: {
+            value = (currentValue & 0x000000ff) | (alignedWord << 8);
+            break;
+        }
+        case 3: {
+            value = (currentValue & 0x00000000) | (alignedWord << 0);
+            break;
+        }
     }
+
+    loadPair = {rt, value};
+}
+
+void CPU::operationLoadWord(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (cop0->isCacheIsolated()) {
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
+        return;
+    }
+    if (address % 4 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::LoadAddress);
+        return;
+    }
+    uint32_t value = load<uint32_t>(address);
+    loadPair = {rt, value};
 }
 
 void CPU::operationLoadByteUnsigned(Instruction instruction) {
@@ -816,156 +1108,180 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
     loadPair = {rt, value};
 }
 
-
-void CPU::operationJumpAndLinkRegister(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
-
-    uint32_t returnAddress = nextProgramCounter;
-
-    setRegisterAtIndex(rd, returnAddress);
-    nextProgramCounter = registerAtIndex(rs);
-    isBranching = true;
-}
-
-// Multipe branch-if instructions
-// 000001 | rs   | 00000| <--immediate16bit--> | bltz
-// 000001 | rs   | 00001| <--immediate16bit--> | bgez
-// 000001 | rs   | 10000| <--immediate16bit--> | bltzal
-// 000001 | rs   | 10001| <--immediate16bit--> | bgezal
-void CPU::operationsMultipleBranchIf(Instruction instruction) {
+void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
     uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
 
-    uint32_t data = instruction.value;
-    bool isGreatherThanOrEqualToZero = (data >> 16) & 1;
-    bool shouldLink = ((data >> 17) & 0xF) == 0x8;
-
-    int32_t value = registerAtIndex(rs);
-    bool result;
-    if (isGreatherThanOrEqualToZero) {
-        result = value >= 0;
-    } else {
-        result = value < 0;
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (cop0->isCacheIsolated()) {
+        printWarning("Cache is isolated, ignoring load at address: %#x", address);
+        return;
     }
-
-    if (shouldLink) {
-        uint32_t returnAddress = programCounter;
-        setRegisterAtIndex(31, returnAddress);
+    if (address % 2 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::LoadAddress);
+        return;
     }
-
-    if (result) {
-        branch(imm);
-    }
+    uint32_t value = load<uint16_t>(address);
+    loadPair = {rt, value};
 }
 
-void CPU::operationSetIfLessThanImmediate(Instruction instruction) {
-    int32_t imm = instruction.immSE();
+void CPU::operationLoadWordRight(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
     uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
 
-    uint32_t value = ((int32_t)registerAtIndex(rs)) < imm;
-    setRegisterAtIndex(rt, value);
-}
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t currentValue = outputRegisters[rt];
 
-void CPU::operationSubstractUnsigned(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-    uint32_t rd = instruction.rd;
+    uint32_t alignedAddress = address & 0xfffffffc;
+    uint32_t alignedWord = load<uint32_t>(alignedAddress);
 
-    uint32_t value = registerAtIndex(rs) - registerAtIndex(rt);
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationShiftRightArithmetic(Instruction instruction) {
-    uint32_t imm = instruction.shiftimm;
-    uint32_t rt = instruction.rt;
-    uint32_t rd = instruction.rd;
-
-    uint32_t value = ((int32_t)registerAtIndex(rt)) >> imm;
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationDivision(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    int32_t n = registerAtIndex(rs);
-    int32_t d = registerAtIndex(rt);
-
-    if (d == 0) {
-        highRegister = (uint32_t)n;
-        if (n >= 0) {
-            lowRegister = 0xffffffff;
-        } else {
-            lowRegister = 0x1;
+    uint32_t value;
+    switch (address & 3) {
+        case 0: {
+            value = (currentValue & 0x00000000) | (alignedWord >> 0);
+            break;
         }
-    } else if (((uint32_t)n) == 0x80000000 && d == -1) {
-        highRegister = 0;
-        lowRegister = 0x80000000;
-    } else {
-        highRegister = ((uint32_t)(n % d));
-        lowRegister = ((uint32_t)(n / d));
+        case 1: {
+            value = (currentValue & 0xff000000) | (alignedWord >> 8);
+            break;
+        }
+        case 2: {
+            value = (currentValue & 0xffff0000) | (alignedWord >> 16);
+            break;
+        }
+        case 3: {
+            value = (currentValue & 0xffffff00) | (alignedWord >> 24);
+            break;
+        }
     }
+
+    loadPair = {rt, value};
 }
 
-void CPU::operationMoveFromLowRegister(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t low = lowRegister;
-
-    setRegisterAtIndex(rd, low);
-}
-
-void CPU::operationShiftRightLogical(Instruction instruction) {
-    uint32_t imm = instruction.shiftimm;
-    uint32_t rt = instruction.rt;
-    uint32_t rd = instruction.rd;
-
-    uint32_t value = registerAtIndex(rt) >> imm;
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationSetIfLessThanImmediateUnsigned(Instruction instruction) {
+void CPU::operationStoreByte(Instruction instruction) const {
     uint32_t imm = instruction.immSE();
-    uint32_t rs = instruction.rs;
     uint32_t rt = instruction.rt;
-
-    uint32_t value = registerAtIndex(rs) < imm;
-    setRegisterAtIndex(rt, value);
-}
-
-void CPU::operationDivisionUnsigned(Instruction instruction) {
     uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
 
-    uint32_t n = registerAtIndex(rs);
-    uint32_t d = registerAtIndex(rt);
-
-    if (d == 0) {
-        highRegister = n;
-        lowRegister = 0xffffffff;
-    } else {
-        highRegister = n % d;
-        lowRegister = n / d;
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (cop0->isCacheIsolated()) {
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
+        return;
     }
+
+    uint32_t value = registerAtIndex(rt);
+    store<uint8_t>(address, value);
 }
 
-void CPU::operationMoveFromHighRegister(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t high = highRegister;
-
-    setRegisterAtIndex(rd, high);
-}
-
-void CPU::operationSetOnLessThan(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
+void CPU::operationStoreHalfWord(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
     uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
 
-    int32_t s = (int32_t)registerAtIndex(rs);
-    int32_t t = (int32_t)registerAtIndex(rt);
-    uint32_t value = s < t;
-    setRegisterAtIndex(rd, value);
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (cop0->isCacheIsolated()) {
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
+        return;
+    }
+    if (address % 2 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::StoreAddress);
+        return;
+    }
+
+    uint32_t value = registerAtIndex(rt);
+    store<uint16_t>(address, value);
+}
+
+void CPU::operationStoreWordLeft(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t value = registerAtIndex(rt);
+
+    uint32_t alignedAddress = address & 0xfffffffc;
+    uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
+
+    uint32_t memoryValue;
+    switch (address & 3) {
+        case 0: {
+            memoryValue = (currentMemoryValue & 0xffffff00) | (value >> 24);
+            break;
+        }
+        case 1: {
+            memoryValue = (currentMemoryValue & 0xffff0000) | (value >> 16);
+            break;
+        }
+        case 2: {
+            memoryValue = (currentMemoryValue & 0xff000000) | (value >> 8);
+            break;
+        }
+        case 3: {
+            memoryValue = (currentMemoryValue & 0x00000000) | (value >> 0);
+            break;
+        }
+    }
+
+    store<uint32_t>(alignedAddress, memoryValue);
+}
+
+void CPU::operationStoreWord(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (cop0->isCacheIsolated()) {
+        printWarning("Cache is isolated, ignoring store at address: %#x", address);
+        return;
+    }
+    if (address % 4 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::StoreAddress);
+        return;
+    }
+
+    uint32_t value = registerAtIndex(rt);
+    store<uint32_t>(address, value);
+}
+
+void CPU::operationStoreWordRight(Instruction instruction) {
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    uint32_t value = registerAtIndex(rt);
+
+    uint32_t alignedAddress = address & 0xfffffffc;
+    uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
+
+    uint32_t memoryValue;
+    switch (address & 3) {
+        case 0: {
+            memoryValue = (currentMemoryValue & 0x00000000) | (value << 0);
+            break;
+        }
+        case 1: {
+            memoryValue = (currentMemoryValue & 0x000000ff) | (value << 8);
+            break;
+        }
+        case 2: {
+            memoryValue = (currentMemoryValue & 0x0000ffff) | (value << 16);
+            break;
+        }
+        case 3: {
+            memoryValue = (currentMemoryValue & 0x00ffffff) | (value << 24);
+            break;
+        }
+    }
+
+    store<uint32_t>(alignedAddress, memoryValue);
 }
 
 void CPU::triggerException(ExceptionType exceptionType) {
@@ -1003,315 +1319,6 @@ void CPU::triggerException(ExceptionType exceptionType) {
     nextProgramCounter = programCounter + 4;
 }
 
-void CPU::operationSystemCall(Instruction instruction) {
-    triggerException(ExceptionType::SysCall);
-}
-
-void CPU::operationMoveToLowRegister(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-
-    lowRegister = registerAtIndex(rs);
-}
-
-void CPU::operationMoveToHighRegister(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-
-    highRegister = registerAtIndex(rs);
-}
-
-void CPU::operationReturnFromException(Instruction instruction) {
-    if (instruction.subfunct != 0b010000) {
-        printError("Unhandled cop0 instruction (0b010000) with last 6 bits: %#x", instruction.subfunct);
-    }
-    cop0->status.currentInterruptEnable = cop0->status.previousInterruptEnable;
-    cop0->status._currentOperationMode = cop0->status._previousOperationMode;
-
-    cop0->status.previousInterruptEnable = cop0->status.oldInterruptEnable;
-    cop0->status._previousOperationMode = cop0->status._oldOperationMode;
-}
-
-void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring load at address: %#x", address);
-        return;
-    }
-    if (address % 2 != 0) {
-        triggerException(ExceptionType::LoadAddress);
-        return;
-    }
-    uint32_t value = load<uint16_t>(address);
-    loadPair = {rt, value};
-}
-
-void CPU::operationShiftLeftLogicalVariable(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    uint32_t value = registerAtIndex(rt) << (registerAtIndex(rs) & 0x1f);
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationLoadHalfWord(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring load at address: %#x", address);
-        return;
-    }
-    if (address % 2 != 0) {
-        triggerException(ExceptionType::LoadAddress);
-        return;
-    }
-    uint32_t value = ((int16_t)load<uint16_t>(address));
-    loadPair = {rt, value};
-}
-
-void CPU::operationBitwiseNotOr(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    uint32_t value = ~(registerAtIndex(rs) | registerAtIndex(rt));
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationShiftRightArithmeticVariable(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    uint32_t value = ((int32_t)registerAtIndex(rt)) >> (registerAtIndex(rs) & 0x1f);
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationShiftRightLogicalVariable(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    uint32_t value = registerAtIndex(rt) >> (registerAtIndex(rs) & 0x1f);
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationMultiplyUnsigned(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    uint64_t s = registerAtIndex(rs);
-    uint64_t t = registerAtIndex(rt);
-
-    uint64_t result = s * t;
-    highRegister = ((uint32_t)(result >> 32));
-    lowRegister = ((uint32_t)result);
-}
-
-void CPU::operationBitwiseExclusiveOr(Instruction instruction) {
-    uint32_t rd = instruction.rd;
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    uint32_t value = registerAtIndex(rs) ^ registerAtIndex(rt);
-    setRegisterAtIndex(rd, value);
-}
-
-void CPU::operationBreak(Instruction instruction) {
-    triggerException(ExceptionType::Breakpoint);
-}
-
-void CPU::operationMultiply(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-
-    int64_t s = ((int64_t)registerAtIndex(rs));
-    int64_t t = ((int64_t)registerAtIndex(rt));
-
-    uint64_t result = s * t;
-    highRegister = ((uint32_t)(result >> 32));
-    lowRegister = ((uint32_t)result);
-}
-
-void CPU::operationSubstract(Instruction instruction) {
-    uint32_t rs = instruction.rs;
-    uint32_t rt = instruction.rt;
-    uint32_t rd = instruction.rd;
-
-    int32_t s = registerAtIndex(rs);
-    int32_t t = registerAtIndex(rt);
-    uint32_t result = s - t;
-    if (((s ^ t) & 0x80000000) && ((result ^ s) & 0x80000000)) {
-        triggerException(ExceptionType::Overflow);
-        return;
-    } else {
-        setRegisterAtIndex(rd, result);
-    }
-}
-
-void CPU::operationBitwiseExclusiveOrImmediate(Instruction instruction) {
-    uint32_t imm = instruction.imm();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t value = registerAtIndex(rs) ^ imm;
-    setRegisterAtIndex(rt, value);
-}
-
-void CPU::operationCoprocessor1(Instruction instruction) {
-    triggerException(ExceptionType::Coprocessor);
-}
-
-void CPU::operationCoprocessor2(Instruction instruction) {
-    printError("Unhandled Geometry Translation Engine instruction: %#x", instruction.value);
-}
-
-void CPU::operationCoprocessor3(Instruction instruction) {
-    triggerException(ExceptionType::Coprocessor);
-}
-
-void CPU::operationLoadWordLeft(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t currentValue = outputRegisters[rt];
-
-    uint32_t alignedAddress = address & ~3;
-    uint32_t alignedWord = load<uint32_t>(alignedAddress);
-
-    uint32_t value;
-    switch (address & 3) {
-        case 0: {
-            value = (currentValue & 0x00ffffff) | (alignedWord << 24);
-            break;
-        }
-        case 1: {
-            value = (currentValue & 0x0000ffff) | (alignedWord << 16);
-            break;
-        }
-        case 2: {
-            value = (currentValue & 0x000000ff) | (alignedWord << 8);
-            break;
-        }
-        case 3: {
-            value = (currentValue & 0x00000000) | (alignedWord << 0);
-            break;
-        }
-    }
-
-    loadPair = {rt, value};
-}
-
-void CPU::operationLoadWordRight(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t currentValue = outputRegisters[rt];
-
-    uint32_t alignedAddress = address & ~3;
-    uint32_t alignedWord = load<uint32_t>(alignedAddress);
-
-    uint32_t value;
-    switch (address & 3) {
-        case 0: {
-            value = (currentValue & 0x00000000) | (alignedWord >> 0);
-            break;
-        }
-        case 1: {
-            value = (currentValue & 0xff000000) | (alignedWord >> 8);
-            break;
-        }
-        case 2: {
-            value = (currentValue & 0xffff0000) | (alignedWord >> 16);
-            break;
-        }
-        case 3: {
-            value = (currentValue & 0xffffff00) | (alignedWord >> 24);
-            break;
-        }
-    }
-
-    loadPair = {rt, value};
-}
-
-void CPU::operationStoreWordLeft(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t value = registerAtIndex(rt);
-
-    uint32_t alignedAddress = address & ~3;
-    uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
-
-    uint32_t memoryValue;
-    switch (address & 3) {
-        case 0: {
-            memoryValue = (currentMemoryValue & 0xffffff00) | (value >> 24);
-            break;
-        }
-        case 1: {
-            memoryValue = (currentMemoryValue & 0xffff0000) | (value >> 16);
-            break;
-        }
-        case 2: {
-            memoryValue = (currentMemoryValue & 0xff000000) | (value >> 8);
-            break;
-        }
-        case 3: {
-            memoryValue = (currentMemoryValue & 0x00000000) | (value >> 0);
-            break;
-        }
-    }
-
-    store<uint32_t>(alignedAddress, memoryValue);
-}
-
-void CPU::operationStoreWordRight(Instruction instruction) {
-    uint32_t imm = instruction.immSE();
-    uint32_t rt = instruction.rt;
-    uint32_t rs = instruction.rs;
-
-    uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t value = registerAtIndex(rt);
-
-    uint32_t alignedAddress = address & ~3;
-    uint32_t currentMemoryValue = load<uint32_t>(alignedAddress);
-
-    uint32_t memoryValue;
-    switch (address & 3) {
-        case 0: {
-            memoryValue = (currentMemoryValue & 0x00000000) | (value << 0);
-            break;
-        }
-        case 1: {
-            memoryValue = (currentMemoryValue & 0x000000ff) | (value << 8);
-            break;
-        }
-        case 2: {
-            memoryValue = (currentMemoryValue & 0x0000ffff) | (value << 16);
-            break;
-        }
-        case 3: {
-            memoryValue = (currentMemoryValue & 0x00ffffff) | (value << 24);
-            break;
-        }
-    }
-
-    store<uint32_t>(alignedAddress, memoryValue);
-}
-
 void CPU::operationLoadWordCoprocessor0(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
 }
@@ -1342,10 +1349,6 @@ void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
-}
-
-void CPU::operationIllegal(Instruction instruction) {
-    triggerException(ExceptionType::Illegal);
 }
 
 void CPU::transferToRAM(string path, uint32_t origin, uint32_t size, uint32_t destination) {
