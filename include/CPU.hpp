@@ -6,6 +6,12 @@
 #include "Debugger.hpp"
 #include "COP0.hpp"
 
+struct LoadSlot {
+    uint32_t registerIndex;
+    uint32_t value;
+    uint32_t previousValue;
+};
+
 /*
 CPU Register Summary
 Name       Alias    Common Usage
@@ -26,18 +32,20 @@ R31        ra       Return address (used so by JAL,BLTZAL,BGEZAL opcodes)
 */
 class CPU {
     uint32_t programCounter;
-    uint32_t nextProgramCounter;
-    uint32_t currentProgramCounter;
+    uint32_t jumpDestination;
     bool isBranching;
-    bool isDelaySlot;
+    bool runningException;
     uint32_t registers[32];
-    uint32_t outputRegisters[32];
-    std::pair<uint32_t, uint32_t> loadPair;
+    std::array<LoadSlot, 2> loadSlots;
     uint32_t highRegister;
     uint32_t lowRegister;
     std::unique_ptr<Interconnect> interconnect;
     std::unique_ptr<COP0> cop0;
     Instruction currentInstruction;
+
+    void moveLoadDelaySlots();
+    void loadDelaySlot(uint32_t registerIndex, uint32_t value);
+    void invalidateLoadSlot(uint32_t registerIndex);
 
     uint32_t registerAtIndex(uint32_t index) const;
     void setRegisterAtIndex(uint32_t index, uint32_t value);

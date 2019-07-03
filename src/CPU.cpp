@@ -8,20 +8,17 @@
 using namespace std;
 
 CPU::CPU() : programCounter(0xbfc00000),
-             currentProgramCounter(0xbfc00000),
+             jumpDestination(0),
              isBranching(false),
-             isDelaySlot(false),
-             loadPair({0, 0}),
-             highRegister(0xdeadbeef),
-             lowRegister(0xdeadbeef),
+             runningException(false),
+             loadSlots(),
+             highRegister(0),
+             lowRegister(0),
              currentInstruction(Instruction(0x0))
 {
     cop0 = make_unique<COP0>();
     interconnect = make_unique<Interconnect>(cop0);
-    nextProgramCounter = programCounter + 4;
-    fill_n(registers, 32, 0xDEADBEEF);
-    registers[0] = 0;
-    copy(begin(registers), end(registers), begin(outputRegisters));
+    fill_n(registers, 32, 0);
 }
 
 CPU::~CPU() {
@@ -33,12 +30,10 @@ unique_ptr<COP0>& CPU::cop0Ref() {
 
 void CPU::setProgramCounter(uint32_t address) {
     programCounter = address;
-    nextProgramCounter = programCounter + 4;
 }
 
 void CPU::setGlobalPointer(uint32_t address) {
     registers[28] = address;
-    outputRegisters[28] = address;
 }
 
 std::array<uint32_t, 32> CPU::getRegisters() {
@@ -85,45 +80,76 @@ void CPU::printAllRegisters() {
 }
 
 void CPU::executeNextInstruction() {
-    currentProgramCounter = programCounter;
-    Debugger *debugger = Debugger::getInstance();
-    debugger->inspectCPU();
-    if (currentProgramCounter % 4 != 0) {
-        triggerException(ExceptionType::LoadAddress);
-        return;
-    }
-    currentInstruction = Instruction(load<uint32_t>(programCounter));
-
-    isDelaySlot = isBranching;
-    isBranching = false;
-
-    programCounter = nextProgramCounter;
-    nextProgramCounter = nextProgramCounter + 4;
-
-    uint32_t loadRegisterIndex;
-    uint32_t value;
-    tie(loadRegisterIndex, value) = loadPair;
-    setRegisterAtIndex(loadRegisterIndex, value);
-    loadPair = {0, 0};
-
     if (cop0->areInterruptsPending()) {
         triggerException(ExceptionType::Interrupt);
-    } else {
-        decodeAndExecuteInstruction(currentInstruction);
     }
 
-    copy(begin(outputRegisters), end(outputRegisters), begin(registers));
+    Debugger *debugger = Debugger::getInstance();
+    debugger->inspectCPU();
+
+    currentInstruction = Instruction(load<uint32_t>(programCounter));
+
+    bool isBranchingCycle = isBranching;
+
+    decodeAndExecuteInstruction(currentInstruction);
+
+    moveLoadDelaySlots();
+
+    if (runningException) {
+        runningException = false;
+        return;
+    }
+
+    if (isBranchingCycle) {
+        programCounter = jumpDestination & 0xfffffffc;
+        jumpDestination = 0;
+        isBranching = false;
+    } else {
+        programCounter += 4;
+    }
+}
+
+void CPU::loadDelaySlot(uint32_t registerIndex, uint32_t value) {
+    if (registerIndex == 0) {
+        return;
+    }
+    if (registerIndex == loadSlots[0].registerIndex) {
+        loadSlots[0].registerIndex = 0;
+    }
+
+    loadSlots[1].registerIndex = registerIndex;
+    loadSlots[1].value = value;
+    loadSlots[1].previousValue = registers[registerIndex];
+}
+
+void CPU::moveLoadDelaySlots() {
+    if (loadSlots[0].registerIndex != 0) {
+        if (registers[loadSlots[0].registerIndex] == loadSlots[0].previousValue) {
+            registers[loadSlots[0].registerIndex] = loadSlots[0].value;
+        }
+    }
+
+    loadSlots[0] = loadSlots[1];
+    loadSlots[1].registerIndex = 0;
 }
 
 uint32_t CPU::registerAtIndex(uint32_t index) const {
     return registers[index];
 }
 
+void CPU::invalidateLoadSlot(uint32_t registerIndex) {
+    if (loadSlots[0].registerIndex == registerIndex) {
+        loadSlots[0].registerIndex = 0;
+    }
+}
+
 void CPU::setRegisterAtIndex(uint32_t index, uint32_t value) {
-    outputRegisters[index] = value;
+    registers[index] = value;
 
     // Make sure R0 is always 0
-    outputRegisters[0] = 0;
+    registers[0] = 0;
+
+    invalidateLoadSlot(index);
 }
 
 void CPU::decodeAndExecuteInstruction(Instruction instruction) {
@@ -469,7 +495,7 @@ void CPU::operationShiftRightArithmeticVariable(Instruction instruction) {
 void CPU::operationJumpRegister(Instruction instruction) {
     uint32_t rs = instruction.rs;
     // TODO: validate alignment
-    nextProgramCounter = registerAtIndex(rs);
+    jumpDestination = registerAtIndex(rs);
     isBranching = true;
 }
 
@@ -477,11 +503,11 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
     uint32_t rd = instruction.rd;
     uint32_t rs = instruction.rs;
 
-    uint32_t returnAddress = nextProgramCounter;
+    uint32_t returnAddress = programCounter + 8;
 
     setRegisterAtIndex(rd, returnAddress);
     // TODO: validate alignment
-    nextProgramCounter = registerAtIndex(rs);
+    jumpDestination = registerAtIndex(rs);
     isBranching = true;
 }
 
@@ -714,7 +740,7 @@ void CPU::operationsMultipleBranchIf(Instruction instruction) {
     }
 
     if (shouldLink) {
-        setRegisterAtIndex(31, nextProgramCounter);
+        registers[31] = programCounter + 8;
     }
 
     if (result) {
@@ -724,14 +750,14 @@ void CPU::operationsMultipleBranchIf(Instruction instruction) {
 
 void CPU::operationJump(Instruction instruction) {
     uint32_t imm = instruction.immjump();
-    nextProgramCounter = (programCounter & 0xF0000000) | (imm << 2);
+    jumpDestination = (programCounter & 0xF0000000) | (imm << 2);
     isBranching = true;
 }
 
 void CPU::operationJumpAndLink(Instruction instruction) {
-    uint32_t returnAddress = nextProgramCounter;
+    uint32_t returnAddress = programCounter + 8;
     operationJump(instruction);
-    setRegisterAtIndex(31, returnAddress);
+    registers[31] = returnAddress;
 }
 
 void CPU::operationBranchIfEqual(Instruction instruction) {
@@ -855,7 +881,7 @@ void CPU::operationLoadUpperImmediate(Instruction instruction) {
 void CPU::branch(uint32_t offset) {
     // Align to 32 bits
     offset <<= 2;
-    nextProgramCounter = (int32_t)(programCounter + offset);
+    jumpDestination = ((int32_t)(programCounter + 4) + offset);
     isBranching = true;
 }
 
@@ -933,7 +959,7 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             printError("Unhandled MFC0 at index %#x", copRegisterIndex);
         }
     }
-    loadPair = {cpuRegisterIndex, value};
+    loadDelaySlot(cpuRegisterIndex, value);
 }
 
 void CPU::operationMoveToCoprocessor0(Instruction instruction) {
@@ -1019,7 +1045,7 @@ void CPU::operationLoadByte(Instruction instruction) {
         return;
     }
     uint32_t value = ((int32_t)(load<uint8_t>(address) << 24)) >> 24;
-    loadPair = {rt, value};
+    loadDelaySlot(rt, value);
 }
 
 void CPU::operationLoadHalfWord(Instruction instruction) {
@@ -1038,7 +1064,7 @@ void CPU::operationLoadHalfWord(Instruction instruction) {
         return;
     }
     uint32_t value = ((int16_t)load<uint16_t>(address));
-    loadPair = {rt, value};
+    loadDelaySlot(rt, value);
 }
 
 void CPU::operationLoadWordLeft(Instruction instruction) {
@@ -1047,7 +1073,12 @@ void CPU::operationLoadWordLeft(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t currentValue = outputRegisters[rt];
+    uint32_t currentValue;
+    if (loadSlots[0].registerIndex == rt) {
+        currentValue = loadSlots[0].value;
+    } else {
+        currentValue = registerAtIndex(rt);
+    }
 
     uint32_t alignedAddress = address & 0xfffffffc;
     uint32_t alignedWord = load<uint32_t>(alignedAddress);
@@ -1072,7 +1103,7 @@ void CPU::operationLoadWordLeft(Instruction instruction) {
         }
     }
 
-    loadPair = {rt, value};
+    loadDelaySlot(rt, value);
 }
 
 void CPU::operationLoadWord(Instruction instruction) {
@@ -1091,7 +1122,7 @@ void CPU::operationLoadWord(Instruction instruction) {
         return;
     }
     uint32_t value = load<uint32_t>(address);
-    loadPair = {rt, value};
+    loadDelaySlot(rt, value);
 }
 
 void CPU::operationLoadByteUnsigned(Instruction instruction) {
@@ -1105,7 +1136,7 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
         return;
     }
     uint32_t value = load<uint8_t>(address);
-    loadPair = {rt, value};
+    loadDelaySlot(rt, value);
 }
 
 void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
@@ -1124,7 +1155,7 @@ void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
         return;
     }
     uint32_t value = load<uint16_t>(address);
-    loadPair = {rt, value};
+    loadDelaySlot(rt, value);
 }
 
 void CPU::operationLoadWordRight(Instruction instruction) {
@@ -1133,7 +1164,12 @@ void CPU::operationLoadWordRight(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    uint32_t currentValue = outputRegisters[rt];
+    uint32_t currentValue;
+    if (loadSlots[0].registerIndex == rt) {
+        currentValue = loadSlots[0].value;
+    } else {
+        currentValue = registerAtIndex(rt);
+    }
 
     uint32_t alignedAddress = address & 0xfffffffc;
     uint32_t alignedWord = load<uint32_t>(alignedAddress);
@@ -1158,7 +1194,7 @@ void CPU::operationLoadWordRight(Instruction instruction) {
         }
     }
 
-    loadPair = {rt, value};
+    loadDelaySlot(rt, value);
 }
 
 void CPU::operationStoreByte(Instruction instruction) const {
@@ -1300,11 +1336,11 @@ void CPU::triggerException(ExceptionType exceptionType) {
     cop0->status.currentInterruptEnable = false;
     cop0->status._currentOperationMode = Kernel;
 
-    if (isDelaySlot) {
-        cop0->returnAddressFromTrap = currentProgramCounter - 4;
+    if (isBranching) {
+        cop0->returnAddressFromTrap = programCounter - 4;
         cop0->cause.branchDelay = true;
     } else {
-        cop0->returnAddressFromTrap = currentProgramCounter;
+        cop0->returnAddressFromTrap = programCounter;
         cop0->cause.branchDelay = false;
     }
 
@@ -1316,7 +1352,8 @@ void CPU::triggerException(ExceptionType exceptionType) {
     }
 
     programCounter = handlerAddress;
-    nextProgramCounter = programCounter + 4;
+    isBranching = false;
+    runningException = true;
 }
 
 void CPU::operationLoadWordCoprocessor0(Instruction instruction) {
