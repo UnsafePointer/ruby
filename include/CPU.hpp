@@ -141,7 +141,7 @@ public:
     template <typename T>
     inline void store(uint32_t address, T value) const;
 
-    void executeNextInstruction();
+    bool executeNextInstruction();
     // GDB register naming and order used here:
     // r0-r31
     std::array<uint32_t, 32> getRegisters();

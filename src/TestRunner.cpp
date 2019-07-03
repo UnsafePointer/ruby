@@ -89,12 +89,7 @@ void TestRunner::setup() {
         printError("Invalid file size found in file header");
     }
     cpu->transferToRAM("tests.exe", 0x800, fileSize, destinationAddress);
-}
 
-void TestRunner::setupMidBootHook() {
-    if (!shouldRunTests()) {
-        return;
-    }
     cpu->setProgramCounter(programCounter());
     cpu->setGlobalPointer(globalPointer());
 }

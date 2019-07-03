@@ -79,9 +79,13 @@ void CPU::printAllRegisters() {
     printWarning("pc: %#x", programCounter);
 }
 
-void CPU::executeNextInstruction() {
+bool CPU::executeNextInstruction() {
     if (cop0->areInterruptsPending()) {
         triggerException(ExceptionType::Interrupt);
+    }
+    if (cop0->breakPointControl & (1 << 24) && programCounter == cop0->breakPointOnExecute) {
+        cop0->breakPointControl  &= ~(1 << 24);
+        return false;
     }
 
     Debugger *debugger = Debugger::getInstance();
@@ -97,7 +101,7 @@ void CPU::executeNextInstruction() {
 
     if (runningException) {
         runningException = false;
-        return;
+        return true;
     }
 
     if (isBranchingCycle) {
@@ -107,6 +111,8 @@ void CPU::executeNextInstruction() {
     } else {
         programCounter += 4;
     }
+
+    return true;
 }
 
 void CPU::loadDelaySlot(uint32_t registerIndex, uint32_t value) {

@@ -53,6 +53,5 @@ public:
     uint32_t programCounter();
     uint32_t globalPointer();
     void setup();
-    void setupMidBootHook();
     void checkTTY();
 };
