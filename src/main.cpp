@@ -8,9 +8,10 @@
 const uint32_t MID_BOOT_HOOK = 0x80030000;
 
 int main(int argc, char* argv[]) {
-    std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
     TestRunner *testRunner = TestRunner::getInstance();
-    testRunner->configure(argc, argv, cpu.get());
+    testRunner->configure(argc, argv);
+    std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
+    testRunner->setCPU(cpu.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(cpu.get());
     testRunner->setup();

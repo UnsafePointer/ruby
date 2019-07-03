@@ -19,13 +19,16 @@ TestRunner* TestRunner::getInstance() {
     return instance;
 }
 
-void TestRunner::configure(int argc, char* argv[], CPU *cpu) {
+void TestRunner::configure(int argc, char* argv[]) {
     if (argc > 1) {
         string argument = string(argv[1]);
         if (argument.compare("--run-tests") == 0) {
             runTests = true;
         }
     }
+}
+
+void TestRunner::setCPU(CPU *cpu) {
     this->cpu = cpu;
 }
 

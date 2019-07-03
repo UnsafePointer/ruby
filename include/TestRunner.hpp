@@ -47,7 +47,8 @@ class TestRunner {
 public:
     static TestRunner* getInstance();
 
-    void configure(int argc, char* argv[], CPU *cpu);
+    void configure(int argc, char* argv[]);
+    void setCPU(CPU *cpu);
     bool shouldRunTests();
     uint32_t programCounter();
     uint32_t globalPointer();

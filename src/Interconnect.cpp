@@ -1,5 +1,6 @@
 #include "Interconnect.hpp"
 #include "Range.hpp"
+#include "TestRunner.hpp"
 
 using namespace std;
 
@@ -23,6 +24,11 @@ Interconnect::Interconnect(std::unique_ptr<COP0> &cop0) {
     scratchpad = make_unique<Scratchpad>();
     cdrom = make_unique<CDROM>();
     interruptController = make_unique<InterruptController>(cop0);
+    expansion1 = make_unique<Expansion1>();
+    TestRunner *testRunner = TestRunner::getInstance();
+    if (testRunner->shouldRunTests()) {
+        expansion1->loadBin("expansion/EXPNSION.BIN");
+    }
 }
 
 Interconnect::~Interconnect() {
