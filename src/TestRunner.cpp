@@ -67,6 +67,14 @@ uint32_t TestRunner::globalPointer() {
     return loadWord(0x14);
 }
 
+uint32_t TestRunner::initialStackFramePointerBase() {
+    return loadWord(0x30);
+}
+
+uint32_t TestRunner::initialStackFramePointeroffset() {
+    return loadWord(0x34);
+}
+
 uint32_t TestRunner::destinationAddress() {
     return loadWord(0x18);
 }
@@ -93,6 +101,8 @@ void TestRunner::setup() {
 
     cpu->setProgramCounter(programCounter());
     cpu->setGlobalPointer(globalPointer());
+    cpu->setStackPointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
+    cpu->setFramePointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
 }
 
 void TestRunner::checkTTY() {

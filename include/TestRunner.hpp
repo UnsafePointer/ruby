@@ -53,6 +53,8 @@ public:
     bool shouldRunTests();
     uint32_t programCounter();
     uint32_t globalPointer();
+    uint32_t initialStackFramePointerBase();
+    uint32_t initialStackFramePointeroffset();
     void setup();
     void checkTTY();
 };

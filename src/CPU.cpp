@@ -36,6 +36,14 @@ void CPU::setGlobalPointer(uint32_t address) {
     registers[28] = address;
 }
 
+void CPU::setStackPointer(uint32_t address) {
+    registers[29] = address;
+}
+
+void CPU::setFramePointer(uint32_t address) {
+    registers[30] = address;
+}
+
 std::array<uint32_t, 32> CPU::getRegisters() {
     array<uint32_t, 32> regs;
     copy(begin(registers), end(registers), begin(regs));
