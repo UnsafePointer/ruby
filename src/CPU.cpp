@@ -500,8 +500,13 @@ void CPU::operationShiftRightArithmeticVariable(Instruction instruction) {
 
 void CPU::operationJumpRegister(Instruction instruction) {
     uint32_t rs = instruction.rs;
-    // TODO: validate alignment
-    jumpDestination = registerAtIndex(rs);
+    uint32_t address = registerAtIndex(rs);
+    if (address % 2 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::LoadAddress);
+        return;
+    }
+    jumpDestination = address;
     isBranching = true;
 }
 
@@ -512,8 +517,13 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
     uint32_t returnAddress = programCounter + 8;
 
     setRegisterAtIndex(rd, returnAddress);
-    // TODO: validate alignment
-    jumpDestination = registerAtIndex(rs);
+    uint32_t address = registerAtIndex(rs);
+    if (address % 2 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::LoadAddress);
+        return;
+    }
+    jumpDestination = address;
     isBranching = true;
 }
 
