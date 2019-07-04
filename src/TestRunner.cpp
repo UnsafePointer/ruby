@@ -2,13 +2,14 @@
 #include <string>
 #include <fstream>
 #include "Output.hpp"
+#include <iostream>
 
 using namespace std;
 
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
 const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
 
-TestRunner::TestRunner() : cpu(nullptr), runTests(false), header() {}
+TestRunner::TestRunner() : cpu(nullptr), runTests(false), header(), ttyBuffer() {}
 
 TestRunner* TestRunner::instance = nullptr;
 
@@ -99,7 +100,11 @@ void TestRunner::checkTTY() {
         array<uint32_t, 32> registers = cpu->getRegisters();
         uint32_t function = registers[9];
         if (function == BIOS_STD_OUT_PUT_CHAR) {
-            printf("%c", registers[4]);
+            ttyBuffer.append(1, registers[4]);
+            if (registers[4] == '\n') {
+                cout << ttyBuffer;
+                ttyBuffer.clear();
+            }
         }
     }
 }

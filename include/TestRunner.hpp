@@ -36,6 +36,7 @@ class TestRunner {
     CPU *cpu;
     bool runTests;
     uint8_t header[TEST_HEADER_SIZE];
+    std::string ttyBuffer;
 
     void readHeader();
     std::string id();
