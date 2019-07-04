@@ -52,12 +52,20 @@ Renderer::~Renderer() {
 }
 
 void Renderer::pushTriangle(std::array<Vertex, 3> vertices) {
+    uint size = vertices.size();
+    if (size > buffer->remainingCapacity() - size) {
+        display();
+    }
     buffer->addData(vector<Vertex>(vertices.begin(), vertices.end()));
     return;
 }
 
 
 void Renderer::pushQuad(std::array<Vertex, 4> vertices) {
+    uint size = vertices.size() - 1;
+    if (size > buffer->remainingCapacity() - size) {
+        display();
+    }
     buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
     buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
     return;
