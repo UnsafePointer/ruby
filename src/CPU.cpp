@@ -562,11 +562,11 @@ void CPU::operationMoveToLowRegister(Instruction instruction) {
 }
 
 void CPU::operationMultiply(Instruction instruction) {
-    int32_t rs = instruction.rs;
-    int32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
+    uint32_t rt = instruction.rt;
 
-    int64_t s = ((int64_t)registerAtIndex(rs));
-    int64_t t = ((int64_t)registerAtIndex(rt));
+    int64_t s = ((int32_t)registerAtIndex(rs));
+    int64_t t = ((int32_t)registerAtIndex(rt));
 
     uint64_t result = s * t;
     highRegister = ((uint32_t)(result >> 32));
