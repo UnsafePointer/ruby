@@ -4,6 +4,7 @@
 #include "CPU.hpp"
 #include "Debugger.hpp"
 #include "TestRunner.hpp"
+#include "Logger.hpp"
 
 int main(int argc, char* argv[]) {
     TestRunner *testRunner = TestRunner::getInstance();
@@ -12,6 +13,9 @@ int main(int argc, char* argv[]) {
     testRunner->setCPU(cpu.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(cpu.get());
+    Logger *logger = Logger::getInstance();
+    logger->configure(testRunner->shouldRunTests());
+    logger->setupTraceFile();
     bool quit = false;
     while (!quit) {
         SDL_Event event;

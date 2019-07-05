@@ -87,3 +87,6 @@ tests.exe
 
 # RAM dump
 ram.bin
+
+# log
+ruby.log

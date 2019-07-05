@@ -2,11 +2,12 @@
 #include <cstdarg>
 #include <iostream>
 #include "TestRunner.hpp"
+#include "Logger.hpp"
 
 using namespace std;
 
 string format(const char *fmt, va_list args) {
-    char buffer[256];
+    char buffer[4096];
 
     const auto result = std::vsnprintf(buffer, sizeof(buffer), fmt, args);
 
@@ -29,6 +30,15 @@ void printMessage(string message) {
     std::cout << message << std::endl;
 }
 
+void logMessage(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+    Logger *logger = Logger::getInstance();
+    logger->logMessage(formatted);
+}
+
 void printWarning(const char *fmt, ...) {
     TestRunner *testRunner = TestRunner::getInstance();
     if (testRunner->shouldRunTests()) {
@@ -39,6 +49,8 @@ void printWarning(const char *fmt, ...) {
     string formatted = format(fmt, args);
     va_end(args);
     printMessage(formatted);
+    Logger *logger = Logger::getInstance();
+    logger->logMessage(formatted);
 }
 
 void printError(const char *fmt, ...) {
@@ -47,6 +59,9 @@ void printError(const char *fmt, ...) {
     string formatted = format(fmt, args);
     va_end(args);
     printMessage(formatted);
+    Logger *logger = Logger::getInstance();
+    logger->logMessage(formatted);
+    logger->flush();
     Debugger *debugger = Debugger::getInstance();
     debugger->debug();
     exit(1);
