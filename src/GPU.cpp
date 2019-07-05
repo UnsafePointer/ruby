@@ -158,6 +158,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x68: {
+                gp0WordsRemaining = 2;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeRectangle1x1DotOpaque();
+                };
+                break;
+            }
             case 0xa0: {
                 gp0WordsRemaining = 3;
                 gp0InstructionMethod = [&]() {
@@ -699,4 +706,29 @@ void GPU::operationGp1GetGPUInfo(uint32_t value) {
             break;
         }
     }
+}
+
+/*
+GP0(68h) - Monochrome Rectangle (1x1) (Dot) (opaque)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeRectangle1x1DotOpaque() {
+    uint32_t color = gp0InstructionBuffer[0] & 0x00ffffff;
+    Vertex topLeft = Vertex(gp0InstructionBuffer[1], color);
+    Vertex topRight = Vertex(gp0InstructionBuffer[1], color);
+    topRight.position.x = topRight.position.x + 1;
+    Vertex bottomLeft = Vertex(gp0InstructionBuffer[1], color);
+    bottomLeft.position.y = bottomLeft.position.y + 1;
+    Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
+    bottomRight.position.x = bottomRight.position.x + 1;
+    bottomRight.position.y = bottomRight.position.y + 1;
+    array<Vertex, 4> vertices = {
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+    };
+    renderer.pushQuad(vertices);
+    return;
 }

@@ -5,15 +5,13 @@
 #include "Debugger.hpp"
 #include "TestRunner.hpp"
 
-const uint32_t MID_BOOT_HOOK = 0x80030000;
-
 int main(int argc, char* argv[]) {
-    std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
     TestRunner *testRunner = TestRunner::getInstance();
-    testRunner->configure(argc, argv, cpu.get());
+    testRunner->configure(argc, argv);
+    std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
+    testRunner->setCPU(cpu.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(cpu.get());
-    testRunner->setup();
     bool quit = false;
     while (!quit) {
         SDL_Event event;
@@ -28,7 +26,6 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
-
         }
         if (debugger->isAttached() && debugger->shouldStep()) {
             debugger->doStep();
@@ -38,11 +35,10 @@ int main(int argc, char* argv[]) {
             continue;
         }
         for (int i = 0; i < 0xFFFF; i++) {
-            if (cpu->getProgramCounter() == MID_BOOT_HOOK) {
-                testRunner->setupMidBootHook();
-            }
             testRunner->checkTTY();
-            cpu->executeNextInstruction();
+            if (!cpu->executeNextInstruction()) {
+                testRunner->setup();
+            }
         }
     }
 }

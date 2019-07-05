@@ -9,6 +9,7 @@
 #include "CDROM.hpp"
 #include "InterruptController.hpp"
 #include "COP0.hpp"
+#include "Expansion1.hpp"
 
 const Range ramRange = Range(0x00000000, RAM_SIZE);
 const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
@@ -18,7 +19,7 @@ const Range ramSizeRange = Range(0x1f801060, 4);
 const Range cacheControlRange = Range(0xfffe0130, 4);
 const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
 const Range expansion2Range = Range(0x1f802000, 66);
-const Range expansion1Range = Range(0x1f000000, 512 * 1024);
+const Range expansion1Range = Range(0x1f000000, EXPANSION1_SIZE);
 const Range interruptRequestControlRange = Range(0x1f801070, 8);
 const Range timerRegisterRange = Range(0x1f801100, 48);
 const Range dmaRegisterRange = Range(0x1f801080, 0x80);
@@ -47,6 +48,7 @@ class Interconnect {
     std::unique_ptr<Scratchpad> scratchpad;
     std::unique_ptr<CDROM> cdrom;
     std::unique_ptr<InterruptController> interruptController;
+    std::unique_ptr<Expansion1> expansion1;
     uint32_t maskRegion(uint32_t address) const;
 public:
     Interconnect(std::unique_ptr<COP0> &cop0);

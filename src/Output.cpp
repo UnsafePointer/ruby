@@ -47,5 +47,7 @@ void printError(const char *fmt, ...) {
     string formatted = format(fmt, args);
     va_end(args);
     printMessage(formatted);
+    Debugger *debugger = Debugger::getInstance();
+    debugger->debug();
     exit(1);
 }

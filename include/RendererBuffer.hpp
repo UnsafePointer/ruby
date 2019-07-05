@@ -24,5 +24,6 @@ public:
     void clean();
     void draw(GLenum mode);
     void addData(std::vector<T> data);
+    uint remainingCapacity();
 };
 

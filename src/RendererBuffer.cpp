@@ -55,10 +55,6 @@ void RendererBuffer<T>::draw(GLenum mode) {
 
 template <class T>
 void RendererBuffer<T>::addData(vector<T> data) {
-    uint remainingCapacity = capacity - size;
-    if (data.size() > remainingCapacity) {
-        printError("Renderer buffer out of memory.");
-    }
     bind();
 
     uint offset = size * sizeof(T);
@@ -66,6 +62,12 @@ void RendererBuffer<T>::addData(vector<T> data) {
     glBufferSubData(GL_ARRAY_BUFFER, offset, dataSize, data.data());
 
     size += data.size();
+}
+
+template <class T>
+uint RendererBuffer<T>::remainingCapacity() {
+    int remainingCapacity = capacity - size;
+    return remainingCapacity;
 }
 
 template <>

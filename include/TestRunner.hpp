@@ -36,6 +36,7 @@ class TestRunner {
     CPU *cpu;
     bool runTests;
     uint8_t header[TEST_HEADER_SIZE];
+    std::string ttyBuffer;
 
     void readHeader();
     std::string id();
@@ -47,11 +48,13 @@ class TestRunner {
 public:
     static TestRunner* getInstance();
 
-    void configure(int argc, char* argv[], CPU *cpu);
+    void configure(int argc, char* argv[]);
+    void setCPU(CPU *cpu);
     bool shouldRunTests();
     uint32_t programCounter();
     uint32_t globalPointer();
+    uint32_t initialStackFramePointerBase();
+    uint32_t initialStackFramePointeroffset();
     void setup();
-    void setupMidBootHook();
     void checkTTY();
 };

@@ -9,6 +9,7 @@
 #include "Scratchpad.tcc"
 #include "CDROM.tcc"
 #include "InterruptController.tcc"
+#include "Expansion1.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -42,8 +43,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = expansion1Range.contains(absoluteAddress);
     if (offset) {
-        // No expansion
-        return 0xFF;
+        return expansion1->load<T>(*offset);
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {

@@ -2,13 +2,14 @@
 #include <string>
 #include <fstream>
 #include "Output.hpp"
+#include <iostream>
 
 using namespace std;
 
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
 const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
 
-TestRunner::TestRunner() : cpu(nullptr), runTests(false), header() {}
+TestRunner::TestRunner() : cpu(nullptr), runTests(false), header(), ttyBuffer() {}
 
 TestRunner* TestRunner::instance = nullptr;
 
@@ -19,13 +20,16 @@ TestRunner* TestRunner::getInstance() {
     return instance;
 }
 
-void TestRunner::configure(int argc, char* argv[], CPU *cpu) {
+void TestRunner::configure(int argc, char* argv[]) {
     if (argc > 1) {
         string argument = string(argv[1]);
         if (argument.compare("--run-tests") == 0) {
             runTests = true;
         }
     }
+}
+
+void TestRunner::setCPU(CPU *cpu) {
     this->cpu = cpu;
 }
 
@@ -63,6 +67,14 @@ uint32_t TestRunner::globalPointer() {
     return loadWord(0x14);
 }
 
+uint32_t TestRunner::initialStackFramePointerBase() {
+    return loadWord(0x30);
+}
+
+uint32_t TestRunner::initialStackFramePointeroffset() {
+    return loadWord(0x34);
+}
+
 uint32_t TestRunner::destinationAddress() {
     return loadWord(0x18);
 }
@@ -86,14 +98,11 @@ void TestRunner::setup() {
         printError("Invalid file size found in file header");
     }
     cpu->transferToRAM("tests.exe", 0x800, fileSize, destinationAddress);
-}
 
-void TestRunner::setupMidBootHook() {
-    if (!shouldRunTests()) {
-        return;
-    }
     cpu->setProgramCounter(programCounter());
     cpu->setGlobalPointer(globalPointer());
+    cpu->setStackPointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
+    cpu->setFramePointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
 }
 
 void TestRunner::checkTTY() {
@@ -101,7 +110,11 @@ void TestRunner::checkTTY() {
         array<uint32_t, 32> registers = cpu->getRegisters();
         uint32_t function = registers[9];
         if (function == BIOS_STD_OUT_PUT_CHAR) {
-            printf("%c", registers[4]);
+            ttyBuffer.append(1, registers[4]);
+            if (registers[4] == '\n') {
+                cout << ttyBuffer;
+                ttyBuffer.clear();
+            }
         }
     }
 }
