@@ -2,14 +2,11 @@
 #include <string>
 #include <fstream>
 #include "Output.hpp"
-#include <iostream>
+#include "CPU.hpp"
 
 using namespace std;
 
-const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
-const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
-
-TestRunner::TestRunner() : cpu(nullptr), runTests(false), exeFile(), header(), ttyBuffer() {}
+TestRunner::TestRunner() : emulator(nullptr), runTests(false), exeFile(), header() {}
 
 TestRunner* TestRunner::instance = nullptr;
 
@@ -34,8 +31,8 @@ void TestRunner::configure(int argc, char* argv[]) {
     }
 }
 
-void TestRunner::setCPU(CPU *cpu) {
-    this->cpu = cpu;
+void TestRunner::setEmulator(Emulator *emulator) {
+    this->emulator = emulator;
 }
 
 void TestRunner::readHeader() {
@@ -102,24 +99,11 @@ void TestRunner::setup() {
     if (fileSize % 0x800 != 0) {
         printError("Invalid file size found in file header");
     }
-    cpu->transferToRAM(exeFile, 0x800, fileSize, destinationAddress);
+    emulator->transferToRAM(exeFile, 0x800, fileSize, destinationAddress);
 
+    CPU *cpu = emulator->getCPU();
     cpu->setProgramCounter(programCounter());
     cpu->setGlobalPointer(globalPointer());
     cpu->setStackPointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
     cpu->setFramePointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
-}
-
-void TestRunner::checkTTY() {
-    if (cpu->getProgramCounter() == BIOS_A_FUNCTIONS_STEP) {
-        array<uint32_t, 32> registers = cpu->getRegisters();
-        uint32_t function = registers[9];
-        if (function == BIOS_STD_OUT_PUT_CHAR) {
-            ttyBuffer.append(1, registers[4]);
-            if (registers[4] == '\n') {
-                cout << ttyBuffer;
-                ttyBuffer.clear();
-            }
-        }
-    }
 }

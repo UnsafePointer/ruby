@@ -1410,11 +1410,3 @@ void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
 }
-
-void CPU::transferToRAM(string path, uint32_t origin, uint32_t size, uint32_t destination) {
-    interconnect->transferToRAM(path, origin, size, destination);
-}
-
-void CPU::dumpRAM() {
-    interconnect->dumpRAM();
-}

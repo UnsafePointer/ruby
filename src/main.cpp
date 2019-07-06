@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     TestRunner *testRunner = TestRunner::getInstance();
     testRunner->configure(argc, argv);
     std::unique_ptr<Emulator> emulator = std::make_unique<Emulator>();
-    testRunner->setCPU(emulator->getCPU());
+    testRunner->setEmulator(emulator.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(emulator->getCPU());
     Logger *logger = Logger::getInstance();

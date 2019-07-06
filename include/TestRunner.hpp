@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
-#include "CPU.hpp"
+#include "Emulator.hpp"
 
 // XXXX_NNN.NN (Boot-Executable) (filename specified in SYSTEM.CNF)
 // FILENAME.EXE (General-Purpose Executable)
@@ -33,11 +33,10 @@ const uint32_t TEST_HEADER_SIZE = 2048;
 class TestRunner {
     static TestRunner* instance;
 
-    CPU *cpu;
+    Emulator *emulator;
     bool runTests;
     std::string exeFile;
     uint8_t header[TEST_HEADER_SIZE];
-    std::string ttyBuffer;
 
     void readHeader();
     std::string id();
@@ -50,12 +49,11 @@ public:
     static TestRunner* getInstance();
 
     void configure(int argc, char* argv[]);
-    void setCPU(CPU *cpu);
+    void setEmulator(Emulator *emulator);
     bool shouldRunTests();
     uint32_t programCounter();
     uint32_t globalPointer();
     uint32_t initialStackFramePointerBase();
     uint32_t initialStackFramePointeroffset();
     void setup();
-    void checkTTY();
 };

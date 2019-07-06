@@ -24,10 +24,16 @@ class Emulator {
     std::unique_ptr<CDROM> cdrom;
     std::unique_ptr<InterruptController> interruptController;
     std::unique_ptr<Expansion1> expansion1;
+
+    std::string ttyBuffer;
+
+    void checkTTY();
 public:
     Emulator();
     ~Emulator();
 
     CPU* getCPU();
     void emulateFrame();
+    void transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
+    void dumpRAM();
 };

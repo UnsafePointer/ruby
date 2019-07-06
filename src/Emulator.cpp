@@ -1,13 +1,17 @@
 #include "Emulator.hpp"
 #include "TestRunner.hpp"
+#include <iostream>
 
 using namespace std;
 
-uint32_t systemClocksPerSecond = 33868800;
-uint32_t videoSystemClocksPerScanline = 3413;
-uint32_t scanlinesPerFrame = 263;
+const uint32_t systemClocksPerSecond = 33868800;
+const uint32_t videoSystemClocksPerScanline = 3413;
+const uint32_t scanlinesPerFrame = 263;
 
-Emulator::Emulator() {
+const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
+const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
+
+Emulator::Emulator() : ttyBuffer() {
     cop0 = make_unique<COP0>();
     bios = make_unique<BIOS>();
     ram = make_unique<RAM>();
@@ -36,7 +40,7 @@ void Emulator::emulateFrame() {
     uint32_t totalScanlines = 0;
     while (totalSystemClocksThisFrame < systemClocksPerSecond) {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
-            testRunner->checkTTY();
+            checkTTY();
             if (!cpu->executeNextInstruction()) {
                 testRunner->setup();
             }
@@ -50,6 +54,28 @@ void Emulator::emulateFrame() {
         if (totalScanlines >= scanlinesPerFrame) {
             interruptController->trigger(VBLANK);
             totalScanlines = 0;
+        }
+    }
+}
+
+void Emulator::transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination) {
+    interconnect->transferToRAM(path, origin, size, destination);
+}
+
+void Emulator::dumpRAM() {
+    interconnect->dumpRAM();
+}
+
+void Emulator::checkTTY() {
+    if (cpu->getProgramCounter() == BIOS_A_FUNCTIONS_STEP) {
+        array<uint32_t, 32> registers = cpu->getRegisters();
+        uint32_t function = registers[9];
+        if (function == BIOS_STD_OUT_PUT_CHAR) {
+            ttyBuffer.append(1, registers[4]);
+            if (registers[4] == '\n') {
+                cout << ttyBuffer;
+                ttyBuffer.clear();
+            }
         }
     }
 }
