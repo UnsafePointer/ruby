@@ -40,10 +40,6 @@ void logMessage(const char *fmt, ...) {
 }
 
 void printWarning(const char *fmt, ...) {
-    TestRunner *testRunner = TestRunner::getInstance();
-    if (testRunner->shouldRunTests()) {
-        return;
-    }
     va_list args;
     va_start(args, fmt);
     string formatted = format(fmt, args);

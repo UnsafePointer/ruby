@@ -58,7 +58,7 @@ inline T Interconnect::load(uint32_t address) const {
     if (offset) {
         return cdrom->load<T>(*offset);
     }
-    printWarning("Unhandled read at offset: %#x", *offset);
+    printWarning("Unhandled read at: %#x", address);
     Debugger *debugger = Debugger::getInstance();
     if (debugger->isAttached()) {
         return 0;
