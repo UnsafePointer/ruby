@@ -12,7 +12,7 @@ COP0::COP0() : breakPointOnExecute(0),
                status(),
                cause(),
                returnAddressFromTrap(0),
-               processorID(0) {
+               processorID(2) {
 }
 
 COP0::~COP0() {
