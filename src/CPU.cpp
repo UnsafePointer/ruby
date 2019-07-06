@@ -521,10 +521,10 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
     uint32_t rd = instruction.rd;
     uint32_t rs = instruction.rs;
 
+    uint32_t address = registerAtIndex(rs);
     uint32_t returnAddress = programCounter + 8;
 
     setRegisterAtIndex(rd, returnAddress);
-    uint32_t address = registerAtIndex(rs);
     if (address % 2 != 0) {
         cop0->badVirtualAddress = address;
         triggerException(ExceptionType::LoadAddress);
