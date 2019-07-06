@@ -70,6 +70,8 @@ public:
     InterruptController(std::unique_ptr<COP0> &cop0);
     ~InterruptController();
 
+    void trigger(InterruptRequestNumber irq);
+
     template <typename T>
     inline T load(uint32_t offset) const;
     template <typename T>

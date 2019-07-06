@@ -15,24 +15,15 @@ const uint32_t regionMask[8] = {
     0xffffffff, 0xffffffff,
 };
 
-Interconnect::Interconnect(std::unique_ptr<COP0> &cop0) {
-    bios = make_unique<BIOS>();
+Interconnect::Interconnect(unique_ptr<BIOS> &bios, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<DMA> &dma, unique_ptr<Scratchpad> &scratchpad, unique_ptr<CDROM> &cdrom, unique_ptr<InterruptController> &interruptController, unique_ptr<Expansion1> &expansion1) : bios(bios), ram(ram), gpu(gpu), dma(dma), scratchpad(scratchpad), cdrom(cdrom), interruptController(interruptController), expansion1(expansion1) {
     bios->loadBin("SCPH1001.BIN");
-    ram = make_unique<RAM>();
-    gpu = make_unique<GPU>();
-    dma = make_unique<DMA>(ram, gpu);
-    scratchpad = make_unique<Scratchpad>();
-    cdrom = make_unique<CDROM>();
-    interruptController = make_unique<InterruptController>(cop0);
-    expansion1 = make_unique<Expansion1>();
     TestRunner *testRunner = TestRunner::getInstance();
     if (testRunner->shouldRunTests()) {
         expansion1->loadBin("expansion/EXPNSION.BIN");
     }
 }
 
-Interconnect::~Interconnect() {
-}
+Interconnect::~Interconnect() {}
 
 uint32_t Interconnect::maskRegion(uint32_t address) const {
     uint8_t index = address >> 29;
