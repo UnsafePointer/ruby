@@ -39,8 +39,8 @@ class CPU {
     std::array<LoadSlot, 2> loadSlots;
     uint32_t highRegister;
     uint32_t lowRegister;
-    std::unique_ptr<Interconnect> interconnect;
-    std::unique_ptr<COP0> cop0;
+    std::unique_ptr<Interconnect> &interconnect;
+    std::unique_ptr<COP0> &cop0;
     Instruction currentInstruction;
 
     void moveLoadDelaySlots();
@@ -131,7 +131,7 @@ class CPU {
 
     void operationIllegal(Instruction instruction);
 public:
-    CPU();
+    CPU(std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0);
     ~CPU();
 
     std::unique_ptr<COP0>& cop0Ref();

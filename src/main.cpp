@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <memory>
 #include <cstdint>
-#include "CPU.hpp"
+#include "Emulator.hpp"
 #include "Debugger.hpp"
 #include "TestRunner.hpp"
 #include "Logger.hpp"
@@ -9,10 +9,10 @@
 int main(int argc, char* argv[]) {
     TestRunner *testRunner = TestRunner::getInstance();
     testRunner->configure(argc, argv);
-    std::unique_ptr<CPU> cpu = std::make_unique<CPU>();
-    testRunner->setCPU(cpu.get());
+    std::unique_ptr<Emulator> emulator = std::make_unique<Emulator>();
+    testRunner->setCPU(emulator->getCPU());
     Debugger *debugger = Debugger::getInstance();
-    debugger->setCPU(cpu.get());
+    debugger->setCPU(emulator->getCPU());
     Logger *logger = Logger::getInstance();
     logger->configure(testRunner->shouldRunTests());
     logger->setupTraceFile();
@@ -38,11 +38,6 @@ int main(int argc, char* argv[]) {
         if (debugger->isAttached() && debugger->isStopped()) {
             continue;
         }
-        for (int i = 0; i < 0xFFFF; i++) {
-            testRunner->checkTTY();
-            if (!cpu->executeNextInstruction()) {
-                testRunner->setup();
-            }
-        }
+        emulator->emulateFrame();
     }
 }

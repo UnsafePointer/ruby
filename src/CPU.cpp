@@ -7,22 +7,21 @@
 
 using namespace std;
 
-CPU::CPU() : programCounter(0xbfc00000),
+CPU::CPU(unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0) : programCounter(0xbfc00000),
              jumpDestination(0),
              isBranching(false),
              runningException(false),
              loadSlots(),
              highRegister(0),
              lowRegister(0),
+             interconnect(interconnect),
+             cop0(cop0),
              currentInstruction(Instruction(0x0))
 {
-    cop0 = make_unique<COP0>();
-    interconnect = make_unique<Interconnect>(cop0);
     fill_n(registers, 32, 0);
 }
 
-CPU::~CPU() {
-}
+CPU::~CPU() {}
 
 unique_ptr<COP0>& CPU::cop0Ref() {
     return cop0;
