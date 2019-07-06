@@ -73,6 +73,8 @@ For a comprehensive list of supported GDB features, see [libHana](https://github
 
 ### Tests
 
+![cpu_tests.png](cpu_tests.png)
+
 #### Prerequisites
 
 - [amidog CPU tests](https://psx.amidog.se/doku.php?id=psx:download:cpu#CPU_Test): psxtest_cpu.exe (SHA1: 023aec8c92aaaf4d3b07956e26dd6c77ff397456)
