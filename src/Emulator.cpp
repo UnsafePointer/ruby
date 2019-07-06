@@ -4,6 +4,8 @@
 using namespace std;
 
 uint32_t systemClocksPerSecond = 33868800;
+uint32_t videoSystemClocksPerScanline = 3413;
+uint32_t scanlinesPerFrame = 263;
 
 Emulator::Emulator() {
     cop0 = make_unique<COP0>();
@@ -28,7 +30,10 @@ CPU* Emulator::getCPU() {
 void Emulator::emulateFrame() {
     TestRunner *testRunner = TestRunner::getInstance();
     uint32_t systemClockStep = 21;
+    uint32_t videoSystemClockStep = systemClockStep*11/7;
     uint32_t totalSystemClocksThisFrame = 0;
+    uint32_t videoSystemClocksScanlineCounter = 0;
+    uint32_t totalScanlines = 0;
     while (totalSystemClocksThisFrame < systemClocksPerSecond) {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
             testRunner->checkTTY();
@@ -36,6 +41,15 @@ void Emulator::emulateFrame() {
                 testRunner->setup();
             }
             totalSystemClocksThisFrame++;
+        }
+        videoSystemClocksScanlineCounter += videoSystemClockStep;
+        if (videoSystemClocksScanlineCounter >= videoSystemClocksPerScanline) {
+            totalScanlines++;
+            videoSystemClocksScanlineCounter = 0;
+        }
+        if (totalScanlines >= scanlinesPerFrame) {
+            interruptController->trigger(VBLANK);
+            totalScanlines = 0;
         }
     }
 }

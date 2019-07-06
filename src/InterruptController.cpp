@@ -10,6 +10,11 @@ InterruptController::~InterruptController() {
 
 }
 
+void InterruptController::trigger(InterruptRequestNumber irq) {
+    status.value |= (1 << irq);
+    update();
+}
+
 bool InterruptController::isActive() {
     return (status.value & mask.value) != 0;
 }
