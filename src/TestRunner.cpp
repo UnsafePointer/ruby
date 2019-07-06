@@ -9,7 +9,7 @@ using namespace std;
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
 const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
 
-TestRunner::TestRunner() : cpu(nullptr), runTests(false), header(), ttyBuffer() {}
+TestRunner::TestRunner() : cpu(nullptr), runTests(false), exeFile(), header(), ttyBuffer() {}
 
 TestRunner* TestRunner::instance = nullptr;
 
@@ -21,11 +21,16 @@ TestRunner* TestRunner::getInstance() {
 }
 
 void TestRunner::configure(int argc, char* argv[]) {
-    if (argc > 1) {
-        string argument = string(argv[1]);
-        if (argument.compare("--run-tests") == 0) {
+    if (argc > 2) {
+        string firstArgument = string(argv[1]);
+        if (firstArgument.compare("--exe") == 0) {
             runTests = true;
+            exeFile = string(argv[2]);
+        } else {
+            printError("Incorrect argument passed. See README.md for usage.");
         }
+    } else if (argc > 1) {
+        printError("Incorrect argument passed. See README.md for usage.");
     }
 }
 
@@ -34,7 +39,7 @@ void TestRunner::setCPU(CPU *cpu) {
 }
 
 void TestRunner::readHeader() {
-    ifstream file ("tests.exe", ios::in|ios::binary|ios::ate);
+    ifstream file = ifstream(exeFile, ios::in|ios::binary|ios::ate);
     if (!file.is_open()) {
         printError("Unable to tests.exe binary");
     }
@@ -97,7 +102,7 @@ void TestRunner::setup() {
     if (fileSize % 0x800 != 0) {
         printError("Invalid file size found in file header");
     }
-    cpu->transferToRAM("tests.exe", 0x800, fileSize, destinationAddress);
+    cpu->transferToRAM(exeFile, 0x800, fileSize, destinationAddress);
 
     cpu->setProgramCounter(programCounter());
     cpu->setGlobalPointer(globalPointer());
