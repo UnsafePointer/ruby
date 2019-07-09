@@ -1,6 +1,45 @@
 #pragma once
 #include <cstdint>
 
+enum Timer0SyncMode {
+    PauseDuringHblank = 0,
+    ResetToZeroAtHblank = 1,
+    ResetToZeroAtHblankAndPauseOutsideHblank = 2,
+    PauseUntilHblankThenSwitchToFreeRun = 3
+};
+
+enum Timer1SyncMode {
+    PauseDuringVblank = 0,
+    ResetToZeroAtVblank = 1,
+    ResetToZeroAtHblankAndPauseOutsideVblank = 2,
+    PauseUntilVblankThenSwitchToFreeRun = 3
+};
+
+enum Timer2SyncMode {
+    StopCounterAtCurrentValue,
+    FreeRun
+};
+
+enum Timer0ClockSource {
+    T0SystemClock,
+    DotClock
+};
+
+enum Timer1ClockSource {
+    T1SystemClock,
+    Hblank
+};
+
+enum Timer2ClockSource {
+    T2SystemClock,
+    SystemClockByEight
+};
+
+enum TimerResetCounter {
+    AfterOverflow = 0,
+    AfterTarget = 1
+};
+
 /*
 1F801104h+N*10h - Timer 0..2 Counter Mode (R/W)
 0     Synchronization Enable (0=Free Run, 1=Synchronize via Bit1-2)
@@ -51,6 +90,39 @@ union TimerCounterMode {
 
     TimerCounterMode() : _value(0) {}
 
+    TimerResetCounter timerResetCounter() { return TimerResetCounter(_resetCounter); }
+
+    Timer0SyncMode timer0SyncMode() { return Timer0SyncMode(_syncMode); }
+    Timer1SyncMode timer1SyncMode() { return Timer1SyncMode(_syncMode); }
+    Timer2SyncMode timer2SyncMode() {
+        if (_syncMode == 0 || _syncMode == 3) {
+            return StopCounterAtCurrentValue;
+        } else {
+            return FreeRun;
+        }
+    }
+
+    Timer0ClockSource timer0ClockSource() {
+        if (_clockSource == 0 || _clockSource == 3) {
+            return T0SystemClock;
+        } else {
+            return DotClock;
+        }
+    }
+    Timer1ClockSource timer1ClockSource() {
+        if (_clockSource == 0 || _clockSource == 3) {
+            return T1SystemClock;
+        } else {
+            return Hblank;
+        }
+    }
+    Timer2ClockSource timer2ClockSource() {
+        if (_clockSource == 0 || _clockSource == 3) {
+            return T2SystemClock;
+        } else {
+            return SystemClockByEight;
+        }
+    }
 };
 
 /*
