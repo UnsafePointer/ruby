@@ -1,6 +1,7 @@
 #include "Timer.hpp"
+#include "Constants.h"
 
-Timer::Timer() : counterValue(), counterMode(), counterTarget() {}
+Timer::Timer() : counterValue(), counterMode(), counterTarget(), counter() {}
 
 Timer::~Timer() {}
 
@@ -32,6 +33,44 @@ void Timer0::setCounterModeRegister(uint32_t value) {
 }
 
 void Timer1::step(uint32_t cycles) {
+    Timer1ClockSource clockSource = counterMode.timer1ClockSource();
+    if (clockSource == Timer1ClockSource::Hblank) {
+        uint32_t videoCycles = cycles*11/7;
+        counter += videoCycles;
+        counterValue.value += counter / VideoSystemClocksPerScanline;
+        counter %= VideoSystemClocksPerScanline;
+    } else {
+        counter += cycles;
+        counterValue.value += cycles;
+    }
+
+    bool checkIRQ = false;
+
+    if (counterValue.value >= counterTarget.target) {
+        counterMode.rearchedTarget = true;
+        TimerResetCounter timerResetCounter = counterMode.timerResetCounter();
+        if (timerResetCounter == AfterTarget) {
+            counterValue._value = 0;
+        }
+        if (counterMode.IRQWhenTarget) {
+            checkIRQ = true;
+        }
+    }
+
+    if (counterValue.value >= 0xffff) {
+        counterMode.rearchedOverflow = true;
+        TimerResetCounter timerResetCounter = counterMode.timerResetCounter();
+        if (timerResetCounter == AfterOverflow) {
+            counterValue._value = 0;
+        }
+        if (counterMode.IRQWhenOverflow) {
+            checkIRQ = true;
+        }
+    }
+
+    if (checkIRQ) {
+        checkInterruptRequest();
+    }
 }
 
 void Timer1::setCounterModeRegister(uint32_t value) {
@@ -44,4 +83,8 @@ void Timer2::step(uint32_t cycles) {
 
 void Timer2::setCounterModeRegister(uint32_t value) {
     counterMode._value = value;
+}
+
+void Timer::checkInterruptRequest() {
+
 }

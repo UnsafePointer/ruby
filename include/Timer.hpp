@@ -162,6 +162,8 @@ protected:
     TimerCounterValue counterValue;
     TimerCounterMode counterMode;
     TimerCounterTarget counterTarget;
+
+    uint32_t counter;
 public:
     Timer();
     ~Timer();
@@ -173,6 +175,7 @@ public:
     void setCounterValueRegister(uint32_t value);
     virtual void setCounterModeRegister(uint32_t value) = 0;
     void setCounterTargetRegister(uint32_t value);
+    void checkInterruptRequest();
 
     template <typename T>
     inline T load(uint32_t offset);
