@@ -58,6 +58,10 @@ void Emulator::emulateFrame() {
     }
 }
 
+void Emulator::renderFrame() {
+    gpu->render();
+}
+
 void Emulator::transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination) {
     interconnect->transferToRAM(path, origin, size, destination);
 }

@@ -243,6 +243,10 @@ void GPU::executeGp0(uint32_t value) {
     }
 }
 
+void GPU::render() {
+    renderer.display();
+}
+
 void GPU::executeGp1(uint32_t value) {
     uint32_t opCode = (value >> 24) & 0xff;
     switch (opCode) {
