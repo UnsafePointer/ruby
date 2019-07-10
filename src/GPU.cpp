@@ -130,6 +130,13 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x02: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0FillRectagleInVRAM();
+                };
+                break;
+            }
             case 0x28: {
                 gp0WordsRemaining = 5;
                 gp0InstructionMethod = [&]() {
@@ -727,6 +734,35 @@ void GPU::operationGp0MonochromeRectangle1x1DotOpaque() {
     Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
     bottomRight.position.x = bottomRight.position.x + 1;
     bottomRight.position.y = bottomRight.position.y + 1;
+    array<Vertex, 4> vertices = {
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+    };
+    renderer.pushQuad(vertices);
+    return;
+}
+
+/*
+GP0(02h) - Fill Rectangle in VRAM
+1st  Color+Command     (CcBbGgRrh)  ;24bit RGB value (see note)
+2nd  Top Left Corner   (YyyyXxxxh)  ;Xpos counted in halfwords, steps of 10h
+3rd  Width+Height      (YsizXsizh)  ;Xsiz counted in halfwords, steps of 10h
+*/
+void GPU::operationGp0FillRectagleInVRAM() {
+    uint32_t color = gp0InstructionBuffer[0] & 0x00ffffff;
+    Vertex topLeft = Vertex(gp0InstructionBuffer[1], color);
+    uint32_t size = gp0InstructionBuffer[2];
+    uint32_t width = size & 0xffff;
+    uint32_t height = size >> 16;
+    Vertex topRight = Vertex(gp0InstructionBuffer[1], color);
+    topRight.position.x = topRight.position.x + width;
+    Vertex bottomLeft = Vertex(gp0InstructionBuffer[1], color);
+    bottomLeft.position.y = bottomLeft.position.y + height;
+    Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
+    bottomRight.position.x = bottomRight.position.x + width;
+    bottomRight.position.y = bottomRight.position.y + height;
     array<Vertex, 4> vertices = {
         topLeft,
         topRight,
