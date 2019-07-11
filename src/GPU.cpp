@@ -533,12 +533,25 @@ void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
     displayLineEnd = ((value >> 10) & 0x3ff);
 }
 
+/*
+GP0(28h) - Monochrome four-point polygon, opaque
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
+(5th) Vertex4           (YyyyXxxxh) (if any)
+*/
 void GPU::operationGp0MonochromeQuadOpaque() {
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point point1 = Point(gp0InstructionBuffer[1]);
+    Point point2 = Point(gp0InstructionBuffer[2]);
+    Point point3 = Point(gp0InstructionBuffer[3]);
+    Point point4 = Point(gp0InstructionBuffer[4]);
     array<Vertex, 4> vertices = {
-        Vertex(gp0InstructionBuffer[1], gp0InstructionBuffer[0]),
-        Vertex(gp0InstructionBuffer[2], gp0InstructionBuffer[0]),
-        Vertex(gp0InstructionBuffer[3], gp0InstructionBuffer[0]),
-        Vertex(gp0InstructionBuffer[4], gp0InstructionBuffer[0]),
+        Vertex(point1, color),
+        Vertex(point2, color),
+        Vertex(point3, color),
+        Vertex(point4, color),
     };
     renderer.pushQuad(vertices);
     return;
@@ -556,13 +569,9 @@ GP0(A0h) - Copy Rectangle (CPU to VRAM)
 ...  Data              (...)      <--- usually transferred via DMA
 */
 void GPU::operationGp0CopyRectangleCPUToVRAM() {
-    uint32_t position = gp0InstructionBuffer[1];
-    uint32_t x = position & 0xffff;
-    uint32_t y = position >> 16;
-    uint32_t resolution = gp0InstructionBuffer[2];
-    uint32_t width = resolution & 0xffff;
-    uint32_t height = resolution >> 16;
-    uint32_t imageSize = width * height;
+    Point point = Point(gp0InstructionBuffer[1]);
+    Dimensions dimensions = Dimensions(gp0InstructionBuffer[2]);
+    uint32_t imageSize = dimensions.width * dimensions.height;
     // Pixels are 16 bit wide and transactions are 32 bit wide
     // If the resolution is odd, add a unit to get the right
     // number of transactions
@@ -571,7 +580,7 @@ void GPU::operationGp0CopyRectangleCPUToVRAM() {
     }
     gp0WordsRemaining = imageSize / 2;
     gp0Mode = GP0Mode::ImageLoad;
-    imageBuffer->reset(x, y, width, height);
+    imageBuffer->reset(point.x, point.y, dimensions.width, dimensions.height);
     return;
 }
 
@@ -599,28 +608,63 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
     printWarning("Unhandled GP0 Copy Rectangle VRAM to CPU with with resolution: %d x %d", width, height);
 }
 
+/*
+GP0(38h) - Shaded four-point polygon, opaque
+1st  Color1+Command    (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Color2            (00BbGgRrh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Color3            (00BbGgRrh)
+6th  Vertex3           (YyyyXxxxh)
+(7th) Color4            (00BbGgRrh) (if any)
+(8th) Vertex4           (YyyyXxxxh) (if any)
+*/
 void GPU::operationGp0ShadedQuadOpaque() {
+    Color color1 = Color(gp0InstructionBuffer[0]);
+    Color color2 = Color(gp0InstructionBuffer[2]);
+    Color color3 = Color(gp0InstructionBuffer[4]);
+    Color color4 = Color(gp0InstructionBuffer[6]);
+    Point point1 = Point(gp0InstructionBuffer[1]);
+    Point point2 = Point(gp0InstructionBuffer[3]);
+    Point point3 = Point(gp0InstructionBuffer[5]);
+    Point point4 = Point(gp0InstructionBuffer[7]);
     array<Vertex, 4> vertices = {
-        Vertex(gp0InstructionBuffer[1], gp0InstructionBuffer[0]),
-        Vertex(gp0InstructionBuffer[3], gp0InstructionBuffer[2]),
-        Vertex(gp0InstructionBuffer[5], gp0InstructionBuffer[4]),
-        Vertex(gp0InstructionBuffer[7], gp0InstructionBuffer[6]),
+        Vertex(point1, color1),
+        Vertex(point2, color2),
+        Vertex(point3, color3),
+        Vertex(point4, color4),
     };
     renderer.pushQuad(vertices);
     return;
 }
 
+/*
+GP0(30h) - Shaded three-point polygon, opaque
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Color2            (00BbGgRrh)
+  4th  Vertex2           (YyyyXxxxh)
+  5th  Color3            (00BbGgRrh)
+  6th  Vertex3           (YyyyXxxxh)
+*/
 void GPU::operationGp0ShadedTriangleOpaque() {
+    Color color1 = Color(gp0InstructionBuffer[0]);
+    Color color2 = Color(gp0InstructionBuffer[2]);
+    Color color3 = Color(gp0InstructionBuffer[4]);
+    Point point1 = Point(gp0InstructionBuffer[1]);
+    Point point2 = Point(gp0InstructionBuffer[3]);
+    Point point3 = Point(gp0InstructionBuffer[5]);
     array<Vertex, 3> vertices = {
-        Vertex(gp0InstructionBuffer[1], gp0InstructionBuffer[0]),
-        Vertex(gp0InstructionBuffer[3], gp0InstructionBuffer[2]),
-        Vertex(gp0InstructionBuffer[5], gp0InstructionBuffer[4]),
+        Vertex(point1, color1),
+        Vertex(point2, color2),
+        Vertex(point3, color3),
     };
     renderer.pushTriangle(vertices);
     return;
 }
 
 /*
+GP0(2Ch) - Textured four-point polygon, opaque, texture-blending
 1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
 2nd  Vertex1           (YyyyXxxxh)
 3rd  Texcoord1+Palette (ClutYyXxh)
@@ -632,14 +676,24 @@ void GPU::operationGp0ShadedTriangleOpaque() {
 (9th) Texcoord4         (0000YyXxh) (if any)
 */
 void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
-    uint32_t color = gp0InstructionBuffer[0] & 0x00ffffff;
-    uint32_t texturePage = gp0InstructionBuffer[4] >> 16;
-    uint16_t clutData = gp0InstructionBuffer[2] >> 16;
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point point1 = Point(gp0InstructionBuffer[1]);
+    Point point2 = Point(gp0InstructionBuffer[3]);
+    Point point3 = Point(gp0InstructionBuffer[5]);
+    Point point4 = Point(gp0InstructionBuffer[7]);
+    Point texturePoint1 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
+    Point texturePoint2 = Point::forTexturePosition(gp0InstructionBuffer[4] & 0xffff);
+    Point texturePage = Point::forTexturePage(gp0InstructionBuffer[4] >> 16);
+    Point texturePoint3 = Point::forTexturePosition(gp0InstructionBuffer[6] & 0xffff);
+    Point texturePoint4 = Point::forTexturePosition(gp0InstructionBuffer[8] & 0xffff);
+    TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[4] >> 16) >> 7) & 0x3);
+    GLuint textureDepthShift = 2 - texturePageColors;
     array<Vertex, 4> vertices = {
-        Vertex(gp0InstructionBuffer[1], color, gp0InstructionBuffer[2] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
-        Vertex(gp0InstructionBuffer[3], color, gp0InstructionBuffer[4] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
-        Vertex(gp0InstructionBuffer[5], color, gp0InstructionBuffer[6] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
-        Vertex(gp0InstructionBuffer[7], color, gp0InstructionBuffer[8] & 0xffff, TextureBlendModeTextureBlend, texturePage, clutData),
+        Vertex(point1, color, texturePoint1, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
+        Vertex(point2, color, texturePoint2, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
+        Vertex(point3, color, texturePoint3, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
+        Vertex(point4, color, texturePoint4, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
     };
     renderer.pushQuad(vertices);
     return;
@@ -725,15 +779,16 @@ GP0(68h) - Monochrome Rectangle (1x1) (Dot) (opaque)
 2nd  Vertex            (YyyyXxxxh)
 */
 void GPU::operationGp0MonochromeRectangle1x1DotOpaque() {
-    uint32_t color = gp0InstructionBuffer[0] & 0x00ffffff;
-    Vertex topLeft = Vertex(gp0InstructionBuffer[1], color);
-    Vertex topRight = Vertex(gp0InstructionBuffer[1], color);
-    topRight.position.x = topRight.position.x + 1;
-    Vertex bottomLeft = Vertex(gp0InstructionBuffer[1], color);
-    bottomLeft.position.y = bottomLeft.position.y + 1;
-    Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
-    bottomRight.position.x = bottomRight.position.x + 1;
-    bottomRight.position.y = bottomRight.position.y + 1;
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point point = Point(gp0InstructionBuffer[1]);
+    Vertex topLeft = Vertex(point, color);
+    Vertex topRight = Vertex(point, color);
+    topRight.point.x += + 1;
+    Vertex bottomLeft = Vertex(point, color);
+    bottomLeft.point.y += 1;
+    Vertex bottomRight = Vertex(point, color);
+    bottomRight.point.x += 1;
+    bottomRight.point.y += 1;
     array<Vertex, 4> vertices = {
         topLeft,
         topRight,
@@ -751,18 +806,19 @@ GP0(02h) - Fill Rectangle in VRAM
 3rd  Width+Height      (YsizXsizh)  ;Xsiz counted in halfwords, steps of 10h
 */
 void GPU::operationGp0FillRectagleInVRAM() {
-    uint32_t color = gp0InstructionBuffer[0] & 0x00ffffff;
-    Vertex topLeft = Vertex(gp0InstructionBuffer[1], color);
-    uint32_t size = gp0InstructionBuffer[2];
-    uint32_t width = size & 0xffff;
-    uint32_t height = size >> 16;
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point point = Point(gp0InstructionBuffer[1]);
+    Dimensions dimentions = Dimensions(gp0InstructionBuffer[2]);
+    Vertex topLeft = Vertex(point, color);
+    uint32_t width = dimentions.width;
+    uint32_t height = dimentions.height;
     Vertex topRight = Vertex(gp0InstructionBuffer[1], color);
-    topRight.position.x = topRight.position.x + width;
+    topRight.point.x = topRight.point.x + width;
     Vertex bottomLeft = Vertex(gp0InstructionBuffer[1], color);
-    bottomLeft.position.y = bottomLeft.position.y + height;
+    bottomLeft.point.y = bottomLeft.point.y + height;
     Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
-    bottomRight.position.x = bottomRight.position.x + width;
-    bottomRight.position.y = bottomRight.position.y + height;
+    bottomRight.point.x = bottomRight.point.x + width;
+    bottomRight.point.y = bottomRight.point.y + height;
     array<Vertex, 4> vertices = {
         topLeft,
         topRight,

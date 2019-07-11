@@ -1,12 +1,31 @@
 #pragma once
 #include <glad/glad.h>
 
+union Dimensions {
+    struct {
+        uint32_t width : 16;
+        uint32_t height : 16;
+    };
+
+    uint32_t _value;
+    Dimensions(uint32_t value) : _value(value) {}
+};
+
 struct Point {
     GLshort x, y;
+
+    Point();
+    Point(GLshort x, GLshort y);
+    Point(uint32_t position);
+    static Point forTexturePosition(uint16_t position);
+    static Point forTexturePage(uint32_t texturePage);
+    static Point forClut(uint16_t clutData);
 };
 
 struct Color {
     GLubyte r, g, b;
+
+    Color(uint32_t color);
 };
 
 enum TextureBlendMode {
@@ -16,7 +35,7 @@ enum TextureBlendMode {
 };
 
 struct Vertex {
-    Point position;
+    Point point;
     Color color;
     Point texturePosition;
     GLuint textureBlendMode;
@@ -24,7 +43,7 @@ struct Vertex {
     GLuint textureDepthShift;
     Point clut;
 public:
-    Vertex(uint32_t position, uint32_t color);
-    Vertex(uint32_t position, uint32_t color, uint16_t texturePosition, TextureBlendMode textureBlendMode, uint32_t texturePage, uint16_t clutData);
+    Vertex(Point point, Color color);
+    Vertex(Point point, Color color, Point texturePosition, TextureBlendMode textureBlendMode, Point texturePage, GLuint textureDepthShift, Point clut);
     ~Vertex();
 };
