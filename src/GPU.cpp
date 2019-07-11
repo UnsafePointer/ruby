@@ -147,7 +147,7 @@ void GPU::executeGp0(uint32_t value) {
             case 0x2c: {
                 gp0WordsRemaining = 9;
                 gp0InstructionMethod = [&]() {
-                    this->operationGp0TexturedQuadOpaqueTextureBlending();
+                    this->operationGp0TexturedFourPointOpaqueTextureBlending();
                 };
                 break;
             }
@@ -683,7 +683,7 @@ GP0(2Ch) - Textured four-point polygon, opaque, texture-blending
 (8th) Vertex4           (YyyyXxxxh) (if any)
 (9th) Texcoord4         (0000YyXxh) (if any)
 */
-void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
+void GPU::operationGp0TexturedFourPointOpaqueTextureBlending() {
     Color color = Color(gp0InstructionBuffer[0]);
     Point point1 = Point(gp0InstructionBuffer[1]);
     Point point2 = Point(gp0InstructionBuffer[3]);

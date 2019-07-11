@@ -163,7 +163,8 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp0CopyRectangleVRAMToCPU();
     void operationGp0ShadedQuadOpaque();
     void operationGp0ShadedTriangleOpaque();
-    void operationGp0TexturedQuadOpaqueTextureBlending();
+    void operationGp0TexturedFourPointOpaqueTextureBlending();
+
     void operationGp0MonochromeRectangle1x1DotOpaque();
     void operationGp0FillRectagleInVRAM();
 
