@@ -165,10 +165,122 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x64: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuadOpaqueTextureBlending();
+                };
+                break;
+            }
+            case 0x65: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuadOpaqueRawTexture();
+                };
+                break;
+            }
+            case 0x66: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuadOpaqueRawTexture();
+                };
+                break;
+            }
+            case 0x67: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuadOpaqueRawTexture();
+                };
+                break;
+            }
             case 0x68: {
                 gp0WordsRemaining = 2;
                 gp0InstructionMethod = [&]() {
                     this->operationGp0MonochromeRectangle1x1DotOpaque();
+                };
+                break;
+            }
+            case 0x6c: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad1x1OpaqueTextureBlending();
+                };
+                break;
+            }
+            case 0x6d: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad1x1OpaqueRawTexture();
+                };
+                break;
+            }
+            case 0x6e: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad1x1SemiTransparentTextureBlending();
+                };
+                break;
+            }
+            case 0x6f: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad1x1SemiTransparentRawTexture();
+                };
+                break;
+            }
+            case 0x74: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad8x8OpaqueTextureBlending();
+                };
+                break;
+            }
+            case 0x75: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad8x8OpaqueRawTexture();
+                };
+                break;
+            }
+            case 0x76: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad8x8SemiTransparentTextureBlending();
+                };
+                break;
+            }
+            case 0x77: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad8x8SemiTransparentRawTexture();
+                };
+                break;
+            }
+            case 0x7c: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad16x16OpaqueTextureBlending();
+                };
+                break;
+            }
+            case 0x7d: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad16x16OpaqueRawTexture();
+                };
+                break;
+            }
+            case 0x7e: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad16x16SemiTransparentTextureBlending();
+                };
+                break;
+            }
+            case 0x7f: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedQuad16x16SemiTransparentRawTexture();
                 };
                 break;
             }
@@ -708,6 +820,202 @@ void GPU::operationGp0TexturedFourPointOpaqueTextureBlending() {
 }
 
 /*
+GP0(64h) - Textured Rectangle, variable size, opaque, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+(4th) Width+Height      (YsizXsizh) (variable size only) (max 1023x511)
+*/
+void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
+    Dimensions dimensions = Dimensions(gp0InstructionBuffer[3]);
+    texturedQuad(dimensions, true, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(65h) - Textured Rectangle, variable size, opaque, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+(4th) Width+Height      (YsizXsizh) (variable size only) (max 1023x511)
+*/
+void GPU::operationGp0TexturedQuadOpaqueRawTexture() {
+    Dimensions dimensions = Dimensions(gp0InstructionBuffer[3]);
+    texturedQuad(dimensions, true, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(66h) - Textured Rectangle, variable size, semi-transp, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+(4th) Width+Height      (YsizXsizh) (variable size only) (max 1023x511)
+*/
+void GPU::operationGp0TexturedSemiTransparentOpaqueTextureBlending() {
+    Dimensions dimensions = Dimensions(gp0InstructionBuffer[3]);
+    texturedQuad(dimensions, false, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(67h) - Textured Rectangle, variable size, semi-transp, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+(4th) Width+Height      (YsizXsizh) (variable size only) (max 1023x511)
+*/
+void GPU::operationGp0TexturedSemiTransparentOpaqueRawTexture() {
+    Dimensions dimensions = Dimensions(gp0InstructionBuffer[3]);
+    texturedQuad(dimensions, false, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(6Ch) - Textured Rectangle, 1x1 (nonsense), opaque, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad1x1OpaqueTextureBlending() {
+    Dimensions dimensions = Dimensions(1, 1);
+    texturedQuad(dimensions, true, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(6Dh) - Textured Rectangle, 1x1 (nonsense), opaque, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad1x1OpaqueRawTexture() {
+    Dimensions dimensions = Dimensions(1, 1);
+    texturedQuad(dimensions, true, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(6Eh) - Textured Rectangle, 1x1 (nonsense), semi-transp, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad1x1SemiTransparentTextureBlending() {
+    Dimensions dimensions = Dimensions(1, 1);
+    texturedQuad(dimensions, false, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(6Fh) - Textured Rectangle, 1x1 (nonsense), semi-transp, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad1x1SemiTransparentRawTexture() {
+    Dimensions dimensions = Dimensions(1, 1);
+    texturedQuad(dimensions, false, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(74h) - Textured Rectangle, 8x8, opaque, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad8x8OpaqueTextureBlending() {
+    Dimensions dimensions = Dimensions(8, 8);
+    texturedQuad(dimensions, true, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(75h) - Textured Rectangle, 8x8, opaque, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad8x8OpaqueRawTexture() {
+    Dimensions dimensions = Dimensions(8, 8);
+    texturedQuad(dimensions, true, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(76h) - Textured Rectangle, 8x8, semi-transparent, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad8x8SemiTransparentTextureBlending() {
+    Dimensions dimensions = Dimensions(8, 8);
+    texturedQuad(dimensions, false, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(77h) - Textured Rectangle, 8x8, semi-transparent, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad8x8SemiTransparentRawTexture() {
+    Dimensions dimensions = Dimensions(8, 8);
+    texturedQuad(dimensions, false, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(7Ch) - Textured Rectangle, 16x16, opaque, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad16x16OpaqueTextureBlending() {
+    Dimensions dimensions = Dimensions(16, 16);
+    texturedQuad(dimensions, true, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(7Dh) - Textured Rectangle, 16x16, opaque, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad16x16OpaqueRawTexture() {
+    Dimensions dimensions = Dimensions(16, 16);
+    texturedQuad(dimensions, true, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(7Eh) - Textured Rectangle, 16x16, semi-transparent, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad16x16SemiTransparentTextureBlending() {
+    Dimensions dimensions = Dimensions(16, 16);
+    texturedQuad(dimensions, false, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(7Fh) - Textured Rectangle, 16x16, semi-transparent, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
+3rd  Texcoord+Palette  (ClutYyXxh) (for 4bpp Textures Xxh must be even!)
+*/
+void GPU::operationGp0TexturedQuad16x16SemiTransparentRawTexture() {
+    Dimensions dimensions = Dimensions(16, 16);
+    texturedQuad(dimensions, false, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
 GP1(02h) - Acknowledge GPU Interrupt (IRQ1)
 0-23  Not used (zero)                                        ;GPUSTAT.24
 */
@@ -840,6 +1148,40 @@ void GPU::operationGp0FillRectagleInVRAM() {
         topRight,
         bottomLeft,
         bottomRight,
+    };
+    renderer.pushQuad(vertices);
+    return;
+}
+
+void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode) {
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point point1 = Point(gp0InstructionBuffer[1]);
+    Point texturePoint1 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    Point point2 = Point(gp0InstructionBuffer[1]);
+    point2.x += dimensions.width;
+    Point texturePoint2 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    texturePoint2.x += dimensions.width;
+    Point point3 = Point(gp0InstructionBuffer[1]);
+    point3.y += dimensions.height;
+    Point texturePoint3 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    texturePoint3.y += dimensions.height;
+    Point point4 = Point(gp0InstructionBuffer[1]);
+    point4.x += dimensions.width;
+    point4.y += dimensions.height;
+    Point texturePoint4 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    texturePoint4.x += dimensions.width;
+    texturePoint4.y += dimensions.height;
+    uint16_t texturePageData = texturePageBaseY;
+    texturePageData <<= 2;
+    texturePageData |= texturePageBaseX;
+    Point texturePage = Point::forTexturePage(texturePageData);
+    GLuint textureDepthShift = 2 - texturePageColors;
+    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
+    array<Vertex, 4> vertices = {
+        Vertex(point1, color, texturePoint1, textureBlendMode, texturePage, textureDepthShift, clut),
+        Vertex(point2, color, texturePoint2, textureBlendMode, texturePage, textureDepthShift, clut),
+        Vertex(point3, color, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
+        Vertex(point4, color, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
     };
     renderer.pushQuad(vertices);
     return;

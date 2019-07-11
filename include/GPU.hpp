@@ -167,6 +167,22 @@ GP1(07h) - Vertical Display range (on Screen)
 
     void operationGp0MonochromeRectangle1x1DotOpaque();
     void operationGp0FillRectagleInVRAM();
+    void operationGp0TexturedQuadOpaqueTextureBlending();
+    void operationGp0TexturedQuadOpaqueRawTexture();
+    void operationGp0TexturedSemiTransparentOpaqueTextureBlending();
+    void operationGp0TexturedSemiTransparentOpaqueRawTexture();
+    void operationGp0TexturedQuad1x1OpaqueTextureBlending();
+    void operationGp0TexturedQuad1x1OpaqueRawTexture();
+    void operationGp0TexturedQuad1x1SemiTransparentTextureBlending();
+    void operationGp0TexturedQuad1x1SemiTransparentRawTexture();
+    void operationGp0TexturedQuad8x8OpaqueTextureBlending();
+    void operationGp0TexturedQuad8x8OpaqueRawTexture();
+    void operationGp0TexturedQuad8x8SemiTransparentTextureBlending();
+    void operationGp0TexturedQuad8x8SemiTransparentRawTexture();
+    void operationGp0TexturedQuad16x16OpaqueTextureBlending();
+    void operationGp0TexturedQuad16x16OpaqueRawTexture();
+    void operationGp0TexturedQuad16x16SemiTransparentTextureBlending();
+    void operationGp0TexturedQuad16x16SemiTransparentRawTexture();
 
     void operationGp1Reset(uint32_t value);
     void operationGp1DisplayMode(uint32_t value);
@@ -181,6 +197,8 @@ GP1(07h) - Vertical Display range (on Screen)
 
     uint32_t statusRegister() const;
     uint32_t readRegister() const;
+
+    void texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode);
 
     void executeGp1(uint32_t value);
 public:
