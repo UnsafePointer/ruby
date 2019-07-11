@@ -432,7 +432,6 @@ void GPU::operationGp1DMADirection(uint32_t value) {
 
 /*
 GP0(E3h) - Set Drawing Area top left (X1,Y1)
-GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
 0-9    X-coordinate (0..1023)
 10-18  Y-coordinate (0..511)   ;\on Old 160pin GPU (max 1MB VRAM)
 19-23  Not used (zero)         ;/
@@ -446,6 +445,15 @@ void GPU::operationGp0SetDrawingAreaTopLeft() {
     drawingAreaLeft = (value & 0x3ff);
 }
 
+/*
+GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
+0-9    X-coordinate (0..1023)
+10-18  Y-coordinate (0..511)   ;\on Old 160pin GPU (max 1MB VRAM)
+19-23  Not used (zero)         ;/
+10-19  Y-coordinate (0..1023)  ;\on New 208pin GPU (max 2MB VRAM)
+20-23  Not used (zero)         ;/(retail consoles have only 1MB though)
+24-31  Command  (Exh)
+*/
 void GPU::operationGp0SetDrawingAreaBottomRight() {
     uint32_t value = gp0InstructionBuffer[0];
     drawingAreaBottom = ((value >> 10) & 0x3ff);
@@ -699,16 +707,24 @@ void GPU::operationGp0TexturedQuadOpaqueTextureBlending() {
     return;
 }
 
+/*
+GP1(02h) - Acknowledge GPU Interrupt (IRQ1)
+0-23  Not used (zero)                                        ;GPUSTAT.24
+*/
 void GPU::operationGp1AcknowledgeGPUInterrupt(uint32_t value) {
     interruptRequestEnable = false;
     return;
 }
 
+/*
+GP1(01h) - Reset Command Buffer
+0-23  Not used (zero)
+*/
 void GPU::operationGp1ResetCommandBuffer(uint32_t value) {
     gp0InstructionBuffer.clear();
     gp0WordsRemaining = 0;
     gp0Mode = GP0Mode::Command;
-    // TODO: clear the command FIFO
+    printWarning("TODO: clear the command FIFO");
 }
 
 /*
