@@ -163,7 +163,11 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp0ShadedQuadOpaque();
     void operationGp0ShadedTriangleOpaque();
 
+    void operationGp0MonochromeThreePointOpaque();
+    void operationGp0MonochromeThreePointSemiTransparent();
     void operationGp0MonochromeFourPointOpaque();
+    void operationGp0MonochromeFourPointSemiTransparent();
+
     void operationGp0TexturedFourPointOpaqueTextureBlending();
 
     void operationGp0FillRectagleInVRAM();
@@ -210,6 +214,7 @@ GP1(07h) - Vertical Display range (on Screen)
 
     void texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode);
     void quad(Dimensions dimensions, bool opaque);
+    void monochromePolygon(uint numberOfPoints, bool opaque);
 
     void executeGp1(uint32_t value);
 public:

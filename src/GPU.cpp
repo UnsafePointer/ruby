@@ -137,10 +137,31 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x20: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeThreePointOpaque();
+                };
+                break;
+            }
+            case 0x22: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeThreePointSemiTransparent();
+                };
+                break;
+            }
             case 0x28: {
                 gp0WordsRemaining = 5;
                 gp0InstructionMethod = [&]() {
                     this->operationGp0MonochromeFourPointOpaque();
+                };
+                break;
+            }
+            case 0x2a: {
+                gp0WordsRemaining = 5;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeFourPointSemiTransparent();
                 };
                 break;
             }
@@ -845,6 +866,30 @@ void GPU::operationGp0TexturedFourPointOpaqueTextureBlending() {
 }
 
 /*
+GP0(20h) - Monochrome three-point polygon, opaque
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeThreePointOpaque() {
+    monochromePolygon(3, true);
+    return;
+}
+
+/*
+GP0(22h) - Monochrome three-point polygon, semi-transparent
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeThreePointSemiTransparent() {
+    monochromePolygon(3, false);
+    return;
+}
+
+/*
 GP0(28h) - Monochrome four-point polygon, opaque
 1st  Color+Command     (CcBbGgRrh)
 2nd  Vertex1           (YyyyXxxxh)
@@ -853,18 +898,20 @@ GP0(28h) - Monochrome four-point polygon, opaque
 (5th) Vertex4           (YyyyXxxxh) (if any)
 */
 void GPU::operationGp0MonochromeFourPointOpaque() {
-    Color color = Color(gp0InstructionBuffer[0]);
-    Point point1 = Point(gp0InstructionBuffer[1]);
-    Point point2 = Point(gp0InstructionBuffer[2]);
-    Point point3 = Point(gp0InstructionBuffer[3]);
-    Point point4 = Point(gp0InstructionBuffer[4]);
-    vector<Vertex> vertices = {
-        Vertex(point1, color),
-        Vertex(point2, color),
-        Vertex(point3, color),
-        Vertex(point4, color),
-    };
-    renderer.pushPolygon(vertices);
+    monochromePolygon(4, true);
+    return;
+}
+
+/*
+GP0(2Ah) - Monochrome four-point polygon, semi-transparent
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
+(5th) Vertex4           (YyyyXxxxh) (if any)
+*/
+void GPU::operationGp0MonochromeFourPointSemiTransparent() {
+    monochromePolygon(4, false);
     return;
 }
 
@@ -1319,4 +1366,14 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
     };
     renderer.pushPolygon(vertices);
     return;
+}
+
+void GPU::monochromePolygon(uint numberOfPoints, bool opaque) {
+    Color color = Color(gp0InstructionBuffer[0]);
+    vector<Vertex> vertices = vector<Vertex>();
+    for (uint i = 1; i <= numberOfPoints; i++) {
+        Point point = Point(gp0InstructionBuffer[i]);
+        vertices.push_back(Vertex(point, color));
+    }
+    renderer.pushPolygon(vertices);
 }
