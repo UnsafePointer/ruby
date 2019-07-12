@@ -140,7 +140,7 @@ void GPU::executeGp0(uint32_t value) {
             case 0x28: {
                 gp0WordsRemaining = 5;
                 gp0InstructionMethod = [&]() {
-                    this->operationGp0MonochromeQuadOpaque();
+                    this->operationGp0MonochromeFourPointOpaque();
                 };
                 break;
             }
@@ -653,30 +653,6 @@ void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
     displayLineEnd = ((value >> 10) & 0x3ff);
 }
 
-/*
-GP0(28h) - Monochrome four-point polygon, opaque
-1st  Color+Command     (CcBbGgRrh)
-2nd  Vertex1           (YyyyXxxxh)
-3rd  Vertex2           (YyyyXxxxh)
-4th  Vertex3           (YyyyXxxxh)
-(5th) Vertex4           (YyyyXxxxh) (if any)
-*/
-void GPU::operationGp0MonochromeQuadOpaque() {
-    Color color = Color(gp0InstructionBuffer[0]);
-    Point point1 = Point(gp0InstructionBuffer[1]);
-    Point point2 = Point(gp0InstructionBuffer[2]);
-    Point point3 = Point(gp0InstructionBuffer[3]);
-    Point point4 = Point(gp0InstructionBuffer[4]);
-    array<Vertex, 4> vertices = {
-        Vertex(point1, color),
-        Vertex(point2, color),
-        Vertex(point3, color),
-        Vertex(point4, color),
-    };
-    renderer.pushQuad(vertices);
-    return;
-}
-
 void GPU::operationGp0ClearCache() {
     return;
 }
@@ -814,6 +790,30 @@ void GPU::operationGp0TexturedFourPointOpaqueTextureBlending() {
         Vertex(point2, color, texturePoint2, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
         Vertex(point3, color, texturePoint3, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
         Vertex(point4, color, texturePoint4, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
+    };
+    renderer.pushQuad(vertices);
+    return;
+}
+
+/*
+GP0(28h) - Monochrome four-point polygon, opaque
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
+(5th) Vertex4           (YyyyXxxxh) (if any)
+*/
+void GPU::operationGp0MonochromeFourPointOpaque() {
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point point1 = Point(gp0InstructionBuffer[1]);
+    Point point2 = Point(gp0InstructionBuffer[2]);
+    Point point3 = Point(gp0InstructionBuffer[3]);
+    Point point4 = Point(gp0InstructionBuffer[4]);
+    array<Vertex, 4> vertices = {
+        Vertex(point1, color),
+        Vertex(point2, color),
+        Vertex(point3, color),
+        Vertex(point4, color),
     };
     renderer.pushQuad(vertices);
     return;
