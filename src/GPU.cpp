@@ -773,13 +773,13 @@ void GPU::operationGp0ShadedQuadOpaque() {
     Point point2 = Point(gp0InstructionBuffer[3]);
     Point point3 = Point(gp0InstructionBuffer[5]);
     Point point4 = Point(gp0InstructionBuffer[7]);
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         Vertex(point1, color1),
         Vertex(point2, color2),
         Vertex(point3, color3),
         Vertex(point4, color4),
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -799,12 +799,12 @@ void GPU::operationGp0ShadedTriangleOpaque() {
     Point point1 = Point(gp0InstructionBuffer[1]);
     Point point2 = Point(gp0InstructionBuffer[3]);
     Point point3 = Point(gp0InstructionBuffer[5]);
-    array<Vertex, 3> vertices = {
+    vector<Vertex> vertices = {
         Vertex(point1, color1),
         Vertex(point2, color2),
         Vertex(point3, color3),
     };
-    renderer.pushTriangle(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -834,13 +834,13 @@ void GPU::operationGp0TexturedFourPointOpaqueTextureBlending() {
     Point texturePoint4 = Point::forTexturePosition(gp0InstructionBuffer[8] & 0xffff);
     TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[4] >> 16) >> 7) & 0x3);
     GLuint textureDepthShift = 2 - texturePageColors;
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         Vertex(point1, color, texturePoint1, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
         Vertex(point2, color, texturePoint2, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
         Vertex(point3, color, texturePoint3, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
         Vertex(point4, color, texturePoint4, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -858,13 +858,13 @@ void GPU::operationGp0MonochromeFourPointOpaque() {
     Point point2 = Point(gp0InstructionBuffer[2]);
     Point point3 = Point(gp0InstructionBuffer[3]);
     Point point4 = Point(gp0InstructionBuffer[4]);
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         Vertex(point1, color),
         Vertex(point2, color),
         Vertex(point3, color),
         Vertex(point4, color),
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -1256,13 +1256,13 @@ void GPU::operationGp0FillRectagleInVRAM() {
     Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
     bottomRight.point.x = bottomRight.point.x + width;
     bottomRight.point.y = bottomRight.point.y + height;
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         topLeft,
         topRight,
         bottomLeft,
         bottomRight,
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -1290,13 +1290,13 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
     Point texturePage = Point::forTexturePage(texturePageData);
     GLuint textureDepthShift = 2 - texturePageColors;
     Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         Vertex(point1, color, texturePoint1, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point2, color, texturePoint2, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point3, color, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point4, color, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -1311,12 +1311,12 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
     Vertex bottomRight = Vertex(point, color);
     bottomRight.point.x += dimensions.width;
     bottomRight.point.y += dimensions.height;
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         topLeft,
         topRight,
         bottomLeft,
         bottomRight,
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }

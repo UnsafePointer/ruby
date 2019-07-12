@@ -51,23 +51,28 @@ Renderer::~Renderer() {
     SDL_Quit();
 }
 
-void Renderer::pushTriangle(std::array<Vertex, 3> vertices) {
+void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     uint size = vertices.size();
-    if (size > buffer->remainingCapacity() - size) {
+    if (size < 3 || size > 4) {
+        printError("Unhandled poligon with %d vertices", size);
+        return;
+    }
+    uint overSize = size - 3;
+    uint checkSize = size - overSize;
+    if (checkSize > buffer->remainingCapacity() - checkSize) {
         display();
     }
-    buffer->addData(vector<Vertex>(vertices.begin(), vertices.end()));
-    return;
-}
-
-
-void Renderer::pushQuad(std::array<Vertex, 4> vertices) {
-    uint size = vertices.size() - 1;
-    if (size > buffer->remainingCapacity() - size) {
-        display();
+    switch (size) {
+        case 3: {
+            buffer->addData(vertices);
+            break;
+        }
+        case 4: {
+            buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
+            buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
+            break;
+        }
     }
-    buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
-    buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
     return;
 }
 
