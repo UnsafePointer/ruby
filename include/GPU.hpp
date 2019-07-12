@@ -165,8 +165,10 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp0ShadedTriangleOpaque();
     void operationGp0TexturedFourPointOpaqueTextureBlending();
 
-    void operationGp0MonochromeRectangle1x1DotOpaque();
     void operationGp0FillRectagleInVRAM();
+
+    void operationGp0MonochromeQuad1x1Opaque();
+
     void operationGp0TexturedQuadOpaqueTextureBlending();
     void operationGp0TexturedQuadOpaqueRawTexture();
     void operationGp0TexturedSemiTransparentOpaqueTextureBlending();
@@ -183,6 +185,7 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp0TexturedQuad16x16OpaqueRawTexture();
     void operationGp0TexturedQuad16x16SemiTransparentTextureBlending();
     void operationGp0TexturedQuad16x16SemiTransparentRawTexture();
+
 
     void operationGp1Reset(uint32_t value);
     void operationGp1DisplayMode(uint32_t value);
