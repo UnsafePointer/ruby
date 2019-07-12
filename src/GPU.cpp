@@ -193,10 +193,59 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x60: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeQuadOpaque();
+                };
+                break;
+            }
+            case 0x62: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeQuadSemiTransparent();
+                };
+                break;
+            }
             case 0x68: {
                 gp0WordsRemaining = 2;
                 gp0InstructionMethod = [&]() {
                     this->operationGp0MonochromeQuad1x1Opaque();
+                };
+                break;
+            }
+            case 0x6a: {
+                gp0WordsRemaining = 2;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeQuad1x1SemiTransparent();
+                };
+                break;
+            }
+            case 0x70: {
+                gp0WordsRemaining = 2;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeQuad8x8Opaque();
+                };
+                break;
+            }
+            case 0x72: {
+                gp0WordsRemaining = 2;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeQuad8x8SemiTransparent();
+                };
+                break;
+            }
+            case 0x78: {
+                gp0WordsRemaining = 2;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeQuad16x16Opaque();
+                };
+                break;
+            }
+            case 0x7a: {
+                gp0WordsRemaining = 2;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeQuad16x16SemiTransparent();
                 };
                 break;
             }
@@ -820,6 +869,96 @@ void GPU::operationGp0MonochromeFourPointOpaque() {
 }
 
 /*
+GP0(60h) - Monochrome Rectangle (variable size) (opaque)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+(3rd) Width+Height      (YsizXsizh) (variable size only) (max 1023x511)
+*/
+void GPU::operationGp0MonochromeQuadOpaque() {
+    Dimensions dimensions = Dimensions(gp0InstructionBuffer[2]);
+    quad(dimensions, true);
+    return;
+}
+
+/*
+GP0(62h) - Monochrome Rectangle (variable size) (semi-transparent)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+(3rd) Width+Height      (YsizXsizh) (variable size only) (max 1023x511)
+*/
+void GPU::operationGp0MonochromeQuadSemiTransparent() {
+    Dimensions dimensions = Dimensions(gp0InstructionBuffer[2]);
+    quad(dimensions, false);
+    return;
+}
+
+/*
+GP0(68h) - Monochrome Rectangle (1x1) (Dot) (opaque)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeQuad1x1Opaque() {
+    Dimensions dimensions = Dimensions(1, 1);
+    quad(dimensions, true);
+    return;
+}
+
+/*
+GP0(6Ah) - Monochrome Rectangle (1x1) (Dot) (semi-transparent)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeQuad1x1SemiTransparent() {
+    Dimensions dimensions = Dimensions(1, 1);
+    quad(dimensions, false);
+    return;
+}
+
+/*
+GP0(70h) - Monochrome Rectangle (8x8) (opaque)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeQuad8x8Opaque() {
+    Dimensions dimensions = Dimensions(8, 8);
+    quad(dimensions, true);
+    return;
+}
+
+/*
+GP0(72h) - Monochrome Rectangle (8x8) (semi-transparent)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeQuad8x8SemiTransparent() {
+    Dimensions dimensions = Dimensions(8, 8);
+    quad(dimensions, false);
+    return;
+}
+
+/*
+GP0(78h) - Monochrome Rectangle (16x16) (opaque)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeQuad16x16Opaque() {
+    Dimensions dimensions = Dimensions(16, 16);
+    quad(dimensions, true);
+    return;
+}
+
+/*
+GP0(7Ah) - Monochrome Rectangle (16x16) (semi-transparent)
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex            (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeQuad16x16SemiTransparent() {
+    Dimensions dimensions = Dimensions(16, 16);
+    quad(dimensions, false);
+    return;
+}
+
+/*
 GP0(64h) - Textured Rectangle, variable size, opaque, texture-blending
 1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
 2nd  Vertex            (YyyyXxxxh) (upper-left edge of the rectangle)
@@ -1098,32 +1237,6 @@ void GPU::operationGp1GetGPUInfo(uint32_t value) {
 }
 
 /*
-GP0(68h) - Monochrome Rectangle (1x1) (Dot) (opaque)
-1st  Color+Command     (CcBbGgRrh)
-2nd  Vertex            (YyyyXxxxh)
-*/
-void GPU::operationGp0MonochromeQuad1x1Opaque() {
-    Color color = Color(gp0InstructionBuffer[0]);
-    Point point = Point(gp0InstructionBuffer[1]);
-    Vertex topLeft = Vertex(point, color);
-    Vertex topRight = Vertex(point, color);
-    topRight.point.x += + 1;
-    Vertex bottomLeft = Vertex(point, color);
-    bottomLeft.point.y += 1;
-    Vertex bottomRight = Vertex(point, color);
-    bottomRight.point.x += 1;
-    bottomRight.point.y += 1;
-    array<Vertex, 4> vertices = {
-        topLeft,
-        topRight,
-        bottomLeft,
-        bottomRight,
-    };
-    renderer.pushQuad(vertices);
-    return;
-}
-
-/*
 GP0(02h) - Fill Rectangle in VRAM
 1st  Color+Command     (CcBbGgRrh)  ;24bit RGB value (see note)
 2nd  Top Left Corner   (YyyyXxxxh)  ;Xpos counted in halfwords, steps of 10h
@@ -1182,6 +1295,27 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
         Vertex(point2, color, texturePoint2, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point3, color, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point4, color, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
+    };
+    renderer.pushQuad(vertices);
+    return;
+}
+
+void GPU::quad(Dimensions dimensions, bool opaque) {
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point point = Point(gp0InstructionBuffer[1]);
+    Vertex topLeft = Vertex(point, color);
+    Vertex topRight = Vertex(point, color);
+    topRight.point.x += + dimensions.width;
+    Vertex bottomLeft = Vertex(point, color);
+    bottomLeft.point.y += dimensions.height;
+    Vertex bottomRight = Vertex(point, color);
+    bottomRight.point.x += dimensions.width;
+    bottomRight.point.y += dimensions.height;
+    array<Vertex, 4> vertices = {
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
     };
     renderer.pushQuad(vertices);
     return;

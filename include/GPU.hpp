@@ -168,7 +168,14 @@ GP1(07h) - Vertical Display range (on Screen)
 
     void operationGp0FillRectagleInVRAM();
 
+    void operationGp0MonochromeQuadOpaque();
+    void operationGp0MonochromeQuadSemiTransparent();
     void operationGp0MonochromeQuad1x1Opaque();
+    void operationGp0MonochromeQuad1x1SemiTransparent();
+    void operationGp0MonochromeQuad8x8Opaque();
+    void operationGp0MonochromeQuad8x8SemiTransparent();
+    void operationGp0MonochromeQuad16x16Opaque();
+    void operationGp0MonochromeQuad16x16SemiTransparent();
 
     void operationGp0TexturedQuadOpaqueTextureBlending();
     void operationGp0TexturedQuadOpaqueRawTexture();
@@ -187,7 +194,6 @@ GP1(07h) - Vertical Display range (on Screen)
     void operationGp0TexturedQuad16x16SemiTransparentTextureBlending();
     void operationGp0TexturedQuad16x16SemiTransparentRawTexture();
 
-
     void operationGp1Reset(uint32_t value);
     void operationGp1DisplayMode(uint32_t value);
     void operationGp1DMADirection(uint32_t value);
@@ -203,6 +209,7 @@ GP1(07h) - Vertical Display range (on Screen)
     uint32_t readRegister() const;
 
     void texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode);
+    void quad(Dimensions dimensions, bool opaque);
 
     void executeGp1(uint32_t value);
 public:
