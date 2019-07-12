@@ -66,6 +66,14 @@ void main() {
             discard;
         }
 
-        fragment_color = texel;
+        vec4 out_color;
+
+        if (fragment_texture_blend_mode == BLEND_MODE_RAW_TEXTURE) {
+          out_color = texel;
+        } else {
+          out_color = vec4(color * 2. * texel.rgb, texel.a);
+        }
+
+        fragment_color = out_color;
     }
 }
