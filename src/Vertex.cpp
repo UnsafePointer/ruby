@@ -49,7 +49,6 @@ Color::Color(uint32_t color) {
 
 Vertex::Vertex(Point point, Color color) : point(point), color(color), texturePosition(), textureBlendMode(), texturePage(), textureDepthShift(), clut() {}
 
-
 Vertex::Vertex(Point point, Color color, Point texturePosition, TextureBlendMode textureBlendMode, Point texturePage, GLuint textureDepthShift, Point clut) : point(point), color(color), texturePosition(texturePosition), textureBlendMode(textureBlendMode), texturePage(texturePage), textureDepthShift(textureDepthShift), clut(clut) {}
 
 Vertex::~Vertex() {}

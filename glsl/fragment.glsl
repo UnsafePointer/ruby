@@ -25,7 +25,11 @@ int ps_color(vec4 color) {
 }
 
 bool is_transparent(vec4 texel) {
-  return texel == vec4(0U, 0U, 0U, 0U);
+  return ps_color(texel) == 0U;
+}
+
+vec4 get_pixel_from_vram(uint x, uint y) {
+  return texelFetch(frame_buffer_texture, ivec2(x & 0x3ffU, y & 0x1ffU), 0);
 }
 
 void main() {
@@ -41,7 +45,7 @@ void main() {
 
         texel_x_pix += fragment_texture_page.x;
         texel_y += fragment_texture_page.y;
-        vec4 texel = texelFetch(frame_buffer_texture, ivec2(texel_x_pix, texel_y), 0);
+        vec4 texel = get_pixel_from_vram(texel_x_pix, texel_y);
 
         if (fragment_texture_depth_shift > 0) {
             uint align = texel_x & ((1U << fragment_texture_depth_shift) - 1U);
@@ -55,13 +59,21 @@ void main() {
             uint clut_x = fragment_clut.x + index;
             uint clut_y = fragment_clut.y;
 
-            texel = texelFetch(frame_buffer_texture, ivec2(clut_x, clut_y), 0);
+            texel = get_pixel_from_vram(clut_x, clut_y);
         }
 
         if (is_transparent(texel)) {
             discard;
         }
 
-        fragment_color = texel;
+        vec4 out_color;
+
+        if (fragment_texture_blend_mode == BLEND_MODE_RAW_TEXTURE) {
+          out_color = texel;
+        } else {
+          out_color = vec4(color * 2. * texel.rgb, texel.a);
+        }
+
+        fragment_color = out_color;
     }
 }

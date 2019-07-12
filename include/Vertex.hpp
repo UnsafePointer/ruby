@@ -9,6 +9,7 @@ union Dimensions {
 
     uint32_t _value;
     Dimensions(uint32_t value) : _value(value) {}
+    Dimensions(uint32_t width, uint32_t height) : width(width), height(height) {}
 };
 
 struct Point {
