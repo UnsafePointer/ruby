@@ -25,7 +25,7 @@ int ps_color(vec4 color) {
 }
 
 bool is_transparent(vec4 texel) {
-  return texel == vec4(0U, 0U, 0U, 0U);
+  return ps_color(texel) == 0U;
 }
 
 void main() {
