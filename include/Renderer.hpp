@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <memory>
-#include <array>
+#include <vector>
 #include "RendererProgram.hpp"
 #include "RendererBuffer.hpp"
 #include "Vertex.hpp"
@@ -26,8 +26,7 @@ public:
     Renderer();
     ~Renderer();
 
-    void pushTriangle(std::array<Vertex, 3> vertices);
-    void pushQuad(std::array<Vertex, 4> vertices);
+    void pushPolygon(std::vector<Vertex> vertices);
     void setDrawingOffset(int16_t x, int16_t y);
     void display();
     void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);

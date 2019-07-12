@@ -137,10 +137,59 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x20: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeThreePointOpaque();
+                };
+                break;
+            }
+            case 0x22: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeThreePointSemiTransparent();
+                };
+                break;
+            }
             case 0x28: {
                 gp0WordsRemaining = 5;
                 gp0InstructionMethod = [&]() {
                     this->operationGp0MonochromeFourPointOpaque();
+                };
+                break;
+            }
+            case 0x2a: {
+                gp0WordsRemaining = 5;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeFourPointSemiTransparent();
+                };
+                break;
+            }
+            case 0x24: {
+                gp0WordsRemaining = 7;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedThreePointOpaqueTextureBlending();
+                };
+                break;
+            }
+            case 0x25: {
+                gp0WordsRemaining = 7;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedThreePointOpaqueRawTexture();
+                };
+                break;
+            }
+            case 0x26: {
+                gp0WordsRemaining = 7;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedThreePointSemiTransparentTextureBlending();
+                };
+                break;
+            }
+            case 0x27: {
+                gp0WordsRemaining = 7;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedThreePointSemiTransparentRawTexture();
                 };
                 break;
             }
@@ -151,17 +200,80 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x2d: {
+                gp0WordsRemaining = 9;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedFourPointOpaqueRawTexture();
+                };
+                break;
+            }
+            case 0x2e: {
+                gp0WordsRemaining = 9;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedFourPointSemiTransparentTextureBlending();
+                };
+                break;
+            }
+            case 0x2f: {
+                gp0WordsRemaining = 9;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedFourPointSemiTransparentRawTexture();
+                };
+                break;
+            }
             case 0x30: {
                 gp0WordsRemaining = 6;
                 gp0InstructionMethod = [&]() {
-                    this->operationGp0ShadedTriangleOpaque();
+                    this->operationGp0ShadedThreePointOpaque();
+                };
+                break;
+            }
+            case 0x32: {
+                gp0WordsRemaining = 6;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0ShadedThreePointSemiTransparent();
                 };
                 break;
             }
             case 0x38: {
                 gp0WordsRemaining = 8;
                 gp0InstructionMethod = [&]() {
-                    this->operationGp0ShadedQuadOpaque();
+                    this->operationGp0ShadedFourPointOpaque();
+                };
+                break;
+            }
+            case 0x3a: {
+                gp0WordsRemaining = 8;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0ShadedFourPointSemiTransparent();
+                };
+                break;
+            }
+            case 0x34: {
+                gp0WordsRemaining = 9;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedShadedThreePointOpaqueTextureBlending();
+                };
+                break;
+            }
+            case 0x36: {
+                gp0WordsRemaining = 9;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedShadedThreePointSemiTransparentTextureBlending();
+                };
+                break;
+            }
+            case 0x3c: {
+                gp0WordsRemaining = 12;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedShadedFourPointOpaqueTextureBlending();
+                };
+                break;
+            }
+            case 0x3e: {
+                gp0WordsRemaining = 12;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0TexturedShadedFourPointSemiTransparentTextureBlending();
                 };
                 break;
             }
@@ -754,57 +866,112 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
 }
 
 /*
-GP0(38h) - Shaded four-point polygon, opaque
-1st  Color1+Command    (CcBbGgRrh)
+GP0(20h) - Monochrome three-point polygon, opaque
+1st  Color+Command     (CcBbGgRrh)
 2nd  Vertex1           (YyyyXxxxh)
-3rd  Color2            (00BbGgRrh)
-4th  Vertex2           (YyyyXxxxh)
-5th  Color3            (00BbGgRrh)
-6th  Vertex3           (YyyyXxxxh)
-(7th) Color4            (00BbGgRrh) (if any)
-(8th) Vertex4           (YyyyXxxxh) (if any)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
 */
-void GPU::operationGp0ShadedQuadOpaque() {
-    Color color1 = Color(gp0InstructionBuffer[0]);
-    Color color2 = Color(gp0InstructionBuffer[2]);
-    Color color3 = Color(gp0InstructionBuffer[4]);
-    Color color4 = Color(gp0InstructionBuffer[6]);
-    Point point1 = Point(gp0InstructionBuffer[1]);
-    Point point2 = Point(gp0InstructionBuffer[3]);
-    Point point3 = Point(gp0InstructionBuffer[5]);
-    Point point4 = Point(gp0InstructionBuffer[7]);
-    array<Vertex, 4> vertices = {
-        Vertex(point1, color1),
-        Vertex(point2, color2),
-        Vertex(point3, color3),
-        Vertex(point4, color4),
-    };
-    renderer.pushQuad(vertices);
+void GPU::operationGp0MonochromeThreePointOpaque() {
+    monochromePolygon(3, true);
     return;
 }
 
 /*
-GP0(30h) - Shaded three-point polygon, opaque
-  1st  Color1+Command    (CcBbGgRrh)
-  2nd  Vertex1           (YyyyXxxxh)
-  3rd  Color2            (00BbGgRrh)
-  4th  Vertex2           (YyyyXxxxh)
-  5th  Color3            (00BbGgRrh)
-  6th  Vertex3           (YyyyXxxxh)
+GP0(22h) - Monochrome three-point polygon, semi-transparent
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
 */
-void GPU::operationGp0ShadedTriangleOpaque() {
-    Color color1 = Color(gp0InstructionBuffer[0]);
-    Color color2 = Color(gp0InstructionBuffer[2]);
-    Color color3 = Color(gp0InstructionBuffer[4]);
-    Point point1 = Point(gp0InstructionBuffer[1]);
-    Point point2 = Point(gp0InstructionBuffer[3]);
-    Point point3 = Point(gp0InstructionBuffer[5]);
-    array<Vertex, 3> vertices = {
-        Vertex(point1, color1),
-        Vertex(point2, color2),
-        Vertex(point3, color3),
-    };
-    renderer.pushTriangle(vertices);
+void GPU::operationGp0MonochromeThreePointSemiTransparent() {
+    monochromePolygon(3, false);
+    return;
+}
+
+/*
+GP0(28h) - Monochrome four-point polygon, opaque
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
+(5th) Vertex4           (YyyyXxxxh) (if any)
+*/
+void GPU::operationGp0MonochromeFourPointOpaque() {
+    monochromePolygon(4, true);
+    return;
+}
+
+/*
+GP0(2Ah) - Monochrome four-point polygon, semi-transparent
+1st  Color+Command     (CcBbGgRrh)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Vertex2           (YyyyXxxxh)
+4th  Vertex3           (YyyyXxxxh)
+(5th) Vertex4           (YyyyXxxxh) (if any)
+*/
+void GPU::operationGp0MonochromeFourPointSemiTransparent() {
+    monochromePolygon(4, false);
+    return;
+}
+
+/*
+GP0(24h) - Textured three-point polygon, opaque, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+*/
+void GPU::operationGp0TexturedThreePointOpaqueTextureBlending() {
+    texturedPolygon(3, true, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(25h) - Textured three-point polygon, opaque, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+*/
+void GPU::operationGp0TexturedThreePointOpaqueRawTexture() {
+    texturedPolygon(3, true, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(26h) - Textured three-point polygon, semi-transparent, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+*/
+void GPU::operationGp0TexturedThreePointSemiTransparentTextureBlending() {
+    texturedPolygon(3, false, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(27h) - Textured three-point polygon, semi-transparent, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+*/
+void GPU::operationGp0TexturedThreePointSemiTransparentRawTexture() {
+    texturedPolygon(3, false, TextureBlendModeRawTexture);
     return;
 }
 
@@ -821,50 +988,193 @@ GP0(2Ch) - Textured four-point polygon, opaque, texture-blending
 (9th) Texcoord4         (0000YyXxh) (if any)
 */
 void GPU::operationGp0TexturedFourPointOpaqueTextureBlending() {
-    Color color = Color(gp0InstructionBuffer[0]);
-    Point point1 = Point(gp0InstructionBuffer[1]);
-    Point point2 = Point(gp0InstructionBuffer[3]);
-    Point point3 = Point(gp0InstructionBuffer[5]);
-    Point point4 = Point(gp0InstructionBuffer[7]);
-    Point texturePoint1 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
-    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
-    Point texturePoint2 = Point::forTexturePosition(gp0InstructionBuffer[4] & 0xffff);
-    Point texturePage = Point::forTexturePage(gp0InstructionBuffer[4] >> 16);
-    Point texturePoint3 = Point::forTexturePosition(gp0InstructionBuffer[6] & 0xffff);
-    Point texturePoint4 = Point::forTexturePosition(gp0InstructionBuffer[8] & 0xffff);
-    TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[4] >> 16) >> 7) & 0x3);
-    GLuint textureDepthShift = 2 - texturePageColors;
-    array<Vertex, 4> vertices = {
-        Vertex(point1, color, texturePoint1, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
-        Vertex(point2, color, texturePoint2, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
-        Vertex(point3, color, texturePoint3, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
-        Vertex(point4, color, texturePoint4, TextureBlendModeTextureBlend, texturePage, textureDepthShift, clut),
-    };
-    renderer.pushQuad(vertices);
+    texturedPolygon(4, true, TextureBlendModeTextureBlend);
     return;
 }
 
 /*
-GP0(28h) - Monochrome four-point polygon, opaque
-1st  Color+Command     (CcBbGgRrh)
+GP0(2Dh) - Textured four-point polygon, opaque, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
 2nd  Vertex1           (YyyyXxxxh)
-3rd  Vertex2           (YyyyXxxxh)
-4th  Vertex3           (YyyyXxxxh)
-(5th) Vertex4           (YyyyXxxxh) (if any)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+(8th) Vertex4           (YyyyXxxxh) (if any)
+(9th) Texcoord4         (0000YyXxh) (if any)
 */
-void GPU::operationGp0MonochromeFourPointOpaque() {
-    Color color = Color(gp0InstructionBuffer[0]);
-    Point point1 = Point(gp0InstructionBuffer[1]);
-    Point point2 = Point(gp0InstructionBuffer[2]);
-    Point point3 = Point(gp0InstructionBuffer[3]);
-    Point point4 = Point(gp0InstructionBuffer[4]);
-    array<Vertex, 4> vertices = {
-        Vertex(point1, color),
-        Vertex(point2, color),
-        Vertex(point3, color),
-        Vertex(point4, color),
-    };
-    renderer.pushQuad(vertices);
+void GPU::operationGp0TexturedFourPointOpaqueRawTexture() {
+    texturedPolygon(4, true, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(2Eh) - Textured four-point polygon, semi-transparent, texture-blending
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+(8th) Vertex4           (YyyyXxxxh) (if any)
+(9th) Texcoord4         (0000YyXxh) (if any)
+*/
+void GPU::operationGp0TexturedFourPointSemiTransparentTextureBlending() {
+    texturedPolygon(4, false, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(2Fh) - Textured four-point polygon, semi-transparent, raw-texture
+1st  Color+Command     (CcBbGgRrh) (color is ignored for raw-textures)
+2nd  Vertex1           (YyyyXxxxh)
+3rd  Texcoord1+Palette (ClutYyXxh)
+4th  Vertex2           (YyyyXxxxh)
+5th  Texcoord2+Texpage (PageYyXxh)
+6th  Vertex3           (YyyyXxxxh)
+7th  Texcoord3         (0000YyXxh)
+(8th) Vertex4           (YyyyXxxxh) (if any)
+(9th) Texcoord4         (0000YyXxh) (if any)
+*/
+void GPU::operationGp0TexturedFourPointSemiTransparentRawTexture() {
+    texturedPolygon(4, false, TextureBlendModeRawTexture);
+    return;
+}
+
+/*
+GP0(30h) - Shaded three-point polygon, opaque
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Color2            (00BbGgRrh)
+  4th  Vertex2           (YyyyXxxxh)
+  5th  Color3            (00BbGgRrh)
+  6th  Vertex3           (YyyyXxxxh)
+*/
+void GPU::operationGp0ShadedThreePointOpaque() {
+    shadedPolygon(3, true);
+    return;
+}
+
+/*
+GP0(30h) - Shaded three-point polygon, opaque
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Color2            (00BbGgRrh)
+  4th  Vertex2           (YyyyXxxxh)
+  5th  Color3            (00BbGgRrh)
+  6th  Vertex3           (YyyyXxxxh)
+*/
+void GPU::operationGp0ShadedThreePointSemiTransparent() {
+    shadedPolygon(3, false);
+    return;
+}
+
+/*
+GP0(30h) - Shaded three-point polygon, opaque
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Color2            (00BbGgRrh)
+  4th  Vertex2           (YyyyXxxxh)
+  5th  Color3            (00BbGgRrh)
+  6th  Vertex3           (YyyyXxxxh)
+ (7th) Color4            (00BbGgRrh) (if any)
+ (8th) Vertex4           (YyyyXxxxh) (if any)
+
+*/
+void GPU::operationGp0ShadedFourPointOpaque() {
+    shadedPolygon(4, true);
+    return;
+}
+
+/*
+GP0(30h) - Shaded three-point polygon, opaque
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Color2            (00BbGgRrh)
+  4th  Vertex2           (YyyyXxxxh)
+  5th  Color3            (00BbGgRrh)
+  6th  Vertex3           (YyyyXxxxh)
+ (7th) Color4            (00BbGgRrh) (if any)
+ (8th) Vertex4           (YyyyXxxxh) (if any)
+*/
+void GPU::operationGp0ShadedFourPointSemiTransparent() {
+    shadedPolygon(4, false);
+    return;
+}
+
+/*
+GP0(34h) - Shaded Textured three-point polygon, opaque, texture-blending
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Texcoord1+Palette (ClutYyXxh)
+  4th  Color2            (00BbGgRrh)
+  5th  Vertex2           (YyyyXxxxh)
+  6th  Texcoord2+Texpage (PageYyXxh)
+  7th  Color3            (00BbGgRrh)
+  8th  Vertex3           (YyyyXxxxh)
+  9th  Texcoord3         (0000YyXxh)
+*/
+void GPU::operationGp0TexturedShadedThreePointOpaqueTextureBlending() {
+    shadedTexturedPolygon(3, true, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(36h) - Shaded Textured three-point polygon, semi-transparent, tex-blend
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Texcoord1+Palette (ClutYyXxh)
+  4th  Color2            (00BbGgRrh)
+  5th  Vertex2           (YyyyXxxxh)
+  6th  Texcoord2+Texpage (PageYyXxh)
+  7th  Color3            (00BbGgRrh)
+  8th  Vertex3           (YyyyXxxxh)
+  9th  Texcoord3         (0000YyXxh)
+*/
+void GPU::operationGp0TexturedShadedThreePointSemiTransparentTextureBlending() {
+    shadedTexturedPolygon(3, false, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(3Ch) - Shaded Textured four-point polygon, opaque, texture-blending
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Texcoord1+Palette (ClutYyXxh)
+  4th  Color2            (00BbGgRrh)
+  5th  Vertex2           (YyyyXxxxh)
+  6th  Texcoord2+Texpage (PageYyXxh)
+  7th  Color3            (00BbGgRrh)
+  8th  Vertex3           (YyyyXxxxh)
+  9th  Texcoord3         (0000YyXxh)
+ (10th) Color4           (00BbGgRrh) (if any)
+ (11th) Vertex4          (YyyyXxxxh) (if any)
+ (12th) Texcoord4        (0000YyXxh) (if any)
+*/
+void GPU::operationGp0TexturedShadedFourPointOpaqueTextureBlending() {
+    shadedTexturedPolygon(4, true, TextureBlendModeTextureBlend);
+    return;
+}
+
+/*
+GP0(3Eh) - Shaded Textured four-point polygon, semi-transparent, tex-blend
+  1st  Color1+Command    (CcBbGgRrh)
+  2nd  Vertex1           (YyyyXxxxh)
+  3rd  Texcoord1+Palette (ClutYyXxh)
+  4th  Color2            (00BbGgRrh)
+  5th  Vertex2           (YyyyXxxxh)
+  6th  Texcoord2+Texpage (PageYyXxh)
+  7th  Color3            (00BbGgRrh)
+  8th  Vertex3           (YyyyXxxxh)
+  9th  Texcoord3         (0000YyXxh)
+ (10th) Color4           (00BbGgRrh) (if any)
+ (11th) Vertex4          (YyyyXxxxh) (if any)
+ (12th) Texcoord4        (0000YyXxh) (if any)
+*/
+void GPU::operationGp0TexturedShadedFourPointSemiTransparentTextureBlending() {
+    shadedTexturedPolygon(4, true, TextureBlendModeTextureBlend);
     return;
 }
 
@@ -1256,13 +1566,13 @@ void GPU::operationGp0FillRectagleInVRAM() {
     Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
     bottomRight.point.x = bottomRight.point.x + width;
     bottomRight.point.y = bottomRight.point.y + height;
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         topLeft,
         topRight,
         bottomLeft,
         bottomRight,
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -1290,13 +1600,13 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
     Point texturePage = Point::forTexturePage(texturePageData);
     GLuint textureDepthShift = 2 - texturePageColors;
     Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         Vertex(point1, color, texturePoint1, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point2, color, texturePoint2, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point3, color, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point4, color, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
 }
 
@@ -1311,12 +1621,65 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
     Vertex bottomRight = Vertex(point, color);
     bottomRight.point.x += dimensions.width;
     bottomRight.point.y += dimensions.height;
-    array<Vertex, 4> vertices = {
+    vector<Vertex> vertices = {
         topLeft,
         topRight,
         bottomLeft,
         bottomRight,
     };
-    renderer.pushQuad(vertices);
+    renderer.pushPolygon(vertices);
     return;
+}
+
+void GPU::monochromePolygon(uint numberOfPoints, bool opaque) {
+    Color color = Color(gp0InstructionBuffer[0]);
+    vector<Vertex> vertices = vector<Vertex>();
+    for (uint i = 1; i <= numberOfPoints; i++) {
+        Point point = Point(gp0InstructionBuffer[i]);
+        vertices.push_back(Vertex(point, color));
+    }
+    renderer.pushPolygon(vertices);
+}
+
+void GPU::shadedPolygon(uint numberOfPoints, bool opaque) {
+    vector<Vertex> vertices = vector<Vertex>();
+    for (uint i = 0; i < numberOfPoints; i++) {
+        Color color = Color(gp0InstructionBuffer[i*2]);
+        Point point = Point(gp0InstructionBuffer[i*2+1]);
+        vertices.push_back(Vertex(point, color));
+    }
+    renderer.pushPolygon(vertices);
+}
+
+void GPU::texturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
+    Color color = Color(gp0InstructionBuffer[0]);
+    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
+    Point texturePage = Point::forTexturePage(gp0InstructionBuffer[4] >> 16);
+    TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[4] >> 16) >> 7) & 0x3);
+    GLuint textureDepthShift = 2 - texturePageColors;
+
+    vector<Vertex> vertices = vector<Vertex>();
+    for (uint i = 0; i < numberOfPoints; i++) {
+        Point point = Point(gp0InstructionBuffer[i*2+1]);
+        Point texturePoint = Point::forTexturePosition(gp0InstructionBuffer[i*2+2] & 0xffff);
+        Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
+        vertices.push_back(vertex);
+    }
+    renderer.pushPolygon(vertices);
+}
+
+void GPU::shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
+    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
+    Point texturePage = Point::forTexturePage(gp0InstructionBuffer[5] >> 16);
+    TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[5] >> 16) >> 7) & 0x3);
+    GLuint textureDepthShift = 2 - texturePageColors;
+    vector<Vertex> vertices = vector<Vertex>();
+    for (uint i = 0; i < numberOfPoints; i++) {
+        Color color = Color(gp0InstructionBuffer[i*3]);
+        Point point = Point(gp0InstructionBuffer[i*3+1]);
+        Point texturePoint = Point::forTexturePosition(gp0InstructionBuffer[i*3+2] & 0xffff);
+        Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
+        vertices.push_back(vertex);
+    }
+    renderer.pushPolygon(vertices);
 }
