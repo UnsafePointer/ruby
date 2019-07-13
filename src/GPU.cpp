@@ -309,6 +309,34 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x50: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0ShadedLineOpaque();
+                };
+                break;
+            }
+            case 0x52: {
+                gp0WordsRemaining = 4;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0ShadedLineSemiTransparent();
+                };
+                break;
+            }
+            case 0x58: {
+                gp0WordsRemaining = -1;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0ShadedPolylineOpaque();
+                };
+                break;
+            }
+            case 0x5a: {
+                gp0WordsRemaining = -1;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0ShadedPolylineSemiTransparent();
+                };
+                break;
+            }
             case 0x64: {
                 gp0WordsRemaining = 4;
                 gp0InstructionMethod = [&]() {
@@ -1264,6 +1292,60 @@ void GPU::operationGp0MonochromePolylineSemiTransparent() {
 }
 
 /*
+GP0(50h) - Shaded line, opaque
+  1st   Color1+Command    (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Color2            (00BbGgRrh)
+  4th   Vertex2           (YyyyXxxxh)
+*/
+void GPU::operationGp0ShadedLineOpaque() {
+    shadedLine(2, true);
+    return;
+}
+
+/*
+GP0(52h) - Shaded line, semi-transparent
+  1st   Color1+Command    (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Color2            (00BbGgRrh)
+  4th   Vertex2           (YyyyXxxxh)
+*/
+void GPU::operationGp0ShadedLineSemiTransparent() {
+    shadedLine(2, false);
+    return;
+}
+
+/*
+GP0(58h) - Shaded Poly-line, opaque
+  1st   Color1+Command    (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Color2            (00BbGgRrh)
+  4th   Vertex2           (YyyyXxxxh)
+ (...)  ColorN            (00BbGgRrh) (poly-line only)
+ (...)  VertexN           (YyyyXxxxh) (poly-line only)
+ (Last) Termination Code  (55555555h) (poly-line only)
+*/
+void GPU::operationGp0ShadedPolylineOpaque()  {
+    shadedLine((gp0WordsRead - 1) / 2, true);
+    return;
+}
+
+/*
+GP0(5Ah) - Shaded Poly-line, semi-transparent
+  1st   Color1+Command    (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Color2            (00BbGgRrh)
+  4th   Vertex2           (YyyyXxxxh)
+ (...)  ColorN            (00BbGgRrh) (poly-line only)
+ (...)  VertexN           (YyyyXxxxh) (poly-line only)
+ (Last) Termination Code  (55555555h) (poly-line only)
+*/
+void GPU::operationGp0ShadedPolylineSemiTransparent() {
+    shadedLine((gp0WordsRead - 1) / 2, false);
+    return;
+}
+
+/*
 GP0(60h) - Monochrome Rectangle (variable size) (opaque)
 1st  Color+Command     (CcBbGgRrh)
 2nd  Vertex            (YyyyXxxxh)
@@ -1774,6 +1856,26 @@ void GPU::monochromeLine(uint numberOfPoints, bool opaque) {
     vector<Vertex> vertices = vector<Vertex>();
     for (uint i = 1; i <= numberOfPoints; i++) {
         Point point = Point(gp0InstructionBuffer[i]);
+        vertices.push_back(Vertex(point, color));
+    }
+    if (numberOfPoints == 2) {
+        renderer.pushLine(vertices);
+        return;
+    }
+    vector<Vertex> lines = vector<Vertex>();
+    for (uint i = 0; i < vertices.size() - 1; i++) {
+        lines.push_back(vertices[i]);
+        lines.push_back(vertices[i+1]);
+        renderer.pushLine(lines);
+        lines.clear();
+    }
+}
+
+void GPU::shadedLine(uint numberOfPoints, bool opaque) {
+    vector<Vertex> vertices = vector<Vertex>();
+    for (uint i = 0; i < numberOfPoints; i++) {
+        Color color = Color(gp0InstructionBuffer[i*2]);
+        Point point = Point(gp0InstructionBuffer[i*2+1]);
         vertices.push_back(Vertex(point, color));
     }
     if (numberOfPoints == 2) {
