@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Renderer::Renderer() {
+Renderer::Renderer() : mode(GL_TRIANGLES) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printError("Error initializing SDL: %s", SDL_GetError());
     }
@@ -51,17 +51,40 @@ Renderer::~Renderer() {
     SDL_Quit();
 }
 
+void Renderer::checkForceDraw(uint verticesToRender, GLenum newMode) {
+    uint verticesToRenderTotal = verticesToRender;
+    if (verticesToRender == 4) {
+        verticesToRenderTotal = 6;
+    }
+    if (buffer->remainingCapacity() < verticesToRenderTotal) {
+        display();
+    }
+    if (mode != newMode) {
+        display();
+    }
+    return;
+}
+
+void Renderer::pushLine(std::vector<Vertex> vertices) {
+    uint size = vertices.size();
+    if (size < 2) {
+        printError("Unhandled line with %d vertices", size);
+        return;
+    }
+    checkForceDraw(size, GL_LINES);
+    mode = GL_LINES;
+    buffer->addData(vertices);
+    return;
+}
+
 void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 3 || size > 4) {
-        printError("Unhandled poligon with %d vertices", size);
+        printError("Unhandled polygon with %d vertices", size);
         return;
     }
-    uint overSize = size - 3;
-    uint checkSize = size - overSize;
-    if (checkSize > buffer->remainingCapacity() - checkSize) {
-        display();
-    }
+    checkForceDraw(size, GL_TRIANGLES);
+    mode = GL_TRIANGLES;
     switch (size) {
         case 3: {
             buffer->addData(vertices);
@@ -77,12 +100,12 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices) {
 }
 
 void Renderer::display() {
-    buffer->draw(GL_TRIANGLES);
+    buffer->draw(mode);
     SDL_GL_SwapWindow(window);
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
-    buffer->draw(GL_TRIANGLES);
+    buffer->draw(mode);
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }
 

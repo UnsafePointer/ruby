@@ -22,10 +22,14 @@ class Renderer {
     std::unique_ptr<Texture> frameBufferTexture;
     std::unique_ptr<RendererProgram> textureRendererProgram;
     std::unique_ptr<RendererBuffer<Point>> textureBuffer;
+
+    GLenum mode;
+    void checkForceDraw(uint verticesToRender, GLenum newMode);
 public:
     Renderer();
     ~Renderer();
 
+    void pushLine(std::vector<Vertex> vertices);
     void pushPolygon(std::vector<Vertex> vertices);
     void setDrawingOffset(int16_t x, int16_t y);
     void display();
