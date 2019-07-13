@@ -4,6 +4,8 @@
 
 using namespace std;
 
+const uint32_t GP0_COMMAND_TERMINATION_CODE = 0x55555555;
+
 uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) {
     return ((value2 & 1) | (value1 & 3 << 1));
 }
@@ -53,6 +55,7 @@ GPU::GPU() : texturePageBaseX(0),
              displayLineEnd(0),
              gp0InstructionBuffer(GPUInstructionBuffer()),
              gp0WordsRemaining(0),
+             gp0WordsRead(0),
              gp0InstructionMethod(nullptr),
              gp0Mode(GP0Mode::Command),
              renderer(Renderer()),
@@ -114,6 +117,7 @@ uint32_t GPU::statusRegister() const {
 
 void GPU::executeGp0(uint32_t value) {
     if (gp0WordsRemaining == 0) {
+        gp0WordsRead = 0;
         uint32_t opCode = (value >> 24) & 0xff;
         switch (opCode) {
             case 0x00: {
@@ -274,6 +278,34 @@ void GPU::executeGp0(uint32_t value) {
                 gp0WordsRemaining = 12;
                 gp0InstructionMethod = [&]() {
                     this->operationGp0TexturedShadedFourPointSemiTransparentTextureBlending();
+                };
+                break;
+            }
+            case 0x40: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeLineOpaque();
+                };
+                break;
+            }
+            case 0x42: {
+                gp0WordsRemaining = 3;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromeLineSemiTransparent();
+                };
+                break;
+            }
+            case 0x48: {
+                gp0WordsRemaining = -1;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromePolylineOpaque();
+                };
+                break;
+            }
+            case 0x4a: {
+                gp0WordsRemaining = -1;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromePolylineSemiTransparent();
                 };
                 break;
             }
@@ -511,8 +543,13 @@ void GPU::executeGp0(uint32_t value) {
 
     if (gp0Mode == GP0Mode::Command) {
         gp0InstructionBuffer.pushWord(value);
+        gp0WordsRead++;
         if (gp0WordsRemaining == 0) {
             gp0InstructionMethod();
+        }
+        if (value == GP0_COMMAND_TERMINATION_CODE) {
+            gp0InstructionMethod();
+            gp0WordsRemaining = 0;
         }
     } else if (gp0Mode == GP0Mode::ImageLoad) {
         imageBuffer->pushWord(value);
@@ -1179,6 +1216,54 @@ void GPU::operationGp0TexturedShadedFourPointSemiTransparentTextureBlending() {
 }
 
 /*
+GP0(40h) - Monochrome line, opaque
+  1st   Color+Command     (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Vertex2           (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeLineOpaque() {
+    monochromeLine(2, true);
+    return;
+}
+
+/*
+GP0(42h) - Monochrome line, semi-transparent
+  1st   Color+Command     (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Vertex2           (YyyyXxxxh)
+*/
+void GPU::operationGp0MonochromeLineSemiTransparent() {
+    monochromeLine(2, false);
+    return;
+}
+
+/*
+GP0(48h) - Monochrome Poly-line, opaque
+  1st   Color+Command     (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Vertex2           (YyyyXxxxh)
+ (...)  VertexN           (YyyyXxxxh) (poly-line only)
+ (Last) Termination Code  (55555555h) (poly-line only)
+*/
+void GPU::operationGp0MonochromePolylineOpaque() {
+    monochromeLine(gp0WordsRead - 2, true);
+    return;
+}
+
+/*
+GP0(4Ah) - Monochrome Poly-line, semi-transparent
+  1st   Color+Command     (CcBbGgRrh)
+  2nd   Vertex1           (YyyyXxxxh)
+  3rd   Vertex2           (YyyyXxxxh)
+ (...)  VertexN           (YyyyXxxxh) (poly-line only)
+ (Last) Termination Code  (55555555h) (poly-line only)
+*/
+void GPU::operationGp0MonochromePolylineSemiTransparent() {
+    monochromeLine(gp0WordsRead - 2, true);
+    return;
+}
+
+/*
 GP0(60h) - Monochrome Rectangle (variable size) (opaque)
 1st  Color+Command     (CcBbGgRrh)
 2nd  Vertex            (YyyyXxxxh)
@@ -1682,4 +1767,24 @@ void GPU::shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMo
         vertices.push_back(vertex);
     }
     renderer.pushPolygon(vertices);
+}
+
+void GPU::monochromeLine(uint numberOfPoints, bool opaque) {
+    Color color = Color(gp0InstructionBuffer[0]);
+    vector<Vertex> vertices = vector<Vertex>();
+    for (uint i = 1; i <= numberOfPoints; i++) {
+        Point point = Point(gp0InstructionBuffer[i]);
+        vertices.push_back(Vertex(point, color));
+    }
+    if (numberOfPoints == 2) {
+        renderer.pushLine(vertices);
+        return;
+    }
+    vector<Vertex> lines = vector<Vertex>();
+    for (uint i = 0; i < vertices.size() - 1; i++) {
+        lines.push_back(vertices[i]);
+        lines.push_back(vertices[i+1]);
+        renderer.pushLine(lines);
+        lines.clear();
+    }
 }

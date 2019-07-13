@@ -51,7 +51,7 @@ Renderer::~Renderer() {
     SDL_Quit();
 }
 
-void Renderer::checkForceDraw(uint verticesToRender) {
+void Renderer::checkForceDraw(uint verticesToRender, GLenum newMode) {
     uint verticesToRenderTotal = verticesToRender;
     if (verticesToRender == 4) {
         verticesToRenderTotal = 6;
@@ -59,16 +59,32 @@ void Renderer::checkForceDraw(uint verticesToRender) {
     if (buffer->remainingCapacity() < verticesToRenderTotal) {
         display();
     }
+    if (mode != newMode) {
+        display();
+    }
+    return;
+}
+
+void Renderer::pushLine(std::vector<Vertex> vertices) {
+    uint size = vertices.size();
+    if (size < 2) {
+        printError("Unhandled line with %d vertices", size);
+        return;
+    }
+    checkForceDraw(size, GL_LINES);
+    mode = GL_LINES;
+    buffer->addData(vertices);
     return;
 }
 
 void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 3 || size > 4) {
-        printError("Unhandled poligon with %d vertices", size);
+        printError("Unhandled polygon with %d vertices", size);
         return;
     }
-    checkForceDraw(size);
+    checkForceDraw(size, GL_TRIANGLES);
+    mode = GL_TRIANGLES;
     switch (size) {
         case 3: {
             buffer->addData(vertices);

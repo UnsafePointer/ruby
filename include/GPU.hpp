@@ -139,7 +139,8 @@ GP1(07h) - Vertical Display range (on Screen)
     uint16_t displayLineEnd;
 
     GPUInstructionBuffer gp0InstructionBuffer;
-    uint32_t gp0WordsRemaining;
+    int32_t gp0WordsRemaining;
+    uint32_t gp0WordsRead;
     std::function<void(void)> gp0InstructionMethod;
 
     uint32_t gpuRead;
@@ -187,6 +188,11 @@ GP1(07h) - Vertical Display range (on Screen)
 
     void operationGp0FillRectagleInVRAM();
 
+    void operationGp0MonochromeLineOpaque();
+    void operationGp0MonochromeLineSemiTransparent();
+    void operationGp0MonochromePolylineOpaque();
+    void operationGp0MonochromePolylineSemiTransparent();
+
     void operationGp0MonochromeQuadOpaque();
     void operationGp0MonochromeQuadSemiTransparent();
     void operationGp0MonochromeQuad1x1Opaque();
@@ -233,6 +239,7 @@ GP1(07h) - Vertical Display range (on Screen)
     void shadedPolygon(uint numberOfPoints, bool opaque);
     void texturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode);
     void shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode);
+    void monochromeLine(uint numberOfPoints, bool opaque);
 
     void executeGp1(uint32_t value);
 public:
