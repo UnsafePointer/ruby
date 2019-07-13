@@ -22,6 +22,9 @@ class Renderer {
     std::unique_ptr<Texture> frameBufferTexture;
     std::unique_ptr<RendererProgram> textureRendererProgram;
     std::unique_ptr<RendererBuffer<Point>> textureBuffer;
+
+    GLenum mode;
+    void checkForceDraw(uint verticesToRender);
 public:
     Renderer();
     ~Renderer();
