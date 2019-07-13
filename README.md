@@ -81,10 +81,8 @@ For a comprehensive list of supported GDB features, see [libHana](https://github
 
 #### Running
 
-The emulator expects a `tests.exe` file at the root.
-
 ```
-./bin/ruby --run-tests
+./bin/ruby --exe psxtest_cpu.exe
 ```
 
 ### Acknowledgments
