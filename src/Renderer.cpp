@@ -43,7 +43,7 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     glUniform2i(offsetUniform, 0, 0);
 
     // TODO: handle resolution for other targets
-    frameBufferTexture = make_unique<Texture>(((GLsizei) width), ((GLsizei) height));
+    loadImageTexture = make_unique<Texture>(((GLsizei) width), ((GLsizei) height));
     checkForOpenGLErrors();
 }
 
@@ -110,7 +110,7 @@ void Renderer::setDrawingOffset(int16_t x, int16_t y) {
 }
 
 void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
-    frameBufferTexture->setImageFromBuffer(imageBuffer);
+    loadImageTexture->setImageFromBuffer(imageBuffer);
     textureBuffer->clean();
     uint16_t x, y, width, height;
     tie(x, y) = imageBuffer->destination();

@@ -19,7 +19,7 @@ class Renderer {
 
     std::unique_ptr<RendererBuffer<Vertex>> buffer;
 
-    std::unique_ptr<Texture> frameBufferTexture;
+    std::unique_ptr<Texture> loadImageTexture;
     std::unique_ptr<RendererProgram> textureRendererProgram;
     std::unique_ptr<RendererBuffer<Point>> textureBuffer;
 
