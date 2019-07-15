@@ -52,3 +52,7 @@ Vertex::Vertex(Point point, Color color) : point(point), color(color), texturePo
 Vertex::Vertex(Point point, Color color, Point texturePosition, TextureBlendMode textureBlendMode, Point texturePage, GLuint textureDepthShift, Point clut) : point(point), color(color), texturePosition(texturePosition), textureBlendMode(textureBlendMode), texturePage(texturePage), textureDepthShift(textureDepthShift), clut(clut) {}
 
 Vertex::~Vertex() {}
+
+Pixel::Pixel(GLfloat pointX, GLfloat pointY, GLfloat framebufferPositionX, GLfloat framebufferPositionY) : pointX(pointX), pointY(pointY), framebufferPositionX(framebufferPositionX), framebufferPositionY(framebufferPositionY) {}
+
+Pixel::~Pixel() {}
