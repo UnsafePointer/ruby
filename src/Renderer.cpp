@@ -5,6 +5,7 @@
 #include <vector>
 #include "RendererDebugger.hpp"
 #include "Output.hpp"
+#include "Framebuffer.hpp"
 
 using namespace std;
 
@@ -40,8 +41,14 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     offsetUniform = program->findProgramAttribute("offset");
     glUniform2i(offsetUniform, 0, 0);
 
+    screenRendererProgram = make_unique<RendererProgram>("./glsl/screen_vertex.glsl", "./glsl/screen_fragment.glsl");
+
+    screenBuffer = make_unique<RendererBuffer<Pixel>>(screenRendererProgram, RENDERER_BUFFER_SIZE);
+
     // TODO: handle resolution for other targets
     loadImageTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
+
+    screenTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
     checkForOpenGLErrors();
 }
 
@@ -55,10 +62,10 @@ void Renderer::checkForceDraw(uint verticesToRender, GLenum newMode) {
         verticesToRenderTotal = 6;
     }
     if (buffer->remainingCapacity() < verticesToRenderTotal) {
-        display();
+        renderFrame();
     }
     if (mode != newMode) {
-        display();
+        renderFrame();
     }
     return;
 }
@@ -97,8 +104,31 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     return;
 }
 
-void Renderer::display() {
+void Renderer::prepareFrame() {
+    loadImageTexture->bind(GL_TEXTURE0);
+}
+
+void Renderer::renderFrame() {
+    Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->draw(mode);
+    checkForOpenGLErrors();
+}
+
+void Renderer::finalizeFrame() {
+    buffer->draw(mode);
+    screenTexture->bind(GL_TEXTURE0);
+    // TODO: set proper display are with the GPU values
+    std::vector<Pixel> pixels = {
+         Pixel(-1.0f, 1.0f, 0.0f, 1.0f),
+         Pixel(-1.0f, -1.0f, 0.0f, 0.0f),
+         Pixel(1.0f, -1.0f, 1.0f, 0.0f),
+         Pixel(-1.0f, 1.0f, 0.0f, 1.0f),
+         Pixel(1.0f, -1.0f, 1.0f, 0.0f),
+         Pixel(1.0f, 1.0f, 1.0f, 1.0f)
+    };
+    screenBuffer->addData(pixels);
+    screenBuffer->draw(GL_TRIANGLE_STRIP);
+    checkForOpenGLErrors();
     SDL_GL_SwapWindow(window);
 }
 
@@ -115,5 +145,7 @@ void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     tie(width, height) = imageBuffer->resolution();
     vector<Point> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
     textureBuffer->addData(data);
+    Framebuffer framebuffer = Framebuffer(screenTexture);
     textureBuffer->draw(GL_TRIANGLE_STRIP);
+    checkForOpenGLErrors();
 }

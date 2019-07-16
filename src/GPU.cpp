@@ -589,7 +589,9 @@ void GPU::executeGp0(uint32_t value) {
 }
 
 void GPU::render() {
-    renderer.display();
+    renderer.prepareFrame();
+    renderer.renderFrame();
+    renderer.finalizeFrame();
 }
 
 void GPU::executeGp1(uint32_t value) {
