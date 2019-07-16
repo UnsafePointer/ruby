@@ -46,6 +46,10 @@ void TestRunner::configure(int argc, char* argv[]) {
         resizeToFitFramebuffer = true;
         return;
     }
+    if (checkOption(argv, argv + argc, "--sleep")) {
+        sleepAtStartup = true;
+        return;
+    }
     printError("Incorrect argument passed. See README.md for usage.");
 }
 
@@ -81,6 +85,10 @@ bool TestRunner::shouldRunTests() {
 
 bool TestRunner::shouldResizeWindowToFitFramebuffer() {
     return resizeToFitFramebuffer;
+}
+
+bool TestRunner::shouldSleepAtStartup() {
+    return sleepAtStartup;
 }
 
 uint32_t TestRunner::programCounter() {

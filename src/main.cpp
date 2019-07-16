@@ -5,6 +5,10 @@
 #include "Debugger.hpp"
 #include "TestRunner.hpp"
 #include "Logger.hpp"
+#include <chrono>
+#include <thread>
+
+using namespace std;
 
 int main(int argc, char* argv[]) {
     TestRunner *testRunner = TestRunner::getInstance();
@@ -16,6 +20,9 @@ int main(int argc, char* argv[]) {
     Logger *logger = Logger::getInstance();
     logger->configure(testRunner->shouldRunTests());
     logger->setupTraceFile();
+    if (testRunner->shouldSleepAtStartup()) {
+        this_thread::sleep_for(chrono::milliseconds(10 * 1000));
+    }
     bool quit = false;
     while (!quit) {
         SDL_Event event;
