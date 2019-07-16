@@ -7,7 +7,7 @@ using namespace std;
 const uint32_t GP0_COMMAND_TERMINATION_CODE = 0x55555555;
 
 uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) {
-    return ((value2 & 1) | (value1 & 3 << 1));
+    return ((value2 & 1) | ((value1 & 3) << 1));
 }
 
 TexturePageColors texturePageColorsWithValue(uint32_t value) {
