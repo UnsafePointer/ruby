@@ -29,6 +29,8 @@ class Renderer {
     std::unique_ptr<RendererBuffer<Pixel>> screenBuffer;
 
     GLenum mode;
+    bool resizeToFitFramebuffer;
+
     void checkForceDraw(uint verticesToRender, GLenum newMode);
 public:
     Renderer();

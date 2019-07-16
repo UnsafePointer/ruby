@@ -42,6 +42,10 @@ void TestRunner::configure(int argc, char* argv[]) {
         exeFile = string(path);
         return;
     }
+    if (checkOption(argv, argv + argc, "--framebuffer")) {
+        resizeToFitFramebuffer = true;
+        return;
+    }
     printError("Incorrect argument passed. See README.md for usage.");
 }
 
@@ -73,6 +77,10 @@ uint32_t TestRunner::loadWord(uint32_t offset) {
 
 bool TestRunner::shouldRunTests() {
     return runTests;
+}
+
+bool TestRunner::shouldResizeWindowToFitFramebuffer() {
+    return resizeToFitFramebuffer;
 }
 
 uint32_t TestRunner::programCounter() {

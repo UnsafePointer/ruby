@@ -7,6 +7,7 @@
 #include "Output.hpp"
 #include "Framebuffer.hpp"
 #include "GPU.hpp"
+#include "TestRunner.hpp"
 
 using namespace std;
 
@@ -21,7 +22,15 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
+    TestRunner *testRunner = TestRunner::getInstance();
+    resizeToFitFramebuffer = testRunner->shouldResizeWindowToFitFramebuffer();
+
+    uint32_t screenHeight = SCREEN_HEIGHT;
+    if (resizeToFitFramebuffer) {
+        screenHeight = 512;
+    }
+
+    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, screenHeight, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
 
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
@@ -45,14 +54,19 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     offsetUniform = program->findProgramAttribute("offset");
     glUniform2i(offsetUniform, 0, 0);
 
-    screenRendererProgram = make_unique<RendererProgram>("./glsl/screen_vertex.glsl", "./glsl/screen_fragment.glsl");
+    // TODO: Use a single vertex shader
+    string screenVertexFile = "./glsl/screen_vertex.glsl";
+    if (resizeToFitFramebuffer) {
+        screenVertexFile = "./glsl/screen_full_vram_vertex.glsl";
+    }
+    screenRendererProgram = make_unique<RendererProgram>(screenVertexFile, "./glsl/screen_fragment.glsl");
 
     screenBuffer = make_unique<RendererBuffer<Pixel>>(screenRendererProgram, RENDERER_BUFFER_SIZE);
 
     // TODO: handle resolution for other targets
     loadImageTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
 
-    screenTexture = make_unique<Texture>(((GLsizei) SCREEN_WIDTH), ((GLsizei) SCREEN_HEIGHT));
+    screenTexture = make_unique<Texture>(((GLsizei) SCREEN_WIDTH), ((GLsizei) screenHeight));
     checkForOpenGLErrors();
 }
 
@@ -121,14 +135,24 @@ void Renderer::renderFrame() {
 void Renderer::finalizeFrame(GPU *gpu) {
     buffer->draw(mode);
     screenTexture->bind(GL_TEXTURE0);
-    Point displayAreaStart = gpu->getDisplayAreaStart();
-    Dimensions screenResolution = gpu->getResolution();
-    std::vector<Pixel> pixels = {
-         Pixel(-1.0f, -1.0f, displayAreaStart.x, displayAreaStart.y + screenResolution.height),
-         Pixel(1.0f, -1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y + screenResolution.height),
-         Pixel(-1.0f, 1.0f, displayAreaStart.x, displayAreaStart.y),
-         Pixel(1.0f, 1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y),
-    };
+    vector<Pixel> pixels;
+    if (resizeToFitFramebuffer) {
+        pixels = {
+            Pixel(-1.0f, -1.0f, 0.0f, 1.0f),
+            Pixel(1.0f, -1.0f, 1.0f, 1.0f),
+            Pixel(-1.0f, 1.0f, 0.0f, 0.0f),
+            Pixel(1.0f, 1.0f, 1.0f, 0.0f),
+        };
+    } else {
+        Point displayAreaStart = gpu->getDisplayAreaStart();
+        Dimensions screenResolution = gpu->getResolution();
+        pixels = {
+            Pixel(-1.0f, -1.0f, displayAreaStart.x, displayAreaStart.y + screenResolution.height),
+            Pixel(1.0f, -1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y + screenResolution.height),
+            Pixel(-1.0f, 1.0f, displayAreaStart.x, displayAreaStart.y),
+            Pixel(1.0f, 1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y),
+        };
+    }
     screenBuffer->addData(pixels);
     screenBuffer->draw(GL_TRIANGLE_STRIP);
     checkForOpenGLErrors();
