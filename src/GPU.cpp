@@ -814,7 +814,6 @@ void GPU::operationGp0SetDrawingOffset() {
     int16_t drawingOffsetY = ((int16_t)(y << 5)) >> 5;
 
     renderer.setDrawingOffset(drawingOffsetX, drawingOffsetY);
-    renderer.display();
 }
 
 /*

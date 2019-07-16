@@ -54,12 +54,9 @@ void Emulator::emulateFrame() {
         if (totalScanlines >= scanlinesPerFrame) {
             interruptController->trigger(VBLANK);
             totalScanlines = 0;
+            gpu->render();
         }
     }
-}
-
-void Emulator::renderFrame() {
-    gpu->render();
 }
 
 void Emulator::transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination) {
