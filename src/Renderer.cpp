@@ -16,9 +16,7 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    int width = 1024;
-    int height = 512;
-    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, VRAM_WIDTH, VRAM_HEIGHT, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
 
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
@@ -43,7 +41,7 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     glUniform2i(offsetUniform, 0, 0);
 
     // TODO: handle resolution for other targets
-    loadImageTexture = make_unique<Texture>(((GLsizei) width), ((GLsizei) height));
+    loadImageTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
     checkForOpenGLErrors();
 }
 
