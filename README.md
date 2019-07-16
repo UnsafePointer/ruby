@@ -4,7 +4,7 @@
 
 ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(console)) emulator written in C++.
 
-![current_progress.gif](current_progress.gif)
+![current_progress.gif](/images/current_progress.gif)
 
 ### Progress
 
@@ -49,7 +49,7 @@ $ make -f x86_64_with_debugger.mk
 
 #### GDB support
 
-If compiled with GDB support, pressing the backspace key at any time will stop the emulator until GDB is attached to `localhost:2109`. You will need a [GDB build with support for MIPS little endian](https://www.linux-mips.org/wiki/Toolchains#GDB).
+If compiled with GDB support, pressing the backspace key at any time will stop the emulator until GDB is attached to `localhost:2109`. You will need a [GDB build with support for MIPS little endian](https://images.linux-mips.org/wiki/Toolchains#GDB).
 
 ```
 $ mipsel-unknown-linux-gnu-gdb
@@ -73,17 +73,25 @@ For a comprehensive list of supported GDB features, see [libHana](https://github
 
 ### Tests
 
-![cpu_tests.png](cpu_tests.png)
-
-#### Prerequisites
-
-- [amidog CPU tests](https://psx.amidog.se/doku.php?id=psx:download:cpu#CPU_Test): psxtest_cpu.exe (SHA1: 023aec8c92aaaf4d3b07956e26dd6c77ff397456)
-
 #### Running
 
 ```
-./bin/ruby --exe psxtest_cpu.exe
+./bin/ruby --exe TESTNAME.exe
 ```
+
+#### CPU Tests
+
+[amidog CPU tests](https://psx.amidog.se/doku.php?id=psx:download:cpu#CPU_Test): psxtest_cpu.exe (SHA1: 023aec8c92aaaf4d3b07956e26dd6c77ff397456)
+
+![cpu_tests.png](/images/cpu_tests.png)
+
+#### GPU Tests
+
+[PeterLemon/PSX GPU tests](https://github.com/PeterLemon/PSX/tree/master/GPU):
+
+![gpu_tests_quads](/images/gpu_tests_quads.png)  ![gpu_tests_textured_quads](/images/gpu_tests_textured_quads.png)
+![gpu_tests_polys](/images/gpu_tests_polys.png)  ![gpu_tests_textured_polys](/images/gpu_tests_textured_polys.png)
+![gpu_tests_lines](/images/gpu_tests_lines.png)
 
 ### Acknowledgments
 
