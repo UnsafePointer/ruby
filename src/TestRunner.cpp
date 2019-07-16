@@ -1,6 +1,6 @@
 #include "TestRunner.hpp"
-#include <string>
 #include <fstream>
+#include <algorithm>
 #include "Output.hpp"
 #include "CPU.hpp"
 
@@ -17,18 +17,36 @@ TestRunner* TestRunner::getInstance() {
     return instance;
 }
 
+bool TestRunner::checkOption(char** begin, char** end, const std::string &option) {
+    return find(begin, end, option) != end;
+}
+
+char* TestRunner::getOptionValue(char** begin, char** end, const std::string &option) {
+    char **iterator = find(begin, end, option);
+    if (iterator != end && iterator++ != end) {
+        return *iterator;
+    }
+    return NULL;
+}
+
 void TestRunner::configure(int argc, char* argv[]) {
-    if (argc > 2) {
-        string firstArgument = string(argv[1]);
-        if (firstArgument.compare("--exe") == 0) {
-            runTests = true;
-            exeFile = string(argv[2]);
-        } else {
+    if (argc <= 1) {
+        return;
+    }
+    if (checkOption(argv, argv + argc, "--exe")) {
+        char *path = getOptionValue(argv, argv + argc, "--exe");
+        if (path == NULL) {
             printError("Incorrect argument passed. See README.md for usage.");
         }
-    } else if (argc > 1) {
-        printError("Incorrect argument passed. See README.md for usage.");
+        runTests = true;
+        exeFile = string(path);
+        return;
     }
+    if (checkOption(argv, argv + argc, "--framebuffer")) {
+        resizeToFitFramebuffer = true;
+        return;
+    }
+    printError("Incorrect argument passed. See README.md for usage.");
 }
 
 void TestRunner::setEmulator(Emulator *emulator) {
@@ -59,6 +77,10 @@ uint32_t TestRunner::loadWord(uint32_t offset) {
 
 bool TestRunner::shouldRunTests() {
     return runTests;
+}
+
+bool TestRunner::shouldResizeWindowToFitFramebuffer() {
+    return resizeToFitFramebuffer;
 }
 
 uint32_t TestRunner::programCounter() {

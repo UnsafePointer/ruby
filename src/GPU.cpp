@@ -7,7 +7,7 @@ using namespace std;
 const uint32_t GP0_COMMAND_TERMINATION_CODE = 0x55555555;
 
 uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) {
-    return ((value2 & 1) | (value1 & 3 << 1));
+    return ((value2 & 1) | ((value1 & 3) << 1));
 }
 
 TexturePageColors texturePageColorsWithValue(uint32_t value) {
@@ -589,7 +589,41 @@ void GPU::executeGp0(uint32_t value) {
 }
 
 void GPU::render() {
-    renderer.display();
+    renderer.prepareFrame();
+    renderer.renderFrame();
+    renderer.finalizeFrame(this);
+}
+
+Dimensions GPU::getResolution() {
+    uint32_t verticalResolution = 240;
+    if (this->verticalResolution == VerticalResolution::Y480) {
+        verticalResolution = 480;
+    }
+    uint8_t horizontalResolutionValue1 = (horizontalResolution >> 1) & 3;
+    uint8_t horizontalResolutionValue2 = horizontalResolution & 1;
+    if (horizontalResolutionValue2 == 1) {
+        return { 368, verticalResolution };
+    } else {
+        switch (horizontalResolutionValue1) {
+            case 0: {
+                return { 256, verticalResolution };
+            }
+            case 1: {
+                return { 320, verticalResolution };
+            }
+            case 2: {
+                return { 512, verticalResolution };
+            }
+            case 3: {
+                return { 640, verticalResolution };
+            }
+        }
+    }
+    return { 0, 0 };
+}
+
+Point GPU::getDisplayAreaStart() {
+    return { (int16_t)displayVRAMStartX, (int16_t)displayVRAMStartY };
 }
 
 void GPU::executeGp1(uint32_t value) {
@@ -814,7 +848,6 @@ void GPU::operationGp0SetDrawingOffset() {
     int16_t drawingOffsetY = ((int16_t)(y << 5)) >> 5;
 
     renderer.setDrawingOffset(drawingOffsetX, drawingOffsetY);
-    renderer.display();
 }
 
 /*

@@ -108,5 +108,16 @@ void RendererBuffer<Point>::enableAttributes() const {
     glEnableVertexAttribArray(positionIdx);
 }
 
+template <>
+void RendererBuffer<Pixel>::enableAttributes() const {
+    GLuint positionIdx = program->findProgramAttribute("vertex_point");
+    glVertexAttribPointer(positionIdx, 2, GL_FLOAT, GL_FALSE, sizeof(Pixel), (void*)offsetof(struct Pixel, pointX));
+    glEnableVertexAttribArray(positionIdx);
+    GLuint texturePositionIdx = program->findProgramAttribute("frame_buffer_point");
+    glVertexAttribPointer(texturePositionIdx, 2, GL_FLOAT, GL_FALSE, sizeof(Pixel), (void*)offsetof(struct Pixel, framebufferPositionX));
+    glEnableVertexAttribArray(texturePositionIdx);
+}
+
 template class RendererBuffer<Vertex>;
 template class RendererBuffer<Point>;
+template class RendererBuffer<Pixel>;

@@ -35,6 +35,7 @@ class TestRunner {
 
     Emulator *emulator;
     bool runTests;
+    bool resizeToFitFramebuffer;
     std::string exeFile;
     uint8_t header[TEST_HEADER_SIZE];
 
@@ -44,6 +45,9 @@ class TestRunner {
     uint32_t destinationAddress();
     uint32_t fileSize();
 
+    bool checkOption(char** begin, char** end, const std::string &option);
+    char* getOptionValue(char** begin, char** end, const std::string &option);
+
     TestRunner();
 public:
     static TestRunner* getInstance();
@@ -51,6 +55,7 @@ public:
     void configure(int argc, char* argv[]);
     void setEmulator(Emulator *emulator);
     bool shouldRunTests();
+    bool shouldResizeWindowToFitFramebuffer();
     uint32_t programCounter();
     uint32_t globalPointer();
     uint32_t initialStackFramePointerBase();

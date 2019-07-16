@@ -12,5 +12,9 @@ public:
     Texture(GLsizei width, GLsizei height);
     ~Texture();
 
+    GLuint getID();
+    GLsizei getWidth();
+    GLsizei getHeight();
+    void bind(GLenum texture);
     void setImageFromBuffer(std::unique_ptr<GPUImageBuffer> &imageBuffer);
 };

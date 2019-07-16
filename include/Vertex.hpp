@@ -43,8 +43,18 @@ struct Vertex {
     Point texturePage;
     GLuint textureDepthShift;
     Point clut;
-public:
+
     Vertex(Point point, Color color);
     Vertex(Point point, Color color, Point texturePosition, TextureBlendMode textureBlendMode, Point texturePage, GLuint textureDepthShift, Point clut);
     ~Vertex();
+};
+
+struct Pixel {
+    GLfloat pointX;
+    GLfloat pointY;
+    GLfloat framebufferPositionX;
+    GLfloat framebufferPositionY;
+
+    Pixel(GLfloat pointX, GLfloat pointY, GLfloat framebufferPositionX, GLfloat framebufferPositionY);
+    ~Pixel();
 };

@@ -2,7 +2,9 @@
 #include <cstdint>
 #include <tuple>
 
-const uint32_t VRAM_SIZE = (1024 * 512) / sizeof(uint16_t);
+const uint32_t VRAM_WIDTH = 1024;
+const uint32_t VRAM_HEIGHT = 512;
+const uint32_t VRAM_SIZE = (VRAM_WIDTH * VRAM_HEIGHT) / sizeof(uint16_t);
 
 class GPUImageBuffer {
     uint16_t destinationX;
