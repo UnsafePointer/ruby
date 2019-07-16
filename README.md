@@ -36,7 +36,7 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 #### Compiling
 
 ```
-$ make -f x86_64.mk
+$ make
 ```
 
 #### Compiling with GDB support
