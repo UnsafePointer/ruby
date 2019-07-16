@@ -44,6 +44,9 @@ class TestRunner {
     uint32_t destinationAddress();
     uint32_t fileSize();
 
+    bool checkOption(char** begin, char** end, const std::string &option);
+    char* getOptionValue(char** begin, char** end, const std::string &option);
+
     TestRunner();
 public:
     static TestRunner* getInstance();
