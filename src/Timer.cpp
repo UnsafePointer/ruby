@@ -1,7 +1,7 @@
 #include "Timer.hpp"
 #include "Constants.h"
 
-Timer::Timer() : counterValue(), counterMode(), counterTarget(), counter() {}
+Timer::Timer(uint8_t identity) : identity(identity), counterValue(), counterMode(), counterTarget(), counter() {}
 
 Timer::~Timer() {}
 

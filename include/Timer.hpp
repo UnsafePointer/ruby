@@ -159,13 +159,14 @@ union TimerCounterTarget {
 
 class Timer {
 protected:
+    uint8_t identity;
     TimerCounterValue counterValue;
     TimerCounterMode counterMode;
     TimerCounterTarget counterTarget;
 
     uint32_t counter;
 public:
-    Timer();
+    Timer(uint8_t identity);
     ~Timer();
 
     virtual void step(uint32_t cycles) = 0;
@@ -185,16 +186,19 @@ public:
 
 class Timer0 : public Timer {
 public:
+    Timer0() : Timer(0) {}
     void step(uint32_t cycles) override;
     void setCounterModeRegister(uint32_t value) override;
 };
 class Timer1 : public Timer {
 public:
+    Timer1() : Timer(1) {}
     void step(uint32_t cycles) override;
     void setCounterModeRegister(uint32_t value) override;
 };
 class Timer2 : public Timer {
 public:
+    Timer2() : Timer(2) {}
     void step(uint32_t cycles) override;
     void setCounterModeRegister(uint32_t value) override;
 };
