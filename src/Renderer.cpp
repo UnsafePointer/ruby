@@ -6,8 +6,12 @@
 #include "RendererDebugger.hpp"
 #include "Output.hpp"
 #include "Framebuffer.hpp"
+#include "GPU.hpp"
 
 using namespace std;
+
+const uint32_t SCREEN_WIDTH = 1024;
+const uint32_t SCREEN_HEIGHT = 768;
 
 Renderer::Renderer() : mode(GL_TRIANGLES) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -17,7 +21,7 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, VRAM_WIDTH, VRAM_HEIGHT, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
 
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
@@ -48,7 +52,7 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     // TODO: handle resolution for other targets
     loadImageTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
 
-    screenTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
+    screenTexture = make_unique<Texture>(((GLsizei) SCREEN_WIDTH), ((GLsizei) SCREEN_HEIGHT));
     checkForOpenGLErrors();
 }
 
@@ -114,17 +118,16 @@ void Renderer::renderFrame() {
     checkForOpenGLErrors();
 }
 
-void Renderer::finalizeFrame() {
+void Renderer::finalizeFrame(GPU *gpu) {
     buffer->draw(mode);
     screenTexture->bind(GL_TEXTURE0);
-    // TODO: set proper display are with the GPU values
+    Point displayAreaStart = gpu->getDisplayAreaStart();
+    Dimensions screenResolution = gpu->getResolution();
     std::vector<Pixel> pixels = {
-         Pixel(-1.0f, 1.0f, 0.0f, 1.0f),
-         Pixel(-1.0f, -1.0f, 0.0f, 0.0f),
-         Pixel(1.0f, -1.0f, 1.0f, 0.0f),
-         Pixel(-1.0f, 1.0f, 0.0f, 1.0f),
-         Pixel(1.0f, -1.0f, 1.0f, 0.0f),
-         Pixel(1.0f, 1.0f, 1.0f, 1.0f)
+         Pixel(-1.0f, -1.0f, displayAreaStart.x, displayAreaStart.y + screenResolution.height),
+         Pixel(1.0f, -1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y + screenResolution.height),
+         Pixel(-1.0f, 1.0f, displayAreaStart.x, displayAreaStart.y),
+         Pixel(1.0f, 1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y),
     };
     screenBuffer->addData(pixels);
     screenBuffer->draw(GL_TRIANGLE_STRIP);

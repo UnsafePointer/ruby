@@ -591,7 +591,39 @@ void GPU::executeGp0(uint32_t value) {
 void GPU::render() {
     renderer.prepareFrame();
     renderer.renderFrame();
-    renderer.finalizeFrame();
+    renderer.finalizeFrame(this);
+}
+
+Dimensions GPU::getResolution() {
+    uint32_t verticalResolution = 240;
+    if (this->verticalResolution == VerticalResolution::Y480) {
+        verticalResolution = 480;
+    }
+    uint8_t horizontalResolutionValue1 = (horizontalResolution >> 1) & 3;
+    uint8_t horizontalResolutionValue2 = horizontalResolution & 1;
+    if (horizontalResolutionValue2 == 1) {
+        return { 368, verticalResolution };
+    } else {
+        switch (horizontalResolutionValue1) {
+            case 0: {
+                return { 256, verticalResolution };
+            }
+            case 1: {
+                return { 320, verticalResolution };
+            }
+            case 2: {
+                return { 512, verticalResolution };
+            }
+            case 3: {
+                return { 640, verticalResolution };
+            }
+        }
+    }
+    return { 0, 0 };
+}
+
+Point GPU::getDisplayAreaStart() {
+    return { (int16_t)displayVRAMStartX, (int16_t)displayVRAMStartY };
 }
 
 void GPU::executeGp1(uint32_t value) {

@@ -9,6 +9,8 @@
 #include "GPUImageBuffer.hpp"
 #include "Texture.hpp"
 
+class GPU;
+
 class Renderer {
     SDL_GLContext glContext;
     SDL_Window *window;
@@ -37,6 +39,6 @@ public:
     void setDrawingOffset(int16_t x, int16_t y);
     void prepareFrame();
     void renderFrame();
-    void finalizeFrame();
+    void finalizeFrame(GPU *gpu);
     void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);
 };

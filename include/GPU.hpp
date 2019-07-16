@@ -259,6 +259,8 @@ public:
     // TODO: should be private
     void executeGp0(uint32_t value);
     void render();
+    Dimensions getResolution();
+    Point getDisplayAreaStart();
 };
 
 TexturePageColors texturePageColorsWithValue(uint32_t value);
