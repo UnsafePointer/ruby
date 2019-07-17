@@ -48,6 +48,7 @@ void Emulator::emulateFrame() {
         }
         timer0->step(systemClockStep);
         timer1->step(systemClockStep);
+        timer2->step(systemClockStep);
         videoSystemClocksScanlineCounter += videoSystemClockStep;
         if (videoSystemClocksScanlineCounter >= VideoSystemClocksPerScanline) {
             totalScanlines++;

@@ -66,6 +66,17 @@ void Timer1::setCounterModeRegister(uint32_t value) {
 }
 
 void Timer2::step(uint32_t cycles) {
+    Timer2ClockSource clockSource = counterMode.timer2ClockSource();
+    if (clockSource == Timer2ClockSource::SystemClockByEight) {
+        counter += cycles;
+        counterValue.value += counter / 8;
+        counter %= 8;
+    } else {
+        counter += cycles;
+        counterValue.value += cycles;
+    }
+
+    checkTargetsAndOverflows();
 }
 
 void Timer2::setCounterModeRegister(uint32_t value) {
