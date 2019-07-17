@@ -118,6 +118,9 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = ramRange.contains(absoluteAddress);
     if (offset) {
+        if (cop0->isCacheIsolated()) {
+            return;
+        }
         ram->store<T>(*offset, value);
         return;
     }

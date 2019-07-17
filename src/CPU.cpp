@@ -1063,10 +1063,6 @@ void CPU::operationLoadByte(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
     uint32_t value = ((int32_t)(load<uint8_t>(address) << 24)) >> 24;
     loadDelaySlot(rt, value);
 }
@@ -1077,10 +1073,6 @@ void CPU::operationLoadHalfWord(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring load at address: %#x", address);
-        return;
-    }
     if (address % 2 != 0) {
         cop0->badVirtualAddress = address;
         triggerException(ExceptionType::LoadAddress);
@@ -1135,10 +1127,6 @@ void CPU::operationLoadWord(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
     if (address % 4 != 0) {
         cop0->badVirtualAddress = address;
         triggerException(ExceptionType::LoadAddress);
@@ -1154,10 +1142,6 @@ void CPU::operationLoadByteUnsigned(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
     uint32_t value = load<uint8_t>(address);
     loadDelaySlot(rt, value);
 }
@@ -1168,10 +1152,6 @@ void CPU::operationLoadHalfWordUnsigned(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring load at address: %#x", address);
-        return;
-    }
     if (address % 2 != 0) {
         cop0->badVirtualAddress = address;
         triggerException(ExceptionType::LoadAddress);
@@ -1226,10 +1206,6 @@ void CPU::operationStoreByte(Instruction instruction) const {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
 
     uint32_t value = registerAtIndex(rt);
     store<uint8_t>(address, value);
@@ -1241,10 +1217,6 @@ void CPU::operationStoreHalfWord(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
     if (address % 2 != 0) {
         cop0->badVirtualAddress = address;
         triggerException(ExceptionType::StoreAddress);
@@ -1295,10 +1267,6 @@ void CPU::operationStoreWord(Instruction instruction) {
     uint32_t rs = instruction.rs;
 
     uint32_t address = registerAtIndex(rs) + imm;
-    if (cop0->isCacheIsolated()) {
-        printWarning("Cache is isolated, ignoring store at address: %#x", address);
-        return;
-    }
     if (address % 4 != 0) {
         cop0->badVirtualAddress = address;
         triggerException(ExceptionType::StoreAddress);
