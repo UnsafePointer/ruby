@@ -42,6 +42,7 @@ void Timer0::step(uint32_t cycles) {
 
 void Timer0::setCounterModeRegister(uint32_t value) {
     counterMode._value = value;
+    counterValue._value = 0;
 }
 
 void Timer1::step(uint32_t cycles) {
@@ -69,6 +70,7 @@ void Timer2::step(uint32_t cycles) {
 
 void Timer2::setCounterModeRegister(uint32_t value) {
     counterMode._value = value;
+    counterValue._value = 0;
 }
 
 void Timer::checkTargetsAndOverflows() {
