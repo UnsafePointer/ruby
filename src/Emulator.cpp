@@ -1,12 +1,9 @@
 #include "Emulator.hpp"
 #include "TestRunner.hpp"
 #include <iostream>
+#include "Constants.h"
 
 using namespace std;
-
-const uint32_t systemClocksPerSecond = 33868800;
-const uint32_t videoSystemClocksPerScanline = 3413;
-const uint32_t scanlinesPerFrame = 263;
 
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
 const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
@@ -21,7 +18,10 @@ Emulator::Emulator() : ttyBuffer() {
     cdrom = make_unique<CDROM>();
     interruptController = make_unique<InterruptController>(cop0);
     expansion1 = make_unique<Expansion1>();
-    interconnect = make_unique<Interconnect>(bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1);
+    timer0 = make_unique<Timer0>();
+    timer1 = make_unique<Timer1>();
+    timer2 = make_unique<Timer2>();
+    interconnect = make_unique<Interconnect>(bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2);
     cpu = make_unique<CPU>(interconnect, cop0);
 }
 
@@ -38,7 +38,7 @@ void Emulator::emulateFrame() {
     uint32_t totalSystemClocksThisFrame = 0;
     uint32_t videoSystemClocksScanlineCounter = 0;
     uint32_t totalScanlines = 0;
-    while (totalSystemClocksThisFrame < systemClocksPerSecond) {
+    while (totalSystemClocksThisFrame < SystemClocksPerSecond) {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
             checkTTY();
             if (!cpu->executeNextInstruction()) {
@@ -46,12 +46,15 @@ void Emulator::emulateFrame() {
             }
             totalSystemClocksThisFrame++;
         }
+        timer0->step(systemClockStep);
+        timer1->step(systemClockStep);
+        timer2->step(systemClockStep);
         videoSystemClocksScanlineCounter += videoSystemClockStep;
-        if (videoSystemClocksScanlineCounter >= videoSystemClocksPerScanline) {
+        if (videoSystemClocksScanlineCounter >= VideoSystemClocksPerScanline) {
             totalScanlines++;
             videoSystemClocksScanlineCounter = 0;
         }
-        if (totalScanlines >= scanlinesPerFrame) {
+        if (totalScanlines >= ScanlinesPerFrame) {
             interruptController->trigger(VBLANK);
             totalScanlines = 0;
             gpu->render();

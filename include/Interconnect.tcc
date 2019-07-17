@@ -10,6 +10,7 @@
 #include "CDROM.tcc"
 #include "InterruptController.tcc"
 #include "Expansion1.tcc"
+#include "Timer.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -36,10 +37,17 @@ inline T Interconnect::load(uint32_t address) const {
     if (offset) {
         return gpu->load<T>(*offset);
     }
-    offset = timerRegisterRange.contains(absoluteAddress);
+    offset = timer0RegisterRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Timer Register read at offset: %#x", *offset);
-        return 0;
+        return timer0->load<T>(*offset);
+    }
+    offset = timer1RegisterRange.contains(absoluteAddress);
+    if (offset) {
+        return timer1->load<T>(*offset);
+    }
+    offset = timer2RegisterRange.contains(absoluteAddress);
+    if (offset) {
+        return timer2->load<T>(*offset);
     }
     offset = expansion1Range.contains(absoluteAddress);
     if (offset) {
@@ -128,9 +136,19 @@ inline void Interconnect::store(uint32_t address, T value) const {
         gpu->store<T>(*offset, value);
         return;
     }
-    offset = timerRegisterRange.contains(absoluteAddress);
+    offset = timer0RegisterRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Timer Register write at offset: %#x", *offset);
+        timer0->store<T>(*offset, value);
+        return;
+    }
+    offset = timer1RegisterRange.contains(absoluteAddress);
+    if (offset) {
+        timer1->store<T>(*offset, value);
+        return;
+    }
+    offset = timer2RegisterRange.contains(absoluteAddress);
+    if (offset) {
+        timer2->store<T>(*offset, value);
         return;
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);

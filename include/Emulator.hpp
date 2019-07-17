@@ -11,6 +11,7 @@
 #include "CDROM.hpp"
 #include "InterruptController.hpp"
 #include "Expansion1.hpp"
+#include "Timer.hpp"
 
 class Emulator {
     std::unique_ptr<CPU> cpu;
@@ -24,6 +25,9 @@ class Emulator {
     std::unique_ptr<CDROM> cdrom;
     std::unique_ptr<InterruptController> interruptController;
     std::unique_ptr<Expansion1> expansion1;
+    std::unique_ptr<Timer0> timer0;
+    std::unique_ptr<Timer1> timer1;
+    std::unique_ptr<Timer2> timer2;
 
     std::string ttyBuffer;
 
