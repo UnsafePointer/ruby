@@ -55,7 +55,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Sound Processing Unit read at offset: %#x", *offset);
+        printMessage("Unhandled Sound Processing Unit read at offset: %#x", *offset);
         return 0;
     }
     offset = scratchpadRange.contains(absoluteAddress);
@@ -153,7 +153,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Sound Processing Unit write at offset: %#x", *offset);
+        printMessage("Unhandled Sound Processing Unit write at offset: %#x", *offset);
         return;
     }
     offset = expansion2Range.contains(absoluteAddress);
