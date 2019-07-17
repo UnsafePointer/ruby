@@ -37,6 +37,7 @@ class TestRunner {
     bool runTests;
     bool resizeToFitFramebuffer;
     bool sleepAtStartup;
+    bool verbose;
     std::string exeFile;
     uint8_t header[TEST_HEADER_SIZE];
 
@@ -58,6 +59,7 @@ public:
     bool shouldRunTests();
     bool shouldResizeWindowToFitFramebuffer();
     bool shouldSleepAtStartup();
+    bool shouldLogVerbose();
     uint32_t programCounter();
     uint32_t globalPointer();
     uint32_t initialStackFramePointerBase();

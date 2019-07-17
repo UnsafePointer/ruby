@@ -1,6 +1,5 @@
 #include "Output.hpp"
 #include <cstdarg>
-#include <iostream>
 #include "TestRunner.hpp"
 #include "Logger.hpp"
 
@@ -9,7 +8,7 @@ using namespace std;
 string format(const char *fmt, va_list args) {
     char buffer[4096];
 
-    const auto result = std::vsnprintf(buffer, sizeof(buffer), fmt, args);
+    const auto result = vsnprintf(buffer, sizeof(buffer), fmt, args);
 
     if (result < 0) {
         return {};
@@ -20,17 +19,13 @@ string format(const char *fmt, va_list args) {
         return { buffer, length };
     }
 
-    std::string formatted(length, '\0');
-    std::vsnprintf(formatted.data(), length + 1, fmt, args);
+    string formatted(length, '\0');
+    vsnprintf(formatted.data(), length + 1, fmt, args);
 
     return formatted;
 }
 
-void printMessage(string message) {
-    std::cout << message << std::endl;
-}
-
-void logMessage(const char *fmt, ...) {
+void printMessage(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     string formatted = format(fmt, args);
@@ -44,9 +39,8 @@ void printWarning(const char *fmt, ...) {
     va_start(args, fmt);
     string formatted = format(fmt, args);
     va_end(args);
-    printMessage(formatted);
     Logger *logger = Logger::getInstance();
-    logger->logMessage(formatted);
+    logger->logWarning(formatted);
 }
 
 void printError(const char *fmt, ...) {
@@ -54,10 +48,8 @@ void printError(const char *fmt, ...) {
     va_start(args, fmt);
     string formatted = format(fmt, args);
     va_end(args);
-    printMessage(formatted);
     Logger *logger = Logger::getInstance();
-    logger->logMessage(formatted);
-    logger->flush();
+    logger->logError(formatted);
     Debugger *debugger = Debugger::getInstance();
     debugger->debug();
     exit(1);

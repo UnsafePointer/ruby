@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(emulator->getCPU());
     Logger *logger = Logger::getInstance();
-    logger->configure(testRunner->shouldRunTests());
+    logger->configure(testRunner->shouldRunTests(), testRunner->shouldLogVerbose());
     logger->setupTraceFile();
     if (testRunner->shouldSleepAtStartup()) {
         this_thread::sleep_for(chrono::milliseconds(10 * 1000));

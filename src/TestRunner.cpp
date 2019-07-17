@@ -50,6 +50,10 @@ void TestRunner::configure(int argc, char* argv[]) {
         sleepAtStartup = true;
         return;
     }
+    if (checkOption(argv, argv + argc, "--verbose")) {
+        verbose = true;
+        return;
+    }
     printError("Incorrect argument passed. See README.md for usage.");
 }
 
@@ -89,6 +93,10 @@ bool TestRunner::shouldResizeWindowToFitFramebuffer() {
 
 bool TestRunner::shouldSleepAtStartup() {
     return sleepAtStartup;
+}
+
+bool TestRunner::shouldLogVerbose() {
+    return verbose;
 }
 
 uint32_t TestRunner::programCounter() {
