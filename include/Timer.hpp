@@ -176,6 +176,7 @@ public:
     void setCounterValueRegister(uint32_t value);
     virtual void setCounterModeRegister(uint32_t value) = 0;
     void setCounterTargetRegister(uint32_t value);
+    void checkTargetsAndOverflows();
     void checkInterruptRequest();
 
     template <typename T>

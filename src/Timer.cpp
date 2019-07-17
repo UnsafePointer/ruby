@@ -26,6 +26,18 @@ void Timer::setCounterTargetRegister(uint32_t value) {
 }
 
 void Timer0::step(uint32_t cycles) {
+    Timer0ClockSource clockSource = counterMode.timer0ClockSource();
+    if (clockSource == Timer0ClockSource::DotClock) {
+        uint32_t videoCycles = cycles*11/7;
+        counter += videoCycles;
+        counterValue.value += counter / VideoSystemClocksPerDot;
+        counter %= VideoSystemClocksPerDot;
+    } else {
+        counter += cycles;
+        counterValue.value += cycles;
+    }
+
+    checkTargetsAndOverflows();
 }
 
 void Timer0::setCounterModeRegister(uint32_t value) {
@@ -44,6 +56,22 @@ void Timer1::step(uint32_t cycles) {
         counterValue.value += cycles;
     }
 
+    checkTargetsAndOverflows();
+}
+
+void Timer1::setCounterModeRegister(uint32_t value) {
+    counterMode._value = value;
+    counterValue._value = 0;
+}
+
+void Timer2::step(uint32_t cycles) {
+}
+
+void Timer2::setCounterModeRegister(uint32_t value) {
+    counterMode._value = value;
+}
+
+void Timer::checkTargetsAndOverflows() {
     bool checkIRQ = false;
 
     if (counterValue.value >= counterTarget.target) {
@@ -68,21 +96,11 @@ void Timer1::step(uint32_t cycles) {
         }
     }
 
-    if (checkIRQ) {
-        checkInterruptRequest();
+    if (!checkIRQ) {
+        return;
     }
-}
 
-void Timer1::setCounterModeRegister(uint32_t value) {
-    counterMode._value = value;
-    counterValue._value = 0;
-}
-
-void Timer2::step(uint32_t cycles) {
-}
-
-void Timer2::setCounterModeRegister(uint32_t value) {
-    counterMode._value = value;
+    checkInterruptRequest();
 }
 
 void Timer::checkInterruptRequest() {
