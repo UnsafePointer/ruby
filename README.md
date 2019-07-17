@@ -13,7 +13,7 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 - [x] DMA
 - [x] GPU
 - [ ] CDROM
-- [ ] Interrupts
+- [x] Interrupts
 - [x] Timers
 - [ ] Controllers and Memory Cards
 - [ ] GTE
