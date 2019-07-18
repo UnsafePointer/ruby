@@ -45,6 +45,9 @@ int main(int argc, char* argv[]) {
         if (debugger->isAttached() && debugger->isStopped()) {
             continue;
         }
+        if (quit) {
+            continue;
+        }
         emulator->emulateFrame();
     }
 }
