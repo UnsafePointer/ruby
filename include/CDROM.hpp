@@ -1,10 +1,36 @@
 #pragma once
 #include <cstdint>
 
-class CDROM {
-    uint8_t index;
+/*
+1F801800h - Index/Status Register (Bit0-1 R/W) (Bit2-7 Read Only)
+0-1 Index   Port 1F801801h-1F801803h index (0..3 = Index0..Index3)   (R/W)
+2   ADPBUSY XA-ADPCM fifo empty  (0=Empty) ;set when playing XA-ADPCM sound
+3   PRMEMPT Parameter fifo empty (1=Empty) ;triggered before writing 1st byte
+4   PRMWRDY Parameter fifo full  (0=Full)  ;triggered after writing 16 bytes
+5   RSLRRDY Response fifo empty  (0=Empty) ;triggered after reading LAST byte
+6   DRQSTS  Data fifo empty      (0=Empty) ;triggered after reading LAST byte
+7   BUSYSTS Command/parameter transmission busy  (1=Busy)
+*/
+union CDROMStatus {
+    struct {
+        uint8_t index : 2;
+        uint8_t XAADCPMFifoEmpty : 1;
+        uint8_t parameterFifoEmpty : 1;
+        uint8_t parameterFifoFull : 1;
+        uint8_t responseFifoEmpty : 1;
+        uint8_t dataFifoEmpty : 1;
+        uint8_t transmissionBusy : 1;
+    };
 
-    void setIndex(uint8_t index);
+    uint8_t _value;
+
+    CDROMStatus() : _value(0) {}
+};
+
+class CDROM {
+    CDROMStatus status;
+
+    void setStatusRegister(uint8_t value);
 public:
     CDROM();
     ~CDROM();

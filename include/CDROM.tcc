@@ -29,37 +29,37 @@ inline void CDROM::store(uint32_t offset, T value) {
     uint8_t param = value & 0xFF;
     switch (offset) {
         case 0: {
-            setIndex(param);
+            setStatusRegister(param);
             break;
         }
         case 2: {
-            switch (index) {
+            switch (status.index) {
                 case 1: {
                     printWarning("Unhandled CDROM Interrupt Enable Register");
                     break;
                 }
                 default: {
-                    printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, index);
+                    printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
                     break;
                 }
             }
             break;
         }
         case 3: {
-            switch (index) {
+            switch (status.index) {
                 case 1: {
                     printWarning("Unhandled CDROM Interrupt Flag Register");
                     break;
                 }
                 default: {
-                    printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, index);
+                    printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
                     break;
                 }
             }
             break;
         }
         default: {
-            printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, index);
+            printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
             break;
         }
     }
