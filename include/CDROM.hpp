@@ -27,10 +27,29 @@ union CDROMStatus {
     CDROMStatus() : _value(0) {}
 };
 
+/*
+1F801803h.Index0 - Interrupt Enable Register (R)
+1F801803h.Index2 - Interrupt Enable Register (R) (Mirror)
+0-4  Interrupt Enable Bits (usually all set, ie. 1Fh=Enable All IRQs)
+5-7  Unknown/unused (write: should be zero) (read: usually all bits set)
+*/
+union CDROMInterrupt {
+    struct {
+        uint8_t enable : 4;
+        uint8_t unknown : 4;
+    };
+
+    uint8_t _value;
+
+    CDROMInterrupt() : _value(0) {}
+};
+
 class CDROM {
     CDROMStatus status;
+    CDROMInterrupt interrupt;
 
     void setStatusRegister(uint8_t value);
+    void setInterruptRegister(uint8_t value);
 public:
     CDROM();
     ~CDROM();
