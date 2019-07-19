@@ -48,7 +48,7 @@ inline void CDROM::store(uint32_t offset, T value) {
         case 3: {
             switch (status.index) {
                 case 1: {
-                    printWarning("Unhandled CDROM Interrupt Flag Register");
+                    setInterruptFlagRegister(value);
                     break;
                 }
                 default: {

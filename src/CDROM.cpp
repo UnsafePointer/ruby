@@ -15,3 +15,11 @@ void CDROM::setStatusRegister(uint8_t value) {
 void CDROM::setInterruptRegister(uint8_t value) {
     interrupt.enable = value;
 }
+
+void CDROM::setInterruptFlagRegister(uint8_t value) {
+    if (value & 0x40) {
+        status.parameterFifoEmpty = 1;
+        status.parameterFifoFull = 1;
+        // TODO: Reset parameter FIFO
+    }
+}
