@@ -14,10 +14,13 @@
 #include "Timer.hpp"
 #include "Window.hpp"
 #include <SDL2/SDL.h>
+#include "DebugInfoRenderer.hpp"
 
 class Emulator {
     std::unique_ptr<Window> mainWindow;
     std::unique_ptr<Window> debugWindow;
+
+    std::unique_ptr<DebugInfoRenderer> debugInfoRenderer;
 
     std::unique_ptr<CPU> cpu;
     std::unique_ptr<COP0> cop0;
