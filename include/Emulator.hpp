@@ -12,8 +12,11 @@
 #include "InterruptController.hpp"
 #include "Expansion1.hpp"
 #include "Timer.hpp"
+#include "Window.hpp"
 
 class Emulator {
+    std::unique_ptr<Window> mainWindow;
+
     std::unique_ptr<CPU> cpu;
     std::unique_ptr<COP0> cop0;
     std::unique_ptr<Interconnect> interconnect;
@@ -32,6 +35,8 @@ class Emulator {
     std::string ttyBuffer;
 
     void checkTTY();
+    void setupSDL();
+    void setupOpenGL();
 public:
     Emulator();
     ~Emulator();

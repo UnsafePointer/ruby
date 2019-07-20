@@ -17,7 +17,7 @@ TexturePageColors texturePageColorsWithValue(uint32_t value) {
     return TexturePageColors(value);
 }
 
-GPU::GPU() : texturePageBaseX(0),
+GPU::GPU(std::unique_ptr<Window> &mainWindow) : texturePageBaseX(0),
              texturePageBaseY(0),
              semiTransparency(0),
              texturePageColors(TexturePageColors::T4Bit),
@@ -58,9 +58,9 @@ GPU::GPU() : texturePageBaseX(0),
              gp0WordsRead(0),
              gp0InstructionMethod(nullptr),
              gp0Mode(GP0Mode::Command),
-             renderer(Renderer()),
              imageBuffer(make_unique<GPUImageBuffer>())
 {
+    renderer = make_unique<Renderer>(mainWindow);
 }
 
 GPU::~GPU() {
@@ -582,16 +582,16 @@ void GPU::executeGp0(uint32_t value) {
     } else if (gp0Mode == GP0Mode::ImageLoad) {
         imageBuffer->pushWord(value);
         if (gp0WordsRemaining == 0) {
-            renderer.loadImage(imageBuffer);
+            renderer->loadImage(imageBuffer);
             gp0Mode = GP0Mode::Command;
         }
     }
 }
 
 void GPU::render() {
-    renderer.prepareFrame();
-    renderer.renderFrame();
-    renderer.finalizeFrame(this);
+    renderer->prepareFrame();
+    renderer->renderFrame();
+    renderer->finalizeFrame(this);
 }
 
 Dimensions GPU::getResolution() {
@@ -847,7 +847,7 @@ void GPU::operationGp0SetDrawingOffset() {
     int16_t drawingOffsetX = ((int16_t)(x << 5)) >> 5;
     int16_t drawingOffsetY = ((int16_t)(y << 5)) >> 5;
 
-    renderer.setDrawingOffset(drawingOffsetX, drawingOffsetY);
+    renderer->setDrawingOffset(drawingOffsetX, drawingOffsetY);
 }
 
 /*
@@ -1772,7 +1772,7 @@ void GPU::operationGp0FillRectagleInVRAM() {
         bottomLeft,
         bottomRight,
     };
-    renderer.pushPolygon(vertices);
+    renderer->pushPolygon(vertices);
     return;
 }
 
@@ -1806,7 +1806,7 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
         Vertex(point3, color, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point4, color, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
     };
-    renderer.pushPolygon(vertices);
+    renderer->pushPolygon(vertices);
     return;
 }
 
@@ -1827,7 +1827,7 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
         bottomLeft,
         bottomRight,
     };
-    renderer.pushPolygon(vertices);
+    renderer->pushPolygon(vertices);
     return;
 }
 
@@ -1838,7 +1838,7 @@ void GPU::monochromePolygon(uint numberOfPoints, bool opaque) {
         Point point = Point(gp0InstructionBuffer[i]);
         vertices.push_back(Vertex(point, color));
     }
-    renderer.pushPolygon(vertices);
+    renderer->pushPolygon(vertices);
 }
 
 void GPU::shadedPolygon(uint numberOfPoints, bool opaque) {
@@ -1848,7 +1848,7 @@ void GPU::shadedPolygon(uint numberOfPoints, bool opaque) {
         Point point = Point(gp0InstructionBuffer[i*2+1]);
         vertices.push_back(Vertex(point, color));
     }
-    renderer.pushPolygon(vertices);
+    renderer->pushPolygon(vertices);
 }
 
 void GPU::texturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
@@ -1865,7 +1865,7 @@ void GPU::texturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode tex
         Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
-    renderer.pushPolygon(vertices);
+    renderer->pushPolygon(vertices);
 }
 
 void GPU::shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
@@ -1881,7 +1881,7 @@ void GPU::shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMo
         Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
-    renderer.pushPolygon(vertices);
+    renderer->pushPolygon(vertices);
 }
 
 void GPU::monochromeLine(uint numberOfPoints, bool opaque) {
@@ -1892,14 +1892,14 @@ void GPU::monochromeLine(uint numberOfPoints, bool opaque) {
         vertices.push_back(Vertex(point, color));
     }
     if (numberOfPoints == 2) {
-        renderer.pushLine(vertices);
+        renderer->pushLine(vertices);
         return;
     }
     vector<Vertex> lines = vector<Vertex>();
     for (uint i = 0; i < vertices.size() - 1; i++) {
         lines.push_back(vertices[i]);
         lines.push_back(vertices[i+1]);
-        renderer.pushLine(lines);
+        renderer->pushLine(lines);
         lines.clear();
     }
 }
@@ -1912,14 +1912,14 @@ void GPU::shadedLine(uint numberOfPoints, bool opaque) {
         vertices.push_back(Vertex(point, color));
     }
     if (numberOfPoints == 2) {
-        renderer.pushLine(vertices);
+        renderer->pushLine(vertices);
         return;
     }
     vector<Vertex> lines = vector<Vertex>();
     for (uint i = 0; i < vertices.size() - 1; i++) {
         lines.push_back(vertices[i]);
         lines.push_back(vertices[i+1]);
-        renderer.pushLine(lines);
+        renderer->pushLine(lines);
         lines.clear();
     }
 }

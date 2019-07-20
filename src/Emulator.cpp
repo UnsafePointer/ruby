@@ -2,17 +2,31 @@
 #include "TestRunner.hpp"
 #include <iostream>
 #include "Constants.h"
+#include <SDL2/SDL.h>
+#include <glad/glad.h>
+#include "Output.hpp"
 
 using namespace std;
 
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
 const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
+const uint32_t SCREEN_WIDTH = 1024;
+const uint32_t SCREEN_HEIGHT = 768;
 
 Emulator::Emulator() : ttyBuffer() {
+    setupSDL();
+    uint32_t screenHeight = SCREEN_HEIGHT;
+    TestRunner *testRunner = TestRunner::getInstance();
+    if (testRunner->shouldResizeWindowToFitFramebuffer()) {
+        screenHeight = 512;
+    }
+    mainWindow = make_unique<Window>("ルビィ", SCREEN_WIDTH, screenHeight);
+    mainWindow->makeCurrent();
+    setupOpenGL();
     cop0 = make_unique<COP0>();
     bios = make_unique<BIOS>();
     ram = make_unique<RAM>();
-    gpu = make_unique<GPU>();
+    gpu = make_unique<GPU>(mainWindow);
     dma = make_unique<DMA>(ram, gpu);
     scratchpad = make_unique<Scratchpad>();
     cdrom = make_unique<CDROM>();
@@ -58,6 +72,7 @@ void Emulator::emulateFrame() {
             interruptController->trigger(VBLANK);
             totalScanlines = 0;
             gpu->render();
+            SDL_GL_SwapWindow(mainWindow->getWindowRef());
         }
     }
 }
@@ -68,6 +83,21 @@ void Emulator::transferToRAM(std::string path, uint32_t origin, uint32_t size, u
 
 void Emulator::dumpRAM() {
     interconnect->dumpRAM();
+}
+
+void Emulator::setupSDL() {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        printError("Error initializing SDL: %s", SDL_GetError());
+    }
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+}
+
+void Emulator::setupOpenGL() {
+    if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
+        printError("Failed to initialize the OpenGL context.");
+    }
 }
 
 void Emulator::checkTTY() {
