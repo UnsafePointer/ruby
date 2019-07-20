@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
+            emulator->handleSDLEvent(event);
         }
         if (debugger->isAttached() && debugger->shouldStep()) {
             debugger->doStep();
@@ -46,6 +47,10 @@ int main(int argc, char* argv[]) {
             continue;
         }
         if (quit) {
+            continue;
+        }
+        if (emulator->shouldTerminate()) {
+            quit = true;
             continue;
         }
         emulator->emulateFrame();

@@ -20,7 +20,8 @@ Emulator::Emulator() : ttyBuffer() {
     if (testRunner->shouldResizeWindowToFitFramebuffer()) {
         screenHeight = 512;
     }
-    mainWindow = make_unique<Window>("ルビィ", SCREEN_WIDTH, screenHeight);
+    debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, screenHeight);
+    mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
     mainWindow->makeCurrent();
     setupOpenGL();
     cop0 = make_unique<COP0>();
@@ -98,6 +99,15 @@ void Emulator::setupOpenGL() {
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
         printError("Failed to initialize the OpenGL context.");
     }
+}
+
+void Emulator::handleSDLEvent(SDL_Event event) {
+    mainWindow->handleSDLEvent(event);
+    debugWindow->handleSDLEvent(event);
+}
+
+bool Emulator::shouldTerminate() {
+    return mainWindow->isHidden();
 }
 
 void Emulator::checkTTY() {

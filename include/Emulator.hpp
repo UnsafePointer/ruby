@@ -13,9 +13,11 @@
 #include "Expansion1.hpp"
 #include "Timer.hpp"
 #include "Window.hpp"
+#include <SDL2/SDL.h>
 
 class Emulator {
     std::unique_ptr<Window> mainWindow;
+    std::unique_ptr<Window> debugWindow;
 
     std::unique_ptr<CPU> cpu;
     std::unique_ptr<COP0> cop0;
@@ -45,4 +47,6 @@ public:
     void emulateFrame();
     void transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
     void dumpRAM();
+    void handleSDLEvent(SDL_Event event);
+    bool shouldTerminate();
 };
