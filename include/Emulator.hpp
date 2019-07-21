@@ -39,7 +39,8 @@ class Emulator {
 
     std::string ttyBuffer;
 
-    void checkTTY();
+    void checkBIOSFunctions();
+    void checkTTY(char c);
     void setupSDL();
     void setupOpenGL();
 public:

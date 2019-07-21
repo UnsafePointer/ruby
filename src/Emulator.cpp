@@ -8,8 +8,6 @@
 
 using namespace std;
 
-const uint32_t BIOS_A_FUNCTIONS_STEP = 0xB0;
-const uint32_t BIOS_STD_OUT_PUT_CHAR = 0x3D;
 const uint32_t SCREEN_WIDTH = 1024;
 const uint32_t SCREEN_HEIGHT = 768;
 
@@ -56,7 +54,7 @@ void Emulator::emulateFrame() {
     uint32_t totalScanlines = 0;
     while (totalSystemClocksThisFrame < SystemClocksPerFrame) {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
-            checkTTY();
+            checkBIOSFunctions();
             if (!cpu->executeNextInstruction()) {
                 testRunner->setup();
             }
@@ -118,16 +116,22 @@ bool Emulator::shouldTerminate() {
     return mainWindow->isHidden();
 }
 
-void Emulator::checkTTY() {
-    if (cpu->getProgramCounter() == BIOS_A_FUNCTIONS_STEP) {
-        array<uint32_t, 32> registers = cpu->getRegisters();
-        uint32_t function = registers[9];
-        if (function == BIOS_STD_OUT_PUT_CHAR) {
-            ttyBuffer.append(1, registers[4]);
-            if (registers[4] == '\n') {
-                cout << ttyBuffer;
-                ttyBuffer.clear();
-            }
-        }
+void Emulator::checkTTY(char c) {
+    ttyBuffer.append(1, c);
+    if (c == '\n') {
+        cout << ttyBuffer;
+        ttyBuffer.clear();
+    }
+}
+
+void Emulator::checkBIOSFunctions() {
+    array<uint32_t, 32> registers = cpu->getRegisters();
+    uint32_t function = registers[9];
+    optional<string> result = bios->checkFunctions(cpu->getProgramCounter(), function);
+    if (!result) {
+        return;
+    }
+    if ((*result).compare("std_out_putchar(char)") == 0) {
+        checkTTY(registers[4]);
     }
 }

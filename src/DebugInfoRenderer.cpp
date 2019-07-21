@@ -32,6 +32,15 @@ void DebugInfoRenderer::update() {
         ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
         ImGui::SetNextWindowSize(syscallWindowSize, ImGuiCond_Always);
         ImGui::Begin("BIOS function calls", NULL, ImGuiWindowFlags_NoResize);
+        {
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
+            ImGui::BeginChild("Child1", ImVec2(ImGui::GetWindowContentRegionWidth(), static_cast<float>(windowDimensions.height - 60)), false, window_flags);
+            for (int i = 0; i < 100; i++) {
+                ImGui::Text("%04d: scrollable region", i);
+            }
+            ImGui::SetScrollHereY();
+            ImGui::EndChild();
+        }
         ImGui::End();
     }
     ImGui::Render();
