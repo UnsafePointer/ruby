@@ -57,4 +57,5 @@ public:
     void dumpRAM();
     void handleSDLEvent(SDL_Event event);
     bool shouldTerminate();
+    void toggleDebugInfoWindow();
 };

@@ -23,4 +23,5 @@ public:
     Dimensions getDimensions();
     void handleSDLEvent(SDL_Event event);
     bool isHidden();
+    void toggleHidden();
 };

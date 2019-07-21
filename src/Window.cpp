@@ -47,3 +47,12 @@ void Window::handleSDLEvent(SDL_Event event) {
 bool Window::isHidden() {
     return hidden;
 }
+
+void Window::toggleHidden() {
+    hidden = !hidden;
+    if (!hidden) {
+        SDL_ShowWindow(window);
+    } else if (!mainWindow) {
+        SDL_HideWindow(window);
+    }
+}

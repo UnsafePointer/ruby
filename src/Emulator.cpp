@@ -125,6 +125,13 @@ bool Emulator::shouldTerminate() {
     return mainWindow->isHidden();
 }
 
+void Emulator::toggleDebugInfoWindow() {
+    if (!showDebugInfoWindow) {
+        return;
+    }
+    debugWindow->toggleHidden();
+}
+
 void Emulator::checkTTY(char c) {
     ttyBuffer.append(1, c);
     if (c == '\n') {

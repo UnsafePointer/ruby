@@ -35,6 +35,10 @@ int main(int argc, char* argv[]) {
                         debugger->debug();
                         break;
                     }
+                    case SDLK_i: {
+                        emulator->toggleDebugInfoWindow();
+                        break;
+                    }
                 }
             }
             emulator->handleSDLEvent(event);
