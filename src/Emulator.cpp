@@ -54,7 +54,7 @@ void Emulator::emulateFrame() {
     uint32_t totalSystemClocksThisFrame = 0;
     uint32_t videoSystemClocksScanlineCounter = 0;
     uint32_t totalScanlines = 0;
-    while (totalSystemClocksThisFrame < SystemClocksPerSecond) {
+    while (totalSystemClocksThisFrame < SystemClocksPerFrame) {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
             checkTTY();
             if (!cpu->executeNextInstruction()) {
