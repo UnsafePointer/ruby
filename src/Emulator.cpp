@@ -24,7 +24,7 @@ Emulator::Emulator() : ttyBuffer() {
     mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
     mainWindow->makeCurrent();
     setupOpenGL();
-    debugInfoRenderer = make_unique<DebugInfoRenderer>();
+    debugInfoRenderer = make_unique<DebugInfoRenderer>(debugWindow);
     cop0 = make_unique<COP0>();
     bios = make_unique<BIOS>();
     ram = make_unique<RAM>();
@@ -111,6 +111,7 @@ void Emulator::setupOpenGL() {
 void Emulator::handleSDLEvent(SDL_Event event) {
     mainWindow->handleSDLEvent(event);
     debugWindow->handleSDLEvent(event);
+    debugInfoRenderer->handleSDLEvent(event);
 }
 
 bool Emulator::shouldTerminate() {
