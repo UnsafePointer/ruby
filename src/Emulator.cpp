@@ -11,7 +11,7 @@ using namespace std;
 const uint32_t SCREEN_WIDTH = 1024;
 const uint32_t SCREEN_HEIGHT = 768;
 
-Emulator::Emulator() : ttyBuffer() {
+Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
     setupSDL();
     uint32_t screenHeight = SCREEN_HEIGHT;
     TestRunner *testRunner = TestRunner::getInstance();
@@ -74,7 +74,7 @@ void Emulator::emulateFrame() {
             gpu->render();
             SDL_GL_SwapWindow(mainWindow->getWindowRef());
             debugWindow->makeCurrent();
-            debugInfoRenderer->update();
+            debugInfoRenderer->update(biosFunctionsLog);
             SDL_GL_SwapWindow(debugWindow->getWindowRef());
             // This application makes most of the OpenGL work on the main window, so after
             // we are doine with the debug window we forget about it until the next time to update
@@ -134,4 +134,5 @@ void Emulator::checkBIOSFunctions() {
     if ((*result).compare("std_out_putchar(char)") == 0) {
         checkTTY(registers[4]);
     }
+    biosFunctionsLog.push_back(*result);
 }

@@ -22,7 +22,7 @@ DebugInfoRenderer::~DebugInfoRenderer() {
     ImGui::DestroyContext();
 }
 
-void DebugInfoRenderer::update() {
+void DebugInfoRenderer::update(vector<string> biosFunctionsLog) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(debugWindow->getWindowRef());
     Dimensions windowDimensions = debugWindow->getDimensions();
@@ -35,8 +35,8 @@ void DebugInfoRenderer::update() {
         {
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
             ImGui::BeginChild("Child1", ImVec2(ImGui::GetWindowContentRegionWidth(), static_cast<float>(windowDimensions.height - 60)), false, window_flags);
-            for (int i = 0; i < 100; i++) {
-                ImGui::Text("%04d: scrollable region", i);
+            for (uint i = 0; i < biosFunctionsLog.size(); i++) {
+                ImGui::Text("%s", biosFunctionsLog[i].c_str());
             }
             ImGui::SetScrollHereY();
             ImGui::EndChild();

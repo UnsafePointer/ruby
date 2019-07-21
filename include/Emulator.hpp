@@ -15,6 +15,7 @@
 #include "Window.hpp"
 #include <SDL2/SDL.h>
 #include "DebugInfoRenderer.hpp"
+#include <vector>
 
 class Emulator {
     std::unique_ptr<Window> mainWindow;
@@ -38,6 +39,7 @@ class Emulator {
     std::unique_ptr<Timer2> timer2;
 
     std::string ttyBuffer;
+    std::vector<std::string> biosFunctionsLog;
 
     void checkBIOSFunctions();
     void checkTTY(char c);
