@@ -20,7 +20,7 @@ Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
     }
     showDebugInfoWindow = testRunner->shouldShowDebugInfoWindow();
     if (showDebugInfoWindow) {
-        debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, screenHeight);
+        debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT);
     }
     mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
     mainWindow->makeCurrent();
