@@ -33,6 +33,7 @@ void TestRunner::configure(int argc, char* argv[]) {
     if (argc <= 1) {
         return;
     }
+    bool argumentFound = false;
     if (checkOption(argv, argv + argc, "--exe")) {
         char *path = getOptionValue(argv, argv + argc, "--exe");
         if (path == NULL) {
@@ -40,25 +41,27 @@ void TestRunner::configure(int argc, char* argv[]) {
         }
         runTests = true;
         exeFile = string(path);
-        return;
+        argumentFound = true;
     }
     if (checkOption(argv, argv + argc, "--framebuffer")) {
         resizeToFitFramebuffer = true;
-        return;
+        argumentFound = true;
     }
     if (checkOption(argv, argv + argc, "--sleep")) {
         sleepAtStartup = true;
-        return;
+        argumentFound = true;
     }
     if (checkOption(argv, argv + argc, "--verbose")) {
         verbose = true;
-        return;
+        argumentFound = true;
     }
     if (checkOption(argv, argv + argc, "--dbginfo")) {
         dbginfo = true;
-        return;
+        argumentFound = true;
     }
-    printError("Incorrect argument passed. See README.md for usage.");
+    if (!argumentFound) {
+        printError("Incorrect argument passed. See README.md for usage.");
+    }
 }
 
 void TestRunner::setEmulator(Emulator *emulator) {
