@@ -8,13 +8,11 @@
 #include "Vertex.hpp"
 #include "GPUImageBuffer.hpp"
 #include "Texture.hpp"
+#include "Window.hpp"
 
 class GPU;
 
 class Renderer {
-    SDL_GLContext glContext;
-    SDL_Window *window;
-
     GLuint offsetUniform;
 
     std::unique_ptr<RendererProgram> program;
@@ -33,7 +31,7 @@ class Renderer {
 
     void checkForceDraw(uint verticesToRender, GLenum newMode);
 public:
-    Renderer();
+    Renderer(std::unique_ptr<Window> &mainWindow);
     ~Renderer();
 
     void pushLine(std::vector<Vertex> vertices);

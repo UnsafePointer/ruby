@@ -35,8 +35,13 @@ int main(int argc, char* argv[]) {
                         debugger->debug();
                         break;
                     }
+                    case SDLK_i: {
+                        emulator->toggleDebugInfoWindow();
+                        break;
+                    }
                 }
             }
+            emulator->handleSDLEvent(event);
         }
         if (debugger->isAttached() && debugger->shouldStep()) {
             debugger->doStep();
@@ -46,6 +51,10 @@ int main(int argc, char* argv[]) {
             continue;
         }
         if (quit) {
+            continue;
+        }
+        if (emulator->shouldTerminate()) {
+            quit = true;
             continue;
         }
         emulator->emulateFrame();

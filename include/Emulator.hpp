@@ -12,8 +12,17 @@
 #include "InterruptController.hpp"
 #include "Expansion1.hpp"
 #include "Timer.hpp"
+#include "Window.hpp"
+#include <SDL2/SDL.h>
+#include "DebugInfoRenderer.hpp"
+#include <vector>
 
 class Emulator {
+    std::unique_ptr<Window> mainWindow;
+    std::unique_ptr<Window> debugWindow;
+
+    std::unique_ptr<DebugInfoRenderer> debugInfoRenderer;
+
     std::unique_ptr<CPU> cpu;
     std::unique_ptr<COP0> cop0;
     std::unique_ptr<Interconnect> interconnect;
@@ -30,8 +39,14 @@ class Emulator {
     std::unique_ptr<Timer2> timer2;
 
     std::string ttyBuffer;
+    std::vector<std::string> biosFunctionsLog;
 
-    void checkTTY();
+    bool showDebugInfoWindow;
+
+    void checkBIOSFunctions();
+    void checkTTY(char c);
+    void setupSDL();
+    void setupOpenGL();
 public:
     Emulator();
     ~Emulator();
@@ -40,4 +55,7 @@ public:
     void emulateFrame();
     void transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
     void dumpRAM();
+    void handleSDLEvent(SDL_Event event);
+    bool shouldTerminate();
+    void toggleDebugInfoWindow();
 };

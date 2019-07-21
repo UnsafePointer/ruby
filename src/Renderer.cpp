@@ -11,36 +11,9 @@
 
 using namespace std;
 
-const uint32_t SCREEN_WIDTH = 1024;
-const uint32_t SCREEN_HEIGHT = 768;
-
-Renderer::Renderer() : mode(GL_TRIANGLES) {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        printError("Error initializing SDL: %s", SDL_GetError());
-    }
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : mode(GL_TRIANGLES) {
     TestRunner *testRunner = TestRunner::getInstance();
     resizeToFitFramebuffer = testRunner->shouldResizeWindowToFitFramebuffer();
-
-    uint32_t screenHeight = SCREEN_HEIGHT;
-    if (resizeToFitFramebuffer) {
-        screenHeight = 512;
-    }
-
-    window = SDL_CreateWindow("ルビィ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, screenHeight, SDL_WINDOW_OPENGL);
-    glContext = SDL_GL_CreateContext(window);
-
-    if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
-        printError("Failed to initialize the OpenGL context.");
-    }
-
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    SDL_GL_SwapWindow(window);
 
     textureRendererProgram = make_unique<RendererProgram>("./glsl/texture_load_vertex.glsl", "./glsl/texture_load_fragment.glsl");
 
@@ -66,7 +39,8 @@ Renderer::Renderer() : mode(GL_TRIANGLES) {
     // TODO: handle resolution for other targets
     loadImageTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
 
-    screenTexture = make_unique<Texture>(((GLsizei) SCREEN_WIDTH), ((GLsizei) screenHeight));
+    Dimensions screenDimensions = mainWindow->getDimensions();
+    screenTexture = make_unique<Texture>(((GLsizei) screenDimensions.width), ((GLsizei) screenDimensions.height));
     checkForOpenGLErrors();
 }
 
@@ -156,7 +130,6 @@ void Renderer::finalizeFrame(GPU *gpu) {
     screenBuffer->addData(pixels);
     screenBuffer->draw(GL_TRIANGLE_STRIP);
     checkForOpenGLErrors();
-    SDL_GL_SwapWindow(window);
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {

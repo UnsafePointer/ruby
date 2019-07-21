@@ -5,6 +5,7 @@
 #include "GPUInstructionBuffer.hpp"
 #include "Renderer.hpp"
 #include "GPUImageBuffer.hpp"
+#include "Window.hpp"
 
 enum TexturePageColors {
     T4Bit = 0,
@@ -147,7 +148,7 @@ GP1(07h) - Vertical Display range (on Screen)
 
     GP0Mode gp0Mode;
 
-    Renderer renderer;
+    std::unique_ptr<Renderer> renderer;
 
     std::unique_ptr<GPUImageBuffer> imageBuffer;
 
@@ -249,7 +250,7 @@ GP1(07h) - Vertical Display range (on Screen)
 
     void executeGp1(uint32_t value);
 public:
-    GPU();
+    GPU(std::unique_ptr<Window> &mainWindow);
     ~GPU();
     template <typename T>
     inline T load(uint32_t offset) const;
