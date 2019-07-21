@@ -41,6 +41,8 @@ class Emulator {
     std::string ttyBuffer;
     std::vector<std::string> biosFunctionsLog;
 
+    bool showDebugInfoWindow;
+
     void checkBIOSFunctions();
     void checkTTY(char c);
     void setupSDL();

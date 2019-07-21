@@ -18,11 +18,16 @@ Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
     if (testRunner->shouldResizeWindowToFitFramebuffer()) {
         screenHeight = 512;
     }
-    debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, screenHeight);
+    showDebugInfoWindow = testRunner->shouldShowDebugInfoWindow();
+    if (showDebugInfoWindow) {
+        debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, screenHeight);
+    }
     mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
     mainWindow->makeCurrent();
     setupOpenGL();
-    debugInfoRenderer = make_unique<DebugInfoRenderer>(debugWindow);
+    if (showDebugInfoWindow) {
+        debugInfoRenderer = make_unique<DebugInfoRenderer>(debugWindow);
+    }
     cop0 = make_unique<COP0>();
     bios = make_unique<BIOS>();
     ram = make_unique<RAM>();
@@ -73,12 +78,14 @@ void Emulator::emulateFrame() {
             totalScanlines = 0;
             gpu->render();
             SDL_GL_SwapWindow(mainWindow->getWindowRef());
-            debugWindow->makeCurrent();
-            debugInfoRenderer->update(biosFunctionsLog);
-            SDL_GL_SwapWindow(debugWindow->getWindowRef());
-            // This application makes most of the OpenGL work on the main window, so after
-            // we are doine with the debug window we forget about it until the next time to update
-            mainWindow->makeCurrent();
+            if (showDebugInfoWindow) {
+                debugWindow->makeCurrent();
+                debugInfoRenderer->update(biosFunctionsLog);
+                SDL_GL_SwapWindow(debugWindow->getWindowRef());
+                // This application makes most of the OpenGL work on the main window, so after
+                // we are doine with the debug window we forget about it until the next time to update
+                mainWindow->makeCurrent();
+            }
         }
     }
 }
@@ -108,8 +115,10 @@ void Emulator::setupOpenGL() {
 
 void Emulator::handleSDLEvent(SDL_Event event) {
     mainWindow->handleSDLEvent(event);
-    debugWindow->handleSDLEvent(event);
-    debugInfoRenderer->handleSDLEvent(event);
+    if (showDebugInfoWindow) {
+        debugWindow->handleSDLEvent(event);
+        debugInfoRenderer->handleSDLEvent(event);
+    }
 }
 
 bool Emulator::shouldTerminate() {

@@ -54,6 +54,10 @@ void TestRunner::configure(int argc, char* argv[]) {
         verbose = true;
         return;
     }
+    if (checkOption(argv, argv + argc, "--dbginfo")) {
+        dbginfo = true;
+        return;
+    }
     printError("Incorrect argument passed. See README.md for usage.");
 }
 
@@ -97,6 +101,10 @@ bool TestRunner::shouldSleepAtStartup() {
 
 bool TestRunner::shouldLogVerbose() {
     return verbose;
+}
+
+bool TestRunner::shouldShowDebugInfoWindow() {
+    return dbginfo;
 }
 
 uint32_t TestRunner::programCounter() {
