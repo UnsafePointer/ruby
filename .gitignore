@@ -90,3 +90,6 @@ ram.bin
 
 # log
 ruby.log
+
+## Dear ImGui Ini files
+imgui.ini

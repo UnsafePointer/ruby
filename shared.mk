@@ -1,6 +1,8 @@
-CXX_FLAGS := -Wall -Wextra -std=c++17 $(CXX_ARCH_SPECIFIC_FLAGS) `$(SYSROOT)/usr/bin/sdl2-config --cflags`
+CXX_FLAGS := -Wall -Wextra -std=c++17 $(CXX_ARCH_SPECIFIC_FLAGS) `$(SYSROOT)/usr/bin/sdl2-config --cflags` -DIMGUI_IMPL_OPENGL_LOADER_GLAD
 
 GLAD_BUILD_DIR := glad
+
+IMGUI_DIR := imgui
 
 PROFILE := valgrind
 PROFILE_FILE := valgrind-out.txt
@@ -24,8 +26,8 @@ run: clean all
 $(GLAD_BUILD_DIR)/src/*.c:
 	python -m glad --out-path=$(GLAD_BUILD_DIR) --api="gl=$(OPENGL_API)" --extensions="GL_KHR_debug" --generator="c"
 
-$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp $(GLAD_BUILD_DIR)/src/*.c
-	$(CXX) $(CXX_FLAGS) $(PREPROCESSOR_MACROS) -I$(INCLUDE) -I$(GLAD_BUILD_DIR)/include -L$(LIB) $^ -o $@ $(LIBRARIES) $(SDL2_FLAGS)
+$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp $(GLAD_BUILD_DIR)/src/*.c $(IMGUI_DIR)/src/*.cpp $(IMGUI_DIR)/src/sdl/*.cpp $(IMGUI_DIR)/src/opengl3/*.cpp
+	$(CXX) $(CXX_FLAGS) $(PREPROCESSOR_MACROS) -I$(INCLUDE) -I$(GLAD_BUILD_DIR)/include -I$(IMGUI_DIR)/include -L$(LIB) $^ -o $@ $(LIBRARIES) $(SDL2_FLAGS)
 
 profile:
 	rm -rf $(PROFILE_FILE)
