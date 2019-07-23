@@ -33,6 +33,10 @@ inline void CDROM::store(uint32_t offset, T value) {
         }
         case 2: {
             switch (status.index) {
+                case 0: {
+                    pushParameter(value);
+                    break;
+                }
                 case 1: {
                     setInterruptRegister(value);
                     break;

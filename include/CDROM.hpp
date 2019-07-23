@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <queue>
 
 /*
 1F801800h - Index/Status Register (Bit0-1 R/W) (Bit2-7 Read Only)
@@ -48,11 +49,18 @@ class CDROM {
     CDROMStatus status;
     CDROMInterrupt interrupt;
 
+    std::queue<uint8_t> parameters;
+
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
     void setInterruptFlagRegister(uint8_t value);
 
     uint8_t getStatusRegister() const;
+
+    void clearParameters();
+    void pushParameter(uint8_t value);
+
+    void updateStatusRegister();
 public:
     CDROM();
     ~CDROM();
