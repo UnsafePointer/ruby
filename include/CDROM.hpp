@@ -51,6 +51,8 @@ class CDROM {
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
     void setInterruptFlagRegister(uint8_t value);
+
+    uint8_t getStatusRegister() const;
 public:
     CDROM();
     ~CDROM();

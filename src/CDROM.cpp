@@ -23,3 +23,7 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
         // TODO: Reset parameter FIFO
     }
 }
+
+uint8_t CDROM::getStatusRegister() const {
+    return status._value;
+}

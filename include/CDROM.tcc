@@ -10,7 +10,7 @@ inline T CDROM::load(uint32_t offset) const {
     }
     switch (offset) {
         case 0: {
-            return status._value;
+            return getStatusRegister();
         }
         default: {
             printError("Unhandled CDROM read at offset: %#x", offset);
