@@ -59,6 +59,10 @@ void TestRunner::configure(int argc, char* argv[]) {
         dbginfo = true;
         argumentFound = true;
     }
+    if (checkOption(argv, argv + argc, "--bios")) {
+        bios = true;
+        argumentFound = true;
+    }
     if (!argumentFound) {
         printError("Incorrect argument passed. See README.md for usage.");
     }
@@ -108,6 +112,10 @@ bool TestRunner::shouldLogVerbose() {
 
 bool TestRunner::shouldShowDebugInfoWindow() {
     return dbginfo;
+}
+
+bool TestRunner::shouldLogBiosFunctionCalls() {
+    return bios;
 }
 
 uint32_t TestRunner::programCounter() {

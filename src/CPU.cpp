@@ -4,6 +4,7 @@
 #include <iomanip>
 #include "CPU.tcc"
 #include "Output.hpp"
+#include "TestRunner.hpp"
 
 using namespace std;
 
@@ -543,6 +544,10 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
 }
 
 void CPU::operationSystemCall(Instruction instruction) {
+    TestRunner *testRunner = TestRunner::getInstance();
+    if (testRunner->shouldLogBiosFunctionCalls()) {
+        printWarning("  SYSCALL: %#x", registers[4]);
+    }
     triggerException(ExceptionType::SysCall);
 }
 

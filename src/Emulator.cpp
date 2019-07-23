@@ -22,6 +22,7 @@ Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
     if (showDebugInfoWindow) {
         debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT);
     }
+    logBiosFunctionCalls = testRunner->shouldLogBiosFunctionCalls();
     mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
     mainWindow->makeCurrent();
     setupOpenGL();
@@ -148,8 +149,18 @@ void Emulator::checkBIOSFunctions() {
     if (!result) {
         return;
     }
-    if ((*result).compare("std_out_putchar(char)") == 0) {
+    string functionCallLog = (*result);
+    bool functionCallLogIsRFE = functionCallLog.find("ReturnFromException()") == 0;
+    if (functionCallLog.find("std_out_putchar(char)") == 0) {
         checkTTY(registers[4]);
+    } else {
+        if (logBiosFunctionCalls) {
+            if (!functionCallLogIsRFE) {
+                printWarning("  BIOS: %s", functionCallLog.c_str());
+            }
+        }
     }
-    biosFunctionsLog.push_back(*result);
+    if (!functionCallLogIsRFE) {
+        biosFunctionsLog.push_back(functionCallLog);
+    }
 }

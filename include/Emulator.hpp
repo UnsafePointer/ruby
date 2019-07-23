@@ -42,6 +42,7 @@ class Emulator {
     std::vector<std::string> biosFunctionsLog;
 
     bool showDebugInfoWindow;
+    bool logBiosFunctionCalls;
 
     void checkBIOSFunctions();
     void checkTTY(char c);

@@ -39,6 +39,7 @@ class TestRunner {
     bool sleepAtStartup;
     bool verbose;
     bool dbginfo;
+    bool bios;
     std::string exeFile;
     uint8_t header[TEST_HEADER_SIZE];
 
@@ -62,6 +63,7 @@ public:
     bool shouldSleepAtStartup();
     bool shouldLogVerbose();
     bool shouldShowDebugInfoWindow();
+    bool shouldLogBiosFunctionCalls();
     uint32_t programCounter();
     uint32_t globalPointer();
     uint32_t initialStackFramePointerBase();
