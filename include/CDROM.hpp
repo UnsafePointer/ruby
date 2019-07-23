@@ -24,7 +24,7 @@ union CDROMStatus {
 
     uint8_t _value;
 
-    CDROMStatus() : _value(0) {}
+    CDROMStatus() : _value(0x18) {}
 };
 
 /*
