@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "Output.hpp"
+#include <sstream>
 
 using namespace std;
 

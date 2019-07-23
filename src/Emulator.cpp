@@ -143,7 +143,8 @@ void Emulator::checkTTY(char c) {
 void Emulator::checkBIOSFunctions() {
     array<uint32_t, 32> registers = cpu->getRegisters();
     uint32_t function = registers[9];
-    optional<string> result = bios->checkFunctions(cpu->getProgramCounter(), function);
+    array<uint32_t, 4> subroutineArguments = cpu->getSubroutineArguments();
+    optional<string> result = bios->checkFunctions(cpu->getProgramCounter(), function, subroutineArguments);
     if (!result) {
         return;
     }

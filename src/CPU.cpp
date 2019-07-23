@@ -73,6 +73,14 @@ uint32_t CPU::getProgramCounter() {
     return programCounter;
 }
 
+array<uint32_t, 4> CPU::getSubroutineArguments() {
+    uint32_t subroutineArguments[4];
+    memcpy(subroutineArguments, &registers[4], 4*sizeof(*registers));
+    array<uint32_t, 4> args;
+    copy(begin(subroutineArguments), end(subroutineArguments), begin(args));
+    return args;
+}
+
 void CPU::printAllRegisters() {
     printWarning("CPU Registers: ");
     for (uint i = 0; i < 32; i++) {

@@ -1,6 +1,8 @@
 #include "BIOS.hpp"
 #include "Output.hpp"
 #include "Helpers.hpp"
+#include "Output.hpp"
+#include <sstream>
 
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xA0;
 const uint32_t BIOS_B_FUNCTIONS_STEP = 0xB0;
@@ -20,555 +22,575 @@ void BIOS::loadBin(const string& path) {
     readBinary(path, data);
 }
 
+std::string BIOS::formatBIOSFunction(std::string function, uint argc, std::array<uint32_t, 4> subroutineArguments) {
+    if (argc > 4) {
+        printError("BIOS formatting incorrect function with argc: %d", argc);
+    }
+
+    stringstream ss;
+    ss << function;
+    if (argc == 0) {
+        return ss.str();
+    }
+    ss << " args: ";
+    for (uint i = 0; i < argc; i++) {
+        ss << hex << subroutineArguments[i];
+        if (i != (argc - 1)) {
+            ss << ", ";
+        }
+    }
+    return ss.str();
+}
+
 /*
 The following three jump tables are taken from no$ documentation:
 http://problemkaputt.de/psx-spx.htm#biosfunctionsummary
 */
 
-optional<string> BIOS::checkAFunctions(uint32_t r9) {
+optional<string> BIOS::checkAFunctions(uint32_t r9, array<uint32_t, 4> subroutineArguments) {
     switch (r9) {
         case 0x00: {
-            return { "FileOpen(filename,accessmode)" };
+            return { formatBIOSFunction("FileOpen(filename,accessmode)", 2, subroutineArguments) };
         }
         case 0x01: {
-            return { "FileSeek(fd,offset,seektype)" };
+            return { formatBIOSFunction("FileSeek(fd,offset,seektype)", 3, subroutineArguments) };
         }
         case 0x02: {
-            return { "FileRead(fd,dst,length)" };
+            return { formatBIOSFunction("FileRead(fd,dst,length)", 3, subroutineArguments) };
         }
         case 0x03: {
-            return { "FileWrite(fd,src,length)" };
+            return { formatBIOSFunction("FileWrite(fd,src,length)", 3, subroutineArguments) };
         }
         case 0x04: {
-            return { "FileClose(fd)" };
+            return { formatBIOSFunction("FileClose(fd)", 1, subroutineArguments) };
         }
         case 0x05: {
-            return { "FileIoctl(fd,cmd,arg)" };
+            return { formatBIOSFunction("FileIoctl(fd,cmd,arg)", 3, subroutineArguments) };
         }
         case 0x06: {
-            return { "exit(exitcode)" };
+            return { formatBIOSFunction("exit(exitcode)", 1, subroutineArguments) };
         }
         case 0x07: {
-            return { "FileGetDeviceFlag(fd)" };
+            return { formatBIOSFunction("FileGetDeviceFlag(fd)", 1, subroutineArguments) };
         }
         case 0x08: {
-            return { "FileGetc(fd)" };
+            return { formatBIOSFunction("FileGetc(fd)", 1, subroutineArguments) };
         }
         case 0x09: {
-            return { "FilePutc(char,fd)" };
+            return { formatBIOSFunction("FilePutc(char,fd)", 2, subroutineArguments) };
         }
         case 0x0A: {
-            return { "todigit(char)" };
+            return { formatBIOSFunction("todigit(char)", 1 , subroutineArguments) };
         }
         case 0x0B: {
-            return { "atof(src)     ;Does NOT work - uses (ABSENT) cop1 !!!" };
+            return { formatBIOSFunction("atof(src)", 1, subroutineArguments) };
         }
         case 0x0C: {
-            return { "strtoul(src,src_end,base)" };
+            return { formatBIOSFunction("strtoul(src,src_end,base)", 3, subroutineArguments) };
         }
         case 0x0D: {
-            return { "strtol(src,src_end,base)" };
+            return { formatBIOSFunction("strtol(src,src_end,base)", 3, subroutineArguments) };
         }
         case 0x0E: {
-            return { "abs(val)" };
+            return { formatBIOSFunction("abs(val)", 1, subroutineArguments) };
         }
         case 0x0F: {
-            return { "labs(val)" };
+            return { formatBIOSFunction("labs(val)", 1, subroutineArguments) };
         }
         case 0x10: {
-            return { "atoi(src)" };
+            return { formatBIOSFunction("atoi(src)", 1, subroutineArguments) };
         }
         case 0x11: {
-            return { "atol(src)" };
+            return { formatBIOSFunction("atol(src)", 1, subroutineArguments) };
         }
         case 0x12: {
-            return { "atob(src,num_dst)" };
+            return { formatBIOSFunction("atob(src,num_dst)", 2, subroutineArguments) };
         }
         case 0x13: {
-            return { "SaveState(buf)" };
+            return { formatBIOSFunction("SaveState(buf)", 1, subroutineArguments) };
         }
         case 0x14: {
-            return { "RestoreState(buf,param)" };
+            return { formatBIOSFunction("RestoreState(buf,param)", 2, subroutineArguments) };
         }
         case 0x15: {
-            return { "strcat(dst,src)" };
+            return { formatBIOSFunction("strcat(dst,src)", 2, subroutineArguments) };
         }
         case 0x16: {
-            return { "strncat(dst,src,maxlen)" };
+            return { formatBIOSFunction("strncat(dst,src,maxlen)", 3, subroutineArguments) };
         }
         case 0x17: {
-            return { "strcmp(str1,str2)" };
+            return { formatBIOSFunction("strcmp(str1,str2)", 2, subroutineArguments) };
         }
         case 0x18: {
-            return { "strncmp(str1,str2,maxlen)" };
+            return { formatBIOSFunction("strncmp(str1,str2,maxlen)", 3, subroutineArguments) };
         }
         case 0x19: {
-            return { "strcpy(dst,src)" };
+            return { formatBIOSFunction("strcpy(dst,src)", 2, subroutineArguments) };
         }
         case 0x1A: {
-            return { "strncpy(dst,src,maxlen)" };
+            return { formatBIOSFunction("strncpy(dst,src,maxlen)", 3, subroutineArguments) };
         }
         case 0x1B: {
-            return { "strlen(src)" };
+            return { formatBIOSFunction("strlen(src)", 1, subroutineArguments) };
         }
         case 0x1C: {
-            return { "index(src,char)" };
+            return { formatBIOSFunction("index(src,char)", 2, subroutineArguments) };
         }
         case 0x1D: {
-            return { "rindex(src,char)" };
+            return { formatBIOSFunction("rindex(src,char)", 2, subroutineArguments) };
         }
         case 0x1E: {
-            return { "strchr(src,char)" };
+            return { formatBIOSFunction("strchr(src,char)", 2, subroutineArguments) };
         }
         case 0x1F: {
-            return { "strrchr(src,char)" };
+            return { formatBIOSFunction("strrchr(src,char)", 2, subroutineArguments) };
         }
         case 0x20: {
-            return { "strpbrk(src,list)" };
+            return { formatBIOSFunction("strpbrk(src,list)", 2, subroutineArguments) };
         }
         case 0x21: {
-            return { "strspn(src,list)" };
+            return { formatBIOSFunction("strspn(src,list)", 2 ,subroutineArguments) };
         }
         case 0x22: {
-            return { "strcspn(src,list)" };
+            return { formatBIOSFunction("strcspn(src,list)", 2, subroutineArguments) };
         }
         case 0x23: {
-            return { "strtok(src,list)" };
+            return { formatBIOSFunction("strtok(src,list)" , 2, subroutineArguments) };
         }
         case 0x24: {
-            return { "strstr(str,substr)" };
+            return { formatBIOSFunction("strstr(str,substr)", 2, subroutineArguments) };
         }
         case 0x25: {
-            return { "toupper(char)" };
+            return { formatBIOSFunction("toupper(char)", 1, subroutineArguments) };
         }
         case 0x26: {
-            return { "tolower(char)" };
+            return { formatBIOSFunction("tolower(char)", 1, subroutineArguments) };
         }
         case 0x27: {
-            return { "bcopy(src,dst,len)" };
+            return { formatBIOSFunction("bcopy(src,dst,len)", 3, subroutineArguments) };
         }
         case 0x28: {
-            return { "bzero(dst,len)" };
+            return { formatBIOSFunction("bzero(dst,len)", 2, subroutineArguments) };
         }
         case 0x29: {
-            return { "bcmp(ptr1,ptr2,len)" };
+            return { formatBIOSFunction("bcmp(ptr1,ptr2,len)", 3, subroutineArguments) };
         }
         case 0x2A: {
-            return { "memcpy(dst,src,len)" };
+            return { formatBIOSFunction("memcpy(dst,src,len)", 3, subroutineArguments) };
         }
         case 0x2B: {
-            return { "memset(dst,fillbyte,len)" };
+            return { formatBIOSFunction("memset(dst,fillbyte,len)", 3, subroutineArguments) };
         }
         case 0x2C: {
-            return { "memmove(dst,src,len)" };
+            return { formatBIOSFunction("memmove(dst,src,len)", 3, subroutineArguments) };
         }
         case 0x2D: {
-            return { "memcmp(src1,src2,len)" };
+            return { formatBIOSFunction("memcmp(src1,src2,len)", 3, subroutineArguments) };
         }
         case 0x2E: {
-            return { "memchr(src,scanbyte,len)" };
+            return { formatBIOSFunction("memchr(src,scanbyte,len)", 3, subroutineArguments) };
         }
         case 0x2F: {
-            return { "rand()" };
+            return { formatBIOSFunction("rand()", 0, subroutineArguments) };
         }
         case 0x30: {
-            return { "srand(seed)" };
+            return { formatBIOSFunction("srand(seed)", 1, subroutineArguments) };
         }
         case 0x31: {
-            return { "qsort(base,nel,width,callback)" };
+            return { formatBIOSFunction("qsort(base,nel,width,callback)", 4, subroutineArguments) };
         }
         case 0x32: {
-            return { "strtod(src,src_end)" };
+            return { formatBIOSFunction("strtod(src,src_end)", 3, subroutineArguments) };
         }
         case 0x33: {
-            return { "malloc(size)" };
+            return { formatBIOSFunction("malloc(size)", 1, subroutineArguments) };
         }
         case 0x34: {
-            return { "free(buf)" };
+            return { formatBIOSFunction("free(buf)", 1, subroutineArguments) };
         }
         case 0x35: {
-            return { "lsearch(key,base,nel,width,callback)" };
+            return { formatBIOSFunction("lsearch(key,base,nel,width,callback)", 4, subroutineArguments) };
         }
         case 0x36: {
-            return { "bsearch(key,base,nel,width,callback)" };
+            return { formatBIOSFunction("bsearch(key,base,nel,width,callback)", 4, subroutineArguments) };
         }
         case 0x37: {
-            return { "calloc(sizx,sizy)" };
+            return { formatBIOSFunction("calloc(sizx,sizy)", 2, subroutineArguments) };
         }
         case 0x38: {
-            return { "realloc(old_buf,new_siz)" };
+            return { formatBIOSFunction("realloc(old_buf,new_siz)", 2, subroutineArguments) };
         }
         case 0x39: {
-            return { "InitHeap(addr,size)" };
+            return { formatBIOSFunction("InitHeap(addr,size)", 2, subroutineArguments) };
         }
         case 0x3A: {
-            return { "SystemErrorExit(exitcode)" };
+            return { formatBIOSFunction("SystemErrorExit(exitcode)", 1, subroutineArguments) };
         }
         case 0x3B: {
-            return { "std_in_getchar()" };
+            return { formatBIOSFunction("std_in_getchar()", 0, subroutineArguments) };
         }
         case 0x3C: {
-            return { "std_out_putchar(char)" };
+            return { formatBIOSFunction("std_out_putchar(char)", 1, subroutineArguments) };
         }
         case 0x3D: {
-            return { "std_in_gets(dst)" };
+            return { formatBIOSFunction("std_in_gets(dst)", 1 ,subroutineArguments) };
         }
         case 0x3E: {
-            return { "std_out_puts(src)" };
+            return { formatBIOSFunction("std_out_puts(src)", 1, subroutineArguments) };
         }
         case 0x3F: {
-            return { "printf(txt,param1,param2,etc.)" };
+            return { formatBIOSFunction("printf(txt,param1,param2,etc.)", 4, subroutineArguments) };
         }
         case 0x40: {
-            return { "SystemErrorUnresolvedException()" };
+            return { formatBIOSFunction("SystemErrorUnresolvedException()", 0, subroutineArguments) };
         }
         case 0x41: {
-            return { "LoadExeHeader(filename,headerbuf)" };
+            return { formatBIOSFunction("LoadExeHeader(filename,headerbuf)", 2, subroutineArguments) };
         }
         case 0x42: {
-            return { "LoadExeFile(filename,headerbuf)" };
+            return { formatBIOSFunction("LoadExeFile(filename,headerbuf)", 2, subroutineArguments) };
         }
         case 0x43: {
-            return { "DoExecute(headerbuf,param1,param2)" };
+            return { formatBIOSFunction("DoExecute(headerbuf,param1,param2)", 3, subroutineArguments) };
         }
         case 0x44: {
-            return { "FlushCache()" };
+            return { formatBIOSFunction("FlushCache()", 0, subroutineArguments) };
         }
         case 0x45: {
-            return { "init_a0_b0_c0_vectors" };
+            return { formatBIOSFunction("init_a0_b0_c0_vectors", 0, subroutineArguments) };
         }
         case 0x46: {
-            return { "GPU_dw(Xdst,Ydst,Xsiz,Ysiz,src)" };
+            return { formatBIOSFunction("GPU_dw(Xdst,Ydst,Xsiz,Ysiz,src)", 4, subroutineArguments) };
         }
         case 0x47: {
-            return { "gpu_send_dma(Xdst,Ydst,Xsiz,Ysiz,src)" };
+            return { formatBIOSFunction("gpu_send_dma(Xdst,Ydst,Xsiz,Ysiz,src)", 4, subroutineArguments) };
         }
         case 0x48: {
-            return { "SendGP1Command(gp1cmd)" };
+            return { formatBIOSFunction("SendGP1Command(gp1cmd)", 1, subroutineArguments) };
         }
         case 0x49: {
-            return { "GPU_cw(gp0cmd)" };
+            return { formatBIOSFunction("GPU_cw(gp0cmd)", 1, subroutineArguments) };
         }
         case 0x4A: {
-            return { "GPU_cwp(src,num)" };
+            return { formatBIOSFunction("GPU_cwp(src,num)", 2, subroutineArguments) };
         }
         case 0x4B: {
-            return { "send_gpu_linked_list(src)" };
+            return { formatBIOSFunction("send_gpu_linked_list(src)", 1, subroutineArguments) };
         }
         case 0x4C: {
-            return { "gpu_abort_dma()" };
+            return { formatBIOSFunction("gpu_abort_dma()", 0, subroutineArguments) };
         }
         case 0x4D: {
-            return { "GetGPUStatus()" };
+            return { formatBIOSFunction("GetGPUStatus()", 0, subroutineArguments) };
         }
         case 0x4E: {
-            return { "gpu_sync()" };
+            return { formatBIOSFunction("gpu_sync()", 0, subroutineArguments) };
         }
         case 0x4F: {
-            return { "SystemError" };
+            return { formatBIOSFunction("SystemError", 0, subroutineArguments) };
         }
         case 0x50: {
-            return { "SystemError" };
+            return { formatBIOSFunction("SystemError", 0, subroutineArguments) };
         }
         case 0x51: {
-            return { "LoadAndExecute(filename,stackbase,stackoffset)" };
+            return { formatBIOSFunction("LoadAndExecute(filename,stackbase,stackoffset)", 3, subroutineArguments) };
         }
         case 0x52: {
-            return { "GetSysSp()" };
+            return { formatBIOSFunction("GetSysSp()", 0, subroutineArguments) };
         }
         case 0x53: {
-            return { "SystemError()" };
+            return { formatBIOSFunction("SystemError()", 0, subroutineArguments) };
         }
         case 0x54: {
-            return { "CdInit()" };
+            return { formatBIOSFunction("CdInit()", 0, subroutineArguments) };
         }
         case 0x55: {
-            return { "_bu_init()" };
+            return { formatBIOSFunction("_bu_init()", 0, subroutineArguments) };
         }
         case 0x56: {
-            return { "CdRemove()" };
+            return { formatBIOSFunction("CdRemove()", 0, subroutineArguments) };
         }
         case 0x57: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x58: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x59: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x5A: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x5B: {
-            return { "dev_tty_init()" };
+            return { formatBIOSFunction("dev_tty_init()", 0, subroutineArguments) };
         }
         case 0x5C: {
-            return { "dev_tty_open(fcb,pathname,accessmode)" };
+            return { formatBIOSFunction("dev_tty_open(fcb,pathname,accessmode)", 3, subroutineArguments) };
         }
         case 0x5D: {
-            return { "dev_tty_in_out(fcb,cmd)" };
+            return { formatBIOSFunction("dev_tty_in_out(fcb,cmd)", 2, subroutineArguments) };
         }
         case 0x5E: {
-            return { "dev_tty_ioctl(fcb,cmd,arg)" };
+            return { formatBIOSFunction("dev_tty_ioctl(fcb,cmd,arg)", 3, subroutineArguments) };
         }
         case 0x5F: {
-            return { "dev_cd_open(fcb,pathname,accessmode" };
+            return { formatBIOSFunction("dev_cd_open(fcb,pathname,accessmode)", 3, subroutineArguments) };
         }
         case 0x60: {
-            return { "dev_cd_read(fcb,dst,len)" };
+            return { formatBIOSFunction("dev_cd_read(fcb,dst,len)", 3, subroutineArguments) };
         }
         case 0x61: {
-            return { "dev_cd_close(fcb)" };
+            return { formatBIOSFunction("dev_cd_close(fcb)", 1, subroutineArguments) };
         }
         case 0x62: {
-            return { "dev_cd_firstfile(fcb,pathname,direntry)" };
+            return { formatBIOSFunction("dev_cd_firstfile(fcb,pathname,direntry)", 3, subroutineArguments) };
         }
         case 0x63: {
-            return { "dev_cd_nextfile(fcb,direntry)" };
+            return { formatBIOSFunction("dev_cd_nextfile(fcb,direntry)", 2, subroutineArguments) };
         }
         case 0x64: {
-            return { "dev_cd_chdir(fcb,path)" };
+            return { formatBIOSFunction("dev_cd_chdir(fcb,path)", 2, subroutineArguments) };
         }
         case 0x65: {
-            return { "dev_card_open(fcb,pathname,accessmode)" };
+            return { formatBIOSFunction("dev_card_open(fcb,pathname,accessmode)", 3, subroutineArguments) };
         }
         case 0x66: {
-            return { "dev_card_read(fcb,dst,len)" };
+            return { formatBIOSFunction("dev_card_read(fcb,dst,len)", 3, subroutineArguments) };
         }
         case 0x67: {
-            return { "dev_card_write(fcb,src,len)" };
+            return { formatBIOSFunction("dev_card_write(fcb,src,len)", 3, subroutineArguments) };
         }
         case 0x68: {
-            return { "dev_card_close(fcb)" };
+            return { formatBIOSFunction("dev_card_close(fcb)", 1, subroutineArguments) };
         }
         case 0x69: {
-            return { "dev_card_firstfile(fcb,pathname,direntry)" };
+            return { formatBIOSFunction("dev_card_firstfile(fcb,pathname,direntry)", 3, subroutineArguments) };
         }
         case 0x6A: {
-            return { "dev_card_nextfile(fcb,direntry)" };
+            return { formatBIOSFunction("dev_card_nextfile(fcb,direntry)", 2, subroutineArguments) };
         }
         case 0x6B: {
-            return { "dev_card_erase(fcb,pathname)" };
+            return { formatBIOSFunction("dev_card_erase(fcb,pathname)", 2, subroutineArguments) };
         }
         case 0x6C: {
-            return { "dev_card_undelete(fcb,pathname)" };
+            return { formatBIOSFunction("dev_card_undelete(fcb,pathname)", 2, subroutineArguments) };
         }
         case 0x6D: {
-            return { "dev_card_format(fcb)" };
+            return { formatBIOSFunction("dev_card_format(fcb)", 1, subroutineArguments) };
         }
         case 0x6E: {
-            return { "dev_card_rename(fcb1,pathname1,fcb2,pathname2)" };
+            return { formatBIOSFunction("dev_card_rename(fcb1,pathname1,fcb2,pathname2)", 4, subroutineArguments) };
         }
         case 0x6F: {
-            return { "card_clear_error(fcb)" };
+            return { formatBIOSFunction("card_clear_error(fcb)", 1, subroutineArguments) };
         }
         case 0x70: {
-            return { "_bu_init()" };
+            return { formatBIOSFunction("_bu_init()", 0, subroutineArguments) };
         }
         case 0x71: {
-            return { "CdInit()" };
+            return { formatBIOSFunction("CdInit()", 0, subroutineArguments) };
         }
         case 0x72: {
-            return { "CdRemove()" };
+            return { formatBIOSFunction("CdRemove()", 0, subroutineArguments) };
         }
         case 0x73: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x74: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x75: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x76: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x77: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x78: {
-            return { "CdAsyncSeekL(src)" };
+            return { formatBIOSFunction("CdAsyncSeekL(src)", 1, subroutineArguments) };
         }
         case 0x79: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x7A: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x7B: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x7C: {
-            return { "CdAsyncGetStatus(dst)" };
+            return { formatBIOSFunction("CdAsyncGetStatus(dst)", 1, subroutineArguments) };
         }
         case 0x7D: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x7E: {
-            return { "CdAsyncReadSector(count,dst,mode)" };
+            return { formatBIOSFunction("CdAsyncReadSector(count,dst,mode)", 3, subroutineArguments) };
         }
         case 0x7F: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x80: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x81: {
-            return { "CdAsyncSetMode(mode)" };
+            return {formatBIOSFunction( "CdAsyncSetMode(mode)", 1, subroutineArguments) };
         }
         case 0x82: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x83: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x84: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x85: {
-            return { "CdStop (?)" };
+            return { formatBIOSFunction("CdStop (?)", 1, subroutineArguments) };
         }
         case 0x86: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x87: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x88: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x89: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x8A: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x8B: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x8C: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x8D: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x8E: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x8F: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x90: {
-            return { "CdromIoIrqFunc1()" };
+            return { formatBIOSFunction("CdromIoIrqFunc1()", 0, subroutineArguments) };
         }
         case 0x91: {
-            return { "CdromDmaIrqFunc1()" };
+            return { formatBIOSFunction("CdromDmaIrqFunc1()", 0, subroutineArguments) };
         }
         case 0x92: {
-            return { "CdromIoIrqFunc2()" };
+            return { formatBIOSFunction("CdromIoIrqFunc2()", 0, subroutineArguments) };
         }
         case 0x93: {
-            return { "CdromDmaIrqFunc2()" };
+            return { formatBIOSFunction("CdromDmaIrqFunc2()", 0, subroutineArguments) };
         }
         case 0x94: {
-            return { "CdromGetInt5errCode(dst1,dst2)" };
+            return { formatBIOSFunction("CdromGetInt5errCode(dst1,dst2)", 2, subroutineArguments) };
         }
         case 0x95: {
-            return { "CdInitSubFunc()" };
+            return { formatBIOSFunction("CdInitSubFunc()", 0, subroutineArguments) };
         }
         case 0x96: {
-            return { "AddCDROMDevice()" };
+            return { formatBIOSFunction("AddCDROMDevice()", 0, subroutineArguments) };
         }
         case 0x97: {
-            return { "AddMemCardDevice()" };
+            return { formatBIOSFunction("AddMemCardDevice()", 0, subroutineArguments) };
         }
         case 0x98: {
-            return { "AddDuartTtyDevice()" };
+            return { formatBIOSFunction("AddDuartTtyDevice()", 0, subroutineArguments) };
         }
         case 0x99: {
-            return { "AddDummyTtyDevice()" };
+            return { formatBIOSFunction("AddDummyTtyDevice()", 0, subroutineArguments) };
         }
         case 0x9A: {
-            return { "AddMessageWindowDevice" };
+            return { formatBIOSFunction("AddMessageWindowDevice()", 0, subroutineArguments) };
         }
         case 0x9B: {
-            return { "AddCdromSimDevice" };
+            return { formatBIOSFunction("AddCdromSimDevice()", 0, subroutineArguments) };
         }
         case 0x9C: {
-            return { "SetConf(num_EvCB,num_TCB,stacktop)" };
+            return { formatBIOSFunction("SetConf(num_EvCB,num_TCB,stacktop)", 3, subroutineArguments) };
         }
         case 0x9D: {
-            return { "GetConf(num_EvCB_dst,num_TCB_dst,stacktop_dst)" };
+            return { formatBIOSFunction("GetConf(num_EvCB_dst,num_TCB_dst,stacktop_dst)", 3, subroutineArguments) };
         }
         case 0x9E: {
-            return { "SetCdromIrqAutoAbort(type,flag)" };
+            return { formatBIOSFunction("SetCdromIrqAutoAbort(type,flag)", 2, subroutineArguments) };
         }
         case 0x9F: {
-            return { "SetMemSize(megabytes)" };
+            return { formatBIOSFunction("SetMemSize(megabytes)", 1, subroutineArguments) };
         }
         case 0xA0: {
-            return { "WarmBoot()" };
+            return { formatBIOSFunction("WarmBoot()", 0, subroutineArguments) };
         }
         case 0xA1: {
-            return { "SystemErrorBootOrDiskFailure(type,errorcode)" };
+            return { formatBIOSFunction("SystemErrorBootOrDiskFailure(type,errorcode)", 2, subroutineArguments) };
         }
         case 0xA2: {
-            return { "EnqueueCdIntr()" };
+            return { formatBIOSFunction("EnqueueCdIntr()", 0, subroutineArguments) };
         }
         case 0xA3: {
-            return { "DequeueCdIntr()" };
+            return { formatBIOSFunction("DequeueCdIntr()", 0, subroutineArguments) };
         }
         case 0xA4: {
-            return { "CdGetLbn(filename)" };
+            return { formatBIOSFunction("CdGetLbn(filename)", 1, subroutineArguments) };
         }
         case 0xA5: {
-            return { "CdReadSector(count,sector,buffer)" };
+            return { formatBIOSFunction("CdReadSector(count,sector,buffer)", 3, subroutineArguments) };
         }
         case 0xA6: {
-            return { "CdGetStatus()" };
+            return { formatBIOSFunction("CdGetStatus()", 0 , subroutineArguments) };
         }
         case 0xA7: {
-            return { "bu_callback_okay()" };
+            return { formatBIOSFunction("bu_callback_okay()", 0, subroutineArguments) };
         }
         case 0xA8: {
-            return { "bu_callback_err_write()" };
+            return { formatBIOSFunction("bu_callback_err_write()", 0, subroutineArguments) };
         }
         case 0xA9: {
-            return { "bu_callback_err_busy()" };
+            return { formatBIOSFunction("bu_callback_err_busy()", 0, subroutineArguments) };
         }
         case 0xAA: {
-            return { "bu_callback_err_eject()" };
+            return { formatBIOSFunction("bu_callback_err_eject()", 0, subroutineArguments) };
         }
         case 0xAB: {
-            return { "_card_info(port)" };
+            return { formatBIOSFunction("_card_info(port)", 1, subroutineArguments) };
         }
         case 0xAC: {
-            return { "_card_async_load_directory(port)" };
+            return { formatBIOSFunction("_card_async_load_directory(port)", 1, subroutineArguments) };
         }
         case 0xAD: {
-            return { "set_card_auto_format(flag)" };
+            return { formatBIOSFunction("set_card_auto_format(flag)", 1, subroutineArguments) };
         }
         case 0xAE: {
-            return { "bu_callback_err_prev_write()" };
+            return { formatBIOSFunction("bu_callback_err_prev_write()", 0, subroutineArguments) };
         }
         case 0xAF: {
-            return { "card_write_test(port)" };
+            return { formatBIOSFunction("card_write_test(port)", 1, subroutineArguments) };
         }
         case 0xB0: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0xB1: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0xB2: {
-            return { "ioabort_raw(param)" };
+            return { formatBIOSFunction("ioabort_raw(param)", 1, subroutineArguments) };
         }
         case 0xB3: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0xB4: {
-            return { "GetSystemInfo(index)" };
+            return { formatBIOSFunction("GetSystemInfo(index)", 1, subroutineArguments) };
         }
         case 0xB5: {
         }
@@ -591,421 +613,421 @@ optional<string> BIOS::checkAFunctions(uint32_t r9) {
         case 0xBE: {
         }
         case 0xBF: {
-            return { "N/A" };
+            return { formatBIOSFunction("N/A", 4, subroutineArguments) };
         }
         default: {
             stringstream ss;
             ss << "Unknown A function with r9: " << std::hex << r9;
-            return { ss.str() };
+            return { formatBIOSFunction(ss.str(), 4, subroutineArguments) };
         }
     }
 }
 
-optional<string> BIOS::checkBFunctions(uint32_t r9) {
+optional<string> BIOS::checkBFunctions(uint32_t r9, array<uint32_t, 4> subroutineArguments) {
     switch (r9) {
         case 0x00: {
-            return { "alloc_kernel_memory(size)" };
+            return { formatBIOSFunction("alloc_kernel_memory(size)", 1, subroutineArguments) };
         }
         case 0x01: {
-            return { "free_kernel_memory(buf)" };
+            return { formatBIOSFunction("free_kernel_memory(buf)", 1, subroutineArguments) };
         }
         case 0x02: {
-            return { "init_timer(t,reload,flags)" };
+            return { formatBIOSFunction("init_timer(t,reload,flags)", 3, subroutineArguments) };
         }
         case 0x03: {
-            return { "get_timer(t)" };
+            return { formatBIOSFunction("get_timer(t)", 1, subroutineArguments) };
         }
         case 0x04: {
-            return { "enable_timer_irq(t)" };
+            return { formatBIOSFunction("enable_timer_irq(t)", 1, subroutineArguments) };
         }
         case 0x05: {
-            return { "disable_timer_irq(t)" };
+            return { formatBIOSFunction("disable_timer_irq(t)", 1, subroutineArguments) };
         }
         case 0x06: {
-            return { "restart_timer(t)" };
+            return { formatBIOSFunction("restart_timer(t)", 1, subroutineArguments) };
         }
         case 0x07: {
-            return { "DeliverEvent(class, spec)" };
+            return { formatBIOSFunction("DeliverEvent(class, spec)", 2, subroutineArguments) };
         }
         case 0x08: {
-            return { "OpenEvent(class,spec,mode,func)" };
+            return { formatBIOSFunction("OpenEvent(class,spec,mode,func)", 4, subroutineArguments) };
         }
         case 0x09: {
-            return { "CloseEvent(event)" };
+            return { formatBIOSFunction("CloseEvent(event)", 1, subroutineArguments) };
         }
         case 0x0A: {
-            return { "WaitEvent(event)" };
+            return { formatBIOSFunction("WaitEvent(event)", 1, subroutineArguments) };
         }
         case 0x0B: {
-            return { "TestEvent(event)" };
+            return { formatBIOSFunction("TestEvent(event)", 1, subroutineArguments) };
         }
         case 0x0C: {
-            return { "EnableEvent(event)" };
+            return { formatBIOSFunction("EnableEvent(event)", 1, subroutineArguments) };
         }
         case 0x0D: {
-            return { "DisableEvent(event)" };
+            return { formatBIOSFunction("DisableEvent(event)", 1, subroutineArguments) };
         }
         case 0x0E: {
-            return { "OpenThread(reg_PC,reg_SP_FP,reg_GP)" };
+            return { formatBIOSFunction("OpenThread(reg_PC,reg_SP_FP,reg_GP)", 3, subroutineArguments) };
         }
         case 0x0F: {
-            return { "CloseThread(handle)" };
+            return { formatBIOSFunction("CloseThread(handle)", 1, subroutineArguments) };
         }
         case 0x10: {
-            return { "ChangeThread(handle)" };
+            return { formatBIOSFunction("ChangeThread(handle)", 1, subroutineArguments) };
         }
         case 0x11: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x12: {
-            return { "InitPad(buf1,siz1,buf2,siz2)" };
+            return { formatBIOSFunction("InitPad(buf1,siz1,buf2,siz2)", 4, subroutineArguments) };
         }
         case 0x13: {
-            return { "StartPad()" };
+            return { formatBIOSFunction("StartPad()", 0, subroutineArguments) };
         }
         case 0x14: {
-            return { "StopPad()" };
+            return { formatBIOSFunction("StopPad()", 0, subroutineArguments) };
         }
         case 0x15: {
-            return { "OutdatedPadInitAndStart(type,button_dest,unused,unused)" };
+            return { formatBIOSFunction("OutdatedPadInitAndStart(type,button_dest,unused,unused)", 4, subroutineArguments) };
         }
         case 0x16: {
-            return { "OutdatedPadGetButtons()" };
+            return { formatBIOSFunction("OutdatedPadGetButtons()", 0, subroutineArguments) };
         }
         case 0x17: {
-            return { "ReturnFromException()" };
+            return { formatBIOSFunction("ReturnFromException()", 0, subroutineArguments) };
         }
         case 0x18: {
-            return { "SetDefaultExitFromException()" };
+            return { formatBIOSFunction("SetDefaultExitFromException()", 0 ,subroutineArguments) };
         }
         case 0x19: {
-            return { "SetCustomExitFromException(addr)" };
+            return { formatBIOSFunction("SetCustomExitFromException(addr)", 1, subroutineArguments) };
         }
         case 0x1A: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x1B: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x1C: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x1D: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x1E: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x1F: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x20: {
-            return { "UnDeliverEvent(class,spec)" };
+            return { formatBIOSFunction("UnDeliverEvent(class,spec)", 2, subroutineArguments) };
         }
         case 0x21: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x22: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x23: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x24: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x25: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x26: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x27: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x28: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x29: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x2A: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x2B: {
-            return { "return 0" };
+            return { formatBIOSFunction("return 0", 0, subroutineArguments) };
         }
         case 0x2C: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x2D: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x2E: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x2F: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x30: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x31: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         case 0x32: {
-            return { "FileOpen(filename,accessmode)" };
+            return { formatBIOSFunction("FileOpen(filename,accessmode)", 2, subroutineArguments) };
         }
         case 0x33: {
-            return { "FileSeek(fd,offset,seektype)" };
+            return { formatBIOSFunction("FileSeek(fd,offset,seektype)", 3, subroutineArguments) };
         }
         case 0x34: {
-            return { "FileRead(fd,dst,length)" };
+            return { formatBIOSFunction("FileRead(fd,dst,length)", 3, subroutineArguments) };
         }
         case 0x35: {
-            return { "FileWrite(fd,src,length)" };
+            return { formatBIOSFunction("FileWrite(fd,src,length)", 3, subroutineArguments) };
         }
         case 0x36: {
-            return { "FileClose(fd)" };
+            return { formatBIOSFunction("FileClose(fd)", 1, subroutineArguments) };
         }
         case 0x37: {
-            return { "FileIoctl(fd,cmd,arg)" };
+            return { formatBIOSFunction("FileIoctl(fd,cmd,arg)", 3, subroutineArguments) };
         }
         case 0x38: {
-            return { "exit(exitcode)" };
+            return { formatBIOSFunction("exit(exitcode)", 1, subroutineArguments) };
         }
         case 0x39: {
-            return { "FileGetDeviceFlag(fd)" };
+            return { formatBIOSFunction("FileGetDeviceFlag(fd)", 1, subroutineArguments) };
         }
         case 0x3A: {
-            return { "FileGetc(fd)" };
+            return { formatBIOSFunction("FileGetc(fd)", 1, subroutineArguments) };
         }
         case 0x3B: {
-            return { "FilePutc(char,fd)" };
+            return { formatBIOSFunction("FilePutc(char,fd)", 2, subroutineArguments) };
         }
         case 0x3C: {
-            return { "std_in_getchar()" };
+            return { formatBIOSFunction("std_in_getchar()", 0, subroutineArguments) };
         }
         case 0x3D: {
-            return { "std_out_putchar(char)" };
+            return { formatBIOSFunction("std_out_putchar(char)", 1, subroutineArguments) };
         }
         case 0x3E: {
-            return { "std_in_gets(dst)" };
+            return { formatBIOSFunction("std_in_gets(dst)", 1, subroutineArguments) };
         }
         case 0x3F: {
-            return { "std_out_puts(src)" };
+            return { formatBIOSFunction("std_out_puts(src)", 1, subroutineArguments) };
         }
         case 0x40: {
-            return { "chdir(name)" };
+            return { formatBIOSFunction("chdir(name)", 1, subroutineArguments) };
         }
         case 0x41: {
-            return { "FormatDevice(devicename)" };
+            return { formatBIOSFunction("FormatDevice(devicename)", 1, subroutineArguments) };
         }
         case 0x42: {
-            return { "firstfile(filename,direntry)" };
+            return { formatBIOSFunction("firstfile(filename,direntry)", 2, subroutineArguments) };
         }
         case 0x43: {
-            return { "nextfile(direntry)" };
+            return { formatBIOSFunction("nextfile(direntry)", 1, subroutineArguments) };
         }
         case 0x44: {
-            return { "FileRename(old_filename,new_filename)" };
+            return { formatBIOSFunction("FileRename(old_filename,new_filename)", 2, subroutineArguments) };
         }
         case 0x45: {
-            return { "FileDelete(filename)" };
+            return { formatBIOSFunction("FileDelete(filename)", 1, subroutineArguments) };
         }
         case 0x46: {
-            return { "FileUndelete(filename)" };
+            return { formatBIOSFunction("FileUndelete(filename)", 1, subroutineArguments) };
         }
         case 0x47: {
-            return { "AddDevice(device_info)" };
+            return { formatBIOSFunction("AddDevice(device_info)", 1, subroutineArguments) };
         }
         case 0x48: {
-            return { "RemoveDevice(device_name_lowercase)" };
+            return { formatBIOSFunction("RemoveDevice(device_name_lowercase)", 1, subroutineArguments) };
         }
         case 0x49: {
-            return { "PrintInstalledDevices()" };
+            return { formatBIOSFunction("PrintInstalledDevices()", 0, subroutineArguments) };
         }
         case 0x4A: {
-            return { "InitCard(pad_enable)" };
+            return { formatBIOSFunction("InitCard(pad_enable)", 1, subroutineArguments) };
         }
         case 0x4B: {
-            return { "StartCard()" };
+            return { formatBIOSFunction("StartCard()", 0, subroutineArguments) };
         }
         case 0x4C: {
-            return { "StopCard()" };
+            return { formatBIOSFunction("StopCard()", 0 ,subroutineArguments) };
         }
         case 0x4D: {
-            return { "_card_info_subfunc(port)" };
+            return { formatBIOSFunction("_card_info_subfunc(port)", 1, subroutineArguments) };
         }
         case 0x4E: {
-            return { "write_card_sector(port,sector,src)" };
+            return { formatBIOSFunction("write_card_sector(port,sector,src)", 3, subroutineArguments) };
         }
         case 0x4F: {
-            return { "read_card_sector(port,sector,dst)" };
+            return { formatBIOSFunction("read_card_sector(port,sector,dst)", 3, subroutineArguments) };
         }
         case 0x50: {
-            return { "allow_new_card()" };
+            return { formatBIOSFunction("allow_new_card()", 0, subroutineArguments) };
         }
         case 0x51: {
-            return { "Krom2RawAdd(shiftjis_code)" };
+            return { formatBIOSFunction("Krom2RawAdd(shiftjis_code)", 1, subroutineArguments) };
         }
         case 0x52: {
-            return { "SystemError" };
+            return { formatBIOSFunction("SystemError", 0 ,subroutineArguments) };
         }
         case 0x53: {
-            return { "Krom2Offset(shiftjis_code)" };
+            return { formatBIOSFunction("Krom2Offset(shiftjis_code)", 1, subroutineArguments) };
         }
         case 0x54: {
-            return { "GetLastError()" };
+            return { formatBIOSFunction("GetLastError()", 0, subroutineArguments) };
         }
         case 0x55: {
-            return { "GetLastFileError(fd)" };
+            return { formatBIOSFunction("GetLastFileError(fd)", 1, subroutineArguments) };
         }
         case 0x56: {
-            return { "GetC0Table" };
+            return { formatBIOSFunction("GetC0Table()", 0, subroutineArguments) };
         }
         case 0x57: {
-            return { "GetB0Table" };
+            return { formatBIOSFunction("GetB0Table()", 0, subroutineArguments) };
         }
         case 0x58: {
-            return { "get_bu_callback_port()" };
+            return { formatBIOSFunction("get_bu_callback_port()", 0, subroutineArguments) };
         }
         case 0x59: {
-            return { "testdevice(devicename)" };
+            return { formatBIOSFunction("testdevice(devicename)", 1, subroutineArguments) };
         }
         case 0x5A: {
-            return { "SystemError" };
+            return { formatBIOSFunction("SystemError", 0, subroutineArguments) };
         }
         case 0x5B: {
-            return { "ChangeClearPad(int)" };
+            return { formatBIOSFunction("ChangeClearPad(int)", 1, subroutineArguments) };
         }
         case 0x5C: {
-            return { "get_card_status(slot)" };
+            return { formatBIOSFunction("get_card_status(slot)", 1, subroutineArguments) };
         }
         case 0x5D: {
-            return { "wait_card_status(slot)" };
+            return { formatBIOSFunction("wait_card_status(slot)", 1, subroutineArguments) };
         }
         case 0x5E: {
-            return { "jump_to_00000000h" };
+            return { formatBIOSFunction("jump_to_00000000h", 4, subroutineArguments) };
         }
         default: {
             stringstream ss;
             ss << "Unknown B function with r9: " << std::hex << r9;
-            return { ss.str() };
+            return { formatBIOSFunction(ss.str(), 4, subroutineArguments) };
         }
     }
 }
 
-optional<string> BIOS::checkCFunctions(uint32_t r9) {
+optional<string> BIOS::checkCFunctions(uint32_t r9, array<uint32_t, 4> subroutineArguments) {
     switch (r9) {
         case 0x00: {
-            return { "EnqueueTimerAndVblankIrqs(priority)" };
+            return { formatBIOSFunction("EnqueueTimerAndVblankIrqs(priority)", 1, subroutineArguments) };
         }
         case 0x01: {
-            return { "EnqueueSyscallHandler(priority)" };
+            return { formatBIOSFunction("EnqueueSyscallHandler(priority)", 1, subroutineArguments) };
         }
         case 0x02: {
-            return { "SysEnqIntRP(priority,struc)" };
+            return { formatBIOSFunction("SysEnqIntRP(priority,struc)", 2, subroutineArguments) };
         }
         case 0x03: {
-            return { "SysDeqIntRP(priority,struc)" };
+            return { formatBIOSFunction("SysDeqIntRP(priority,struc)", 2, subroutineArguments) };
         }
         case 0x04: {
-            return { "get_free_EvCB_slot()" };
+            return { formatBIOSFunction("get_free_EvCB_slot()", 0, subroutineArguments) };
         }
         case 0x05: {
-            return { "get_free_TCB_slot()" };
+            return { formatBIOSFunction("get_free_TCB_slot()", 0, subroutineArguments) };
         }
         case 0x06: {
-            return { "ExceptionHandler()" };
+            return { formatBIOSFunction("ExceptionHandler()", 0, subroutineArguments) };
         }
         case 0x07: {
-            return { "InstallExceptionHandlers()" };
+            return { formatBIOSFunction("InstallExceptionHandlers()", 0, subroutineArguments) };
         }
         case 0x08: {
-            return { "SysInitMemory(addr,size)" };
+            return { formatBIOSFunction("SysInitMemory(addr,size)", 2, subroutineArguments) };
         }
         case 0x09: {
-            return { "SysInitKernelVariables()" };
+            return { formatBIOSFunction("SysInitKernelVariables()", 0, subroutineArguments) };
         }
         case 0x0A: {
-            return { "ChangeClearRCnt(t,flag)" };
+            return { formatBIOSFunction("ChangeClearRCnt(t,flag)", 2, subroutineArguments) };
         }
         case 0x0B: {
-            return { "SystemError" };
+            return { formatBIOSFunction("SystemError", 0, subroutineArguments) };
         }
         case 0x0C: {
-            return { "InitDefInt(priority)" };
+            return { formatBIOSFunction("InitDefInt(priority)", 1, subroutineArguments) };
         }
         case 0x0D: {
-            return { "SetIrqAutoAck(irq,flag)" };
+            return { formatBIOSFunction("SetIrqAutoAck(irq,flag)", 2, subroutineArguments) };
         }
         case 0x0E: {
-            return { "dev_sio_init" };
+            return { formatBIOSFunction("dev_sio_init()", 4, subroutineArguments) };
         }
         case 0x0F: {
-            return { "dev_sio_open" };
+            return { formatBIOSFunction("dev_sio_open()", 4, subroutineArguments) };
         }
         case 0x10: {
-            return { "dev_sio_in_out" };
+            return { formatBIOSFunction("dev_sio_in_out()", 4, subroutineArguments) };
         }
         case 0x11: {
-            return { "dev_sio_ioctl" };
+            return { formatBIOSFunction("dev_sio_ioctl()", 0, subroutineArguments) };
         }
         case 0x12: {
-            return { "InstallDevices(ttyflag)" };
+            return { formatBIOSFunction("InstallDevices(ttyflag)", 1, subroutineArguments) };
         }
         case 0x13: {
-            return { "FlushStdInOutPut()" };
+            return { formatBIOSFunction("FlushStdInOutPut()", 0, subroutineArguments) };
         }
         case 0x14: {
-            return { "SystemError" };
+            return { formatBIOSFunction("SystemError", 0, subroutineArguments) };
         }
         case 0x15: {
-            return { "tty_cdevinput(circ,char)" };
+            return { formatBIOSFunction("tty_cdevinput(circ,char)", 2, subroutineArguments) };
         }
         case 0x16: {
-            return { "tty_cdevscan()" };
+            return { formatBIOSFunction("tty_cdevscan()", 0, subroutineArguments) };
         }
         case 0x17: {
-            return { "tty_circgetc(circ)" };
+            return { formatBIOSFunction("tty_circgetc(circ)", 1, subroutineArguments) };
         }
         case 0x18: {
-            return { "tty_circputc(char,circ)" };
+            return { formatBIOSFunction("tty_circputc(char,circ)", 2, subroutineArguments) };
         }
         case 0x19: {
-            return { "ioabort(txt1,txt2)" };
+            return { formatBIOSFunction("ioabort(txt1,txt2)", 2, subroutineArguments) };
         }
         case 0x1A: {
-            return { "set_card_find_mode(mode)" };
+            return { formatBIOSFunction("set_card_find_mode(mode)", 1, subroutineArguments) };
         }
         case 0x1B: {
-            return { "KernelRedirect(ttyflag)" };
+            return { formatBIOSFunction("KernelRedirect(ttyflag)", 1, subroutineArguments) };
         }
         case 0x1C: {
-            return { "AdjustA0Table()" };
+            return { formatBIOSFunction("AdjustA0Table()", 0, subroutineArguments) };
         }
         case 0x1D: {
-            return { "get_card_find_mode()" };
+            return { formatBIOSFunction("get_card_find_mode()", 0, subroutineArguments) };
         }
         default: {
             stringstream ss;
             ss << "Unknown C function with r9: " << std::hex << r9;
-            return { ss.str() };
+            return { formatBIOSFunction(ss.str(), 4, subroutineArguments) };
         }
     }
 }
 
-optional<string> BIOS::checkFunctions(uint32_t programCounter, uint32_t r9) {
+optional<string> BIOS::checkFunctions(uint32_t programCounter, uint32_t r9, array<uint32_t, 4> subroutineArguments) {
     switch (programCounter) {
         case BIOS_A_FUNCTIONS_STEP: {
-            return checkAFunctions(r9);
+            return checkAFunctions(r9, subroutineArguments);
         }
         case BIOS_B_FUNCTIONS_STEP: {
-            return checkBFunctions(r9);
+            return checkBFunctions(r9, subroutineArguments);
         }
         case BIOS_C_FUNCTIONS_STEP: {
-            return checkCFunctions(r9);
+            return checkCFunctions(r9, subroutineArguments);
         }
         default: {
             return { nullopt };

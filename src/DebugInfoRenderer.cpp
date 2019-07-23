@@ -26,7 +26,7 @@ void DebugInfoRenderer::update(vector<string> biosFunctionsLog) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(debugWindow->getWindowRef());
     Dimensions windowDimensions = debugWindow->getDimensions();
-    ImVec2 syscallWindowSize = ImVec2(static_cast<float>((windowDimensions.width / 2) - 20), static_cast<float>(windowDimensions.height - 20));
+    ImVec2 syscallWindowSize = ImVec2(static_cast<float>(((windowDimensions.width / 3) * 2) - 20), static_cast<float>(windowDimensions.height - 20));
     ImGui::NewFrame();
     {
         ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);

@@ -2,6 +2,7 @@
 #include <cstdarg>
 #include "TestRunner.hpp"
 #include "Logger.hpp"
+#include <sstream>
 
 using namespace std;
 
@@ -22,6 +23,14 @@ string format(const char *fmt, va_list args) {
     string formatted(length, '\0');
     vsnprintf(formatted.data(), length + 1, fmt, args);
 
+    return formatted;
+}
+
+string format(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
     return formatted;
 }
 

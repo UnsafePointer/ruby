@@ -157,6 +157,8 @@ public:
     uint32_t getCauseRegister();
     // pc - 37
     uint32_t getProgramCounter();
+    // r4-r7 (a0-a3)
+    std::array<uint32_t, 4> getSubroutineArguments();
 
     void printAllRegisters();
 
