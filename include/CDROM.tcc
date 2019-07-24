@@ -12,8 +12,21 @@ inline T CDROM::load(uint32_t offset) const {
         case 0: {
             return getStatusRegister();
         }
+        case 3: {
+            switch (status.index) {
+                case 1: {
+                    return getInterruptFlagRegister();
+                }
+                default: {
+                   printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
+                   break;
+                }
+            }
+            break;
+        }
         default: {
-            printError("Unhandled CDROM read at offset: %#x", offset);
+            printError("Unhandled CDROM read at offset: %#x, with index: %d", offset, status.index);
+            break;
         }
     }
     return 0;

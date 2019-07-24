@@ -63,6 +63,7 @@ class CDROM {
     void execute(uint8_t value);
 
     uint8_t getStatusRegister() const;
+    uint8_t getInterruptFlagRegister() const;
 
     void clearParameters();
     void pushParameter(uint8_t value);

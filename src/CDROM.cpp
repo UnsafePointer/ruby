@@ -53,6 +53,14 @@ uint8_t CDROM::getStatusRegister() const {
     return status._value;
 }
 
+uint8_t CDROM::getInterruptFlagRegister() const {
+    uint8_t flags = 0b11100000;
+    if (!interruptQueue.empty()) {
+        flags |= interruptQueue.front() & 0x7;
+    }
+    return flags;
+}
+
 void CDROM::clearParameters() {
     queue<uint8_t> empty;
     swap(parameters, empty);
