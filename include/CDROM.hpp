@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <queue>
+#include <memory>
+#include "InterruptController.hpp"
 
 /*
 1F801800h - Index/Status Register (Bit0-1 R/W) (Bit2-7 Read Only)
@@ -46,11 +48,14 @@ union CDROMInterrupt {
 };
 
 class CDROM {
+    std::unique_ptr<InterruptController> &interruptController;
+
     CDROMStatus status;
     CDROMInterrupt interrupt;
 
     std::queue<uint8_t> parameters;
     std::queue<uint8_t> response;
+    std::queue<uint8_t> interruptQueue;
 
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
@@ -113,8 +118,10 @@ Command          Parameters      Response(s)
 */
     void operationTest();
 public:
-    CDROM();
+    CDROM(std::unique_ptr<InterruptController> &interruptController);
     ~CDROM();
+
+    void step();
 
     template <typename T>
     inline T load(uint32_t offset) const;

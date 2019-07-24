@@ -3,12 +3,20 @@
 
 using namespace std;
 
-CDROM::CDROM() : status(), parameters(), response() {
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController) : status(), parameters(), response(), interruptQueue(), interruptController(interruptController) {
 
 }
 
 CDROM::~CDROM() {
 
+}
+
+void CDROM::step() {
+    if (!interruptQueue.empty()) {
+        if ((interrupt.enable & 0x7) & (interruptQueue.front() & 0x7)) {
+            interruptController->trigger(InterruptRequestNumber::CDROMIRQ);
+        }
+    }
 }
 
 void CDROM::setStatusRegister(uint8_t value) {
@@ -128,6 +136,7 @@ void CDROM::operationTest() {
             pushResponse(0x09); // 9
             pushResponse(0x19); // 25
             pushResponse(0xc0); // 192
+            interruptQueue.push(0x3);
             break;
         }
         default: {
