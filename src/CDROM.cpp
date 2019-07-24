@@ -29,9 +29,11 @@ void CDROM::setInterruptRegister(uint8_t value) {
 
 void CDROM::setInterruptFlagRegister(uint8_t value) {
     if (value & 0x40) {
-        status.parameterFifoEmpty = 1;
-        status.parameterFifoFull = 1;
         clearParameters();
+        updateStatusRegister();
+    }
+    if (!interruptQueue.empty()) {
+        interruptQueue.pop();
     }
 }
 
