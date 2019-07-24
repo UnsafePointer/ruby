@@ -3,7 +3,7 @@
 #include "Output.hpp"
 
 template <typename T>
-inline T CDROM::load(uint32_t offset) const {
+inline T CDROM::load(uint32_t offset) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (sizeof(T) != 1) {
         printError("Unsupported CDROM read with size: %d", sizeof(T));
@@ -11,6 +11,18 @@ inline T CDROM::load(uint32_t offset) const {
     switch (offset) {
         case 0: {
             return getStatusRegister();
+        }
+        case 1: {
+            switch (status.index) {
+                case 1: {
+                    return getReponse();
+                }
+                default: {
+                   printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
+                   break;
+                }
+            }
+            break;
         }
         case 3: {
             switch (status.index) {

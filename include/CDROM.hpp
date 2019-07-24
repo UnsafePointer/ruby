@@ -64,6 +64,7 @@ class CDROM {
 
     uint8_t getStatusRegister() const;
     uint8_t getInterruptFlagRegister() const;
+    uint8_t getReponse();
 
     void clearParameters();
     void pushParameter(uint8_t value);
@@ -125,7 +126,7 @@ public:
     void step();
 
     template <typename T>
-    inline T load(uint32_t offset) const;
+    inline T load(uint32_t offset);
     template <typename T>
     inline void store(uint32_t offset, T value);
 };
