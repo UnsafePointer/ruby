@@ -67,6 +67,8 @@ class CDROM {
     uint8_t getReponse();
 
     void clearParameters();
+    void clearInterruptQueue();
+    void clearResponse();
     void pushParameter(uint8_t value);
     void pushResponse(uint8_t value);
 

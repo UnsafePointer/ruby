@@ -36,6 +36,8 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
 }
 
 void CDROM::execute(uint8_t value) {
+    clearInterruptQueue();
+    clearResponse();
     switch (value) {
         case 0x19: {
             operationTest();
@@ -74,6 +76,16 @@ uint8_t CDROM::getReponse() {
 void CDROM::clearParameters() {
     queue<uint8_t> empty;
     swap(parameters, empty);
+}
+
+void CDROM::clearInterruptQueue() {
+    queue<uint8_t> empty;
+    swap(interruptQueue, empty);
+}
+
+void CDROM::clearResponse() {
+    queue<uint8_t> empty;
+    swap(response, empty);
 }
 
 void CDROM::pushParameter(uint8_t value) {
