@@ -41,6 +41,10 @@ void CDROM::execute(uint8_t value) {
     clearInterruptQueue();
     clearResponse();
     switch (value) {
+        case 0x01: {
+            operationGetstat();
+            break;
+        }
         case 0x19: {
             operationTest();
             break;
@@ -175,4 +179,9 @@ void CDROM::operationTest() {
             printError("Unhandled CDROM operation test with subfunction: %#x", subfunction);
         }
     }
+}
+
+void CDROM::operationGetstat() {
+    pushResponse(status._value);
+    interruptQueue.push(0x3);
 }

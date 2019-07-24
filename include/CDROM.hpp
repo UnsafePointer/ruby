@@ -121,6 +121,8 @@ Command          Parameters      Response(s)
 6Fh..FFh -       -               INT5(11h,40h)  ;-Unused/invalid
 */
     void operationTest();
+
+    void operationGetstat();
 public:
     CDROM(std::unique_ptr<InterruptController> &interruptController);
     ~CDROM();
