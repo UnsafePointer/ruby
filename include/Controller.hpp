@@ -139,11 +139,11 @@ public:
     void setJoypadBaudRegister(uint16_t value);
     void setModeRegister(uint16_t value);
 
-    uint8_t getRxDataRegister() const;
-    uint32_t getStatusRegister() const;
+    uint8_t getRxDataRegister();
+    uint32_t getStatusRegister();
 
     template <typename T>
-    inline T load(uint32_t offset) const;
+    inline T load(uint32_t offset);
     template <typename T>
     inline void store(uint32_t offset, T value);
 };

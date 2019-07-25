@@ -20,10 +20,12 @@ void Controller::setModeRegister(uint16_t value) {
     mode._value = value;
 }
 
-uint8_t Controller::getRxDataRegister() const {
+uint8_t Controller::getRxDataRegister() {
     return rxData.receivedData;
 }
 
-uint32_t Controller::getStatusRegister() const {
+uint32_t Controller::getStatusRegister() {
+    status.txReadyFlag1 = true;
+    status.txReadyFlag1 = true;
     return status._value;
 }
