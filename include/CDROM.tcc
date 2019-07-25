@@ -18,7 +18,7 @@ inline T CDROM::load(uint32_t offset) {
                     return getReponse();
                 }
                 default: {
-                   printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
+                   printError("Unhandled CDROM read at offset: %#x, with index: %d", offset, status.index);
                    break;
                 }
             }
@@ -30,7 +30,7 @@ inline T CDROM::load(uint32_t offset) {
                     return getInterruptFlagRegister();
                 }
                 default: {
-                   printError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
+                   printError("Unhandled CDROM read at offset: %#x, with index: %d", offset, status.index);
                    break;
                 }
             }
