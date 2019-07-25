@@ -1,6 +1,6 @@
 #include "Controller.hpp"
 
-Controller::Controller() : control(), joypadBaud() {
+Controller::Controller() : control(), joypadBaud(), mode() {
 
 }
 
@@ -14,4 +14,8 @@ void Controller::setControlRegister(uint16_t value) {
 
 void Controller::setJoypadBaudRegister(uint16_t value) {
     joypadBaud = value;
+}
+
+void Controller::setModeRegister(uint16_t value) {
+    mode._value = value;
 }

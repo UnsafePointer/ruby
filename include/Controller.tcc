@@ -24,6 +24,10 @@ inline void Controller::store(uint32_t offset, T value) {
         printError("Unsupported Controller write with size: %d", sizeof(T));
     }
     switch (offset) {
+        case 0x8: {
+            setModeRegister(value);
+            break;
+        }
         case 0xa: {
             setControlRegister(value);
             break;

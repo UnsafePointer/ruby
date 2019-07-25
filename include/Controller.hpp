@@ -41,6 +41,32 @@ union JoypadControl {
     JoypadControl() : _value(0x0) {}
 };
 
+/*
+1F801048h JOY_MODE (R/W) (usually 000Dh, ie. 8bit, no parity, MUL1)
+0-1   Baudrate Reload Factor (1=MUL1, 2=MUL16, 3=MUL64) (or 0=MUL1, too)
+2-3   Character Length       (0=5bits, 1=6bits, 2=7bits, 3=8bits)
+4     Parity Enable          (0=No, 1=Enable)
+5     Parity Type            (0=Even, 1=Odd) (seems to be vice-versa...?)
+6-7   Unknown (always zero)
+8     CLK Output Polarity    (0=Normal:High=Idle, 1=Inverse:Low=Idle)
+9-15  Unknown (always zero)
+*/
+union JoypadMode {
+    struct {
+        uint16_t baudRateReloadFactor : 2;
+        uint16_t characterLength : 2;
+        uint16_t parityEnable : 1;
+        uint16_t parityType : 1;
+        uint16_t unknown : 2;
+        uint16_t CLKOutputPolarity : 1;
+        uint16_t unknown2 : 7;
+    };
+
+    uint16_t _value;
+
+    JoypadMode() : _value(0x0) {}
+};
+
 class Controller {
 
 public:
@@ -49,9 +75,11 @@ public:
 
     JoypadControl control;
     uint16_t joypadBaud;
+    JoypadMode mode;
 
     void setControlRegister(uint16_t value);
     void setJoypadBaudRegister(uint16_t value);
+    void setModeRegister(uint16_t value);
 
     template <typename T>
     inline T load(uint32_t offset) const;
