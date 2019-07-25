@@ -67,6 +67,26 @@ union JoypadMode {
     JoypadMode() : _value(0x0) {}
 };
 
+/*
+1F801040h JOY_RX_DATA (R)
+0-7   Received Data      (1st RX FIFO entry) (oldest entry)
+8-15  Preview            (2nd RX FIFO entry)
+16-23 Preview            (3rd RX FIFO entry)
+24-31 Preview            (4th RX FIFO entry) (5th..8th cannot be previewed)
+*/
+union JoypadRxData {
+    struct {
+        uint32_t receivedData : 8;
+        uint32_t preview1 : 8;
+        uint32_t preview2 : 8;
+        uint32_t preview3 : 8;
+    };
+
+    uint32_t _value;
+
+    JoypadRxData() : _value(0x0) {}
+};
+
 class Controller {
 
 public:
@@ -76,10 +96,13 @@ public:
     JoypadControl control;
     uint16_t joypadBaud;
     JoypadMode mode;
+    JoypadRxData rxData;
 
     void setControlRegister(uint16_t value);
     void setJoypadBaudRegister(uint16_t value);
     void setModeRegister(uint16_t value);
+
+    uint8_t getRxDataRegister() const;
 
     template <typename T>
     inline T load(uint32_t offset) const;

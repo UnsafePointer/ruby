@@ -5,10 +5,13 @@
 template <typename T>
 inline T Controller::load(uint32_t offset) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
-    if (sizeof(T) != 2) {
-        printError("Unsupported Controller read with size: %d", sizeof(T));
+    if (sizeof(T) != 1) {
+        printWarning("Unsupported Controller read with size: %d", sizeof(T));
     }
     switch (offset) {
+        case 0x0: {
+            return getRxDataRegister();
+        }
         default: {
             printError("Unhandled Controller read at offset: %#x", offset);
             break;

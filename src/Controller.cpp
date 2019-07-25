@@ -1,6 +1,6 @@
 #include "Controller.hpp"
 
-Controller::Controller() : control(), joypadBaud(), mode() {
+Controller::Controller() : control(), joypadBaud(), mode(), rxData() {
 
 }
 
@@ -18,4 +18,8 @@ void Controller::setJoypadBaudRegister(uint16_t value) {
 
 void Controller::setModeRegister(uint16_t value) {
     mode._value = value;
+}
+
+uint8_t Controller::getRxDataRegister() const {
+    return rxData.receivedData;
 }
