@@ -16,6 +16,7 @@
 #include <SDL2/SDL.h>
 #include "DebugInfoRenderer.hpp"
 #include <vector>
+#include "Controller.hpp"
 
 class Emulator {
     std::unique_ptr<Window> mainWindow;
@@ -37,6 +38,7 @@ class Emulator {
     std::unique_ptr<Timer0> timer0;
     std::unique_ptr<Timer1> timer1;
     std::unique_ptr<Timer2> timer2;
+    std::unique_ptr<Controller> controller;
 
     std::string ttyBuffer;
     std::vector<std::string> biosFunctionsLog;
