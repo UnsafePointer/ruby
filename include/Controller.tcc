@@ -24,6 +24,10 @@ inline void Controller::store(uint32_t offset, T value) {
         printError("Unsupported Controller write with size: %d", sizeof(T));
     }
     switch (offset) {
+        case 0xa: {
+            setControlRegister(value);
+            break;
+        }
         default: {
             printError("Unhandled Controller write at offset: %#x", offset);
             break;
