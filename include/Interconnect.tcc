@@ -11,6 +11,7 @@
 #include "InterruptController.tcc"
 #include "Expansion1.tcc"
 #include "Timer.tcc"
+#include "Controller.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -65,6 +66,10 @@ inline T Interconnect::load(uint32_t address) const {
     offset = cdromRegisterRange.contains(absoluteAddress);
     if (offset) {
         return cdrom->load<T>(*offset);
+    }
+    offset = controllerRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        return controller->load<T>(*offset);
     }
     printWarning("Unhandled read at: %#x", address);
     Debugger *debugger = Debugger::getInstance();
@@ -172,6 +177,11 @@ inline void Interconnect::store(uint32_t address, T value) const {
     offset = cdromRegisterRange.contains(absoluteAddress);
     if (offset) {
         cdrom->store<T>(*offset, value);
+        return;
+    }
+    offset = controllerRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        controller->store<T>(*offset, value);
         return;
     }
     printError("Unhandled write at: %#x", address);

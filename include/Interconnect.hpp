@@ -12,6 +12,7 @@
 #include "COP0.hpp"
 #include "Expansion1.hpp"
 #include "Timer.hpp"
+#include "Controller.hpp"
 
 const Range ramRange = Range(0x00000000, RAM_SIZE);
 const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
@@ -29,6 +30,7 @@ const Range timer2RegisterRange = Range(0x1f801120, 16);
 const Range dmaRegisterRange = Range(0x1f801080, 0x80);
 const Range gpuRegisterRange = Range(0x1f801810, 8);
 const Range cdromRegisterRange = Range(0x1f801800, 4);
+const Range controllerRegisterRange = Range(0x1f801040, 16);
 
 /*
 Memory Map
@@ -57,9 +59,10 @@ class Interconnect {
     std::unique_ptr<Timer0> &timer0;
     std::unique_ptr<Timer1> &timer1;
     std::unique_ptr<Timer2> &timer2;
+    std::unique_ptr<Controller> &controller;
     uint32_t maskRegion(uint32_t address) const;
 public:
-    Interconnect(std::unique_ptr<COP0> &cop0, std::unique_ptr<BIOS> &bios, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<DMA> &dma, std::unique_ptr<Scratchpad> &scratchpad, std::unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2);
+    Interconnect(std::unique_ptr<COP0> &cop0, std::unique_ptr<BIOS> &bios, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<DMA> &dma, std::unique_ptr<Scratchpad> &scratchpad, std::unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller);
     ~Interconnect();
 
     template <typename T>
