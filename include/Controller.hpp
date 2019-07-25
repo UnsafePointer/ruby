@@ -87,6 +87,42 @@ union JoypadRxData {
     JoypadRxData() : _value(0x0) {}
 };
 
+/*
+1F801044h JOY_STAT (R)
+0     TX Ready Flag 1   (1=Ready/Started)
+1     RX FIFO Not Empty (0=Empty, 1=Not Empty)
+2     TX Ready Flag 2   (1=Ready/Finished)
+3     RX Parity Error   (0=No, 1=Error; Wrong Parity, when enabled)  (sticky)
+4     Unknown (zero)    (unlike SIO, this isn't RX FIFO Overrun flag)
+5     Unknown (zero)    (for SIO this would be RX Bad Stop Bit)
+6     Unknown (zero)    (for SIO this would be RX Input Level AFTER Stop bit)
+7     /ACK Input Level  (0=High, 1=Low)
+8     Unknown (zero)    (for SIO this would be CTS Input Level)
+9     Interrupt Request (0=None, 1=IRQ7) (See JOY_CTRL.Bit4,10-12)   (sticky)
+10    Unknown (always zero)
+11-31 Baudrate Timer    (21bit timer, decrementing at 33MHz)
+*/
+union JoypadStatus {
+    struct {
+        uint32_t txReadyFlag1 : 1;
+        uint32_t rxFifoNotEmpty : 1;
+        uint32_t txReadyFlag2 : 1;
+        uint32_t rxParityError : 1;
+        uint32_t unknown1 : 1;
+        uint32_t unknown2 : 1;
+        uint32_t unknown3 : 1;
+        uint32_t ackInputLevel : 1;
+        uint32_t unknown4 : 1;
+        uint32_t interruptRequest : 1;
+        uint32_t unknown5 : 1;
+        uint32_t baudRateTimer : 21;
+    };
+
+    uint32_t _value;
+
+    JoypadStatus() : _value(0x0) {}
+};
+
 class Controller {
 
 public:
@@ -97,12 +133,14 @@ public:
     uint16_t joypadBaud;
     JoypadMode mode;
     JoypadRxData rxData;
+    JoypadStatus status;
 
     void setControlRegister(uint16_t value);
     void setJoypadBaudRegister(uint16_t value);
     void setModeRegister(uint16_t value);
 
     uint8_t getRxDataRegister() const;
+    uint32_t getStatusRegister() const;
 
     template <typename T>
     inline T load(uint32_t offset) const;
