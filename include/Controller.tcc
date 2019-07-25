@@ -28,6 +28,10 @@ inline void Controller::store(uint32_t offset, T value) {
             setControlRegister(value);
             break;
         }
+        case 0xe: {
+            setJoypadBaudRegister(value);
+            break;
+        }
         default: {
             printError("Unhandled Controller write at offset: %#x", offset);
             break;

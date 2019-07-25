@@ -48,8 +48,10 @@ public:
     ~Controller();
 
     JoypadControl control;
+    uint16_t joypadBaud;
 
     void setControlRegister(uint16_t value);
+    void setJoypadBaudRegister(uint16_t value);
 
     template <typename T>
     inline T load(uint32_t offset) const;
