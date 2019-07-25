@@ -1063,7 +1063,7 @@ void CPU::operationCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationCoprocessor2(Instruction instruction) {
-    printError("Unhandled Geometry Transformation Engine instruction: %#x", instruction.value);
+    printWarning("Unhandled Geometry Transformation Engine instruction: %#x", instruction.value);
 }
 
 void CPU::operationCoprocessor3(Instruction instruction) {
