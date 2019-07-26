@@ -23,10 +23,11 @@ inline T Controller::load(uint32_t offset) {
 template <typename T>
 inline void Controller::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
-    if (sizeof(T) != 2) {
-        printError("Unsupported Controller write with size: %d", sizeof(T));
-    }
     switch (offset) {
+        case 0x0: {
+            setTxDataRegister(value);
+            break;
+        }
         case 0x8: {
             setModeRegister(value);
             break;

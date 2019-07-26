@@ -123,6 +123,22 @@ union JoypadStatus {
     JoypadStatus() : _value(0x0) {}
 };
 
+/*
+1F801040h JOY_TX_DATA (W)
+0-7   Data to be sent
+8-31  Not used
+*/
+union JoypadTxData {
+    struct {
+        uint32_t toBeSentData : 8;
+        uint32_t unused : 24;
+    };
+
+    uint32_t _value;
+
+    JoypadTxData() : _value(0x0) {}
+};
+
 class Controller {
 
 public:
@@ -134,10 +150,12 @@ public:
     JoypadMode mode;
     JoypadRxData rxData;
     JoypadStatus status;
+    JoypadTxData txData;
 
     void setControlRegister(uint16_t value);
     void setJoypadBaudRegister(uint16_t value);
     void setModeRegister(uint16_t value);
+    void setTxDataRegister(uint8_t value);
 
     uint8_t getRxDataRegister();
     uint32_t getStatusRegister();

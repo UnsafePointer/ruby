@@ -1,6 +1,6 @@
 #include "Controller.hpp"
 
-Controller::Controller() : control(), joypadBaud(), mode(), rxData(), status() {
+Controller::Controller() : control(), joypadBaud(), mode(), rxData(), status(), txData() {
 
 }
 
@@ -20,12 +20,23 @@ void Controller::setModeRegister(uint16_t value) {
     mode._value = value;
 }
 
+void Controller::setTxDataRegister(uint8_t value) {
+    status.rxFifoNotEmpty = true;
+    txData._value = value;
+    // TODO: send data to device
+    rxData.receivedData = 0xff;
+    status.ackInputLevel = true;
+}
+
 uint8_t Controller::getRxDataRegister() {
+    status.rxFifoNotEmpty = false;
     return rxData.receivedData;
 }
 
 uint32_t Controller::getStatusRegister() {
     status.txReadyFlag1 = true;
     status.txReadyFlag1 = true;
-    return status._value;
+    uint32_t value = status._value;
+    status.ackInputLevel = false;
+    return value;
 }
