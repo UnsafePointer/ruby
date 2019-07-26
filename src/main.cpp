@@ -7,6 +7,7 @@
 #include "Logger.hpp"
 #include <chrono>
 #include <thread>
+#include "Constants.h"
 
 using namespace std;
 
@@ -24,6 +25,9 @@ int main(int argc, char* argv[]) {
         this_thread::sleep_for(chrono::milliseconds(10 * 1000));
     }
     bool quit = false;
+    uint32_t initTicks = SDL_GetTicks();
+    float interval = 1000;
+    interval /= FrameRateTarget;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -57,6 +61,10 @@ int main(int argc, char* argv[]) {
             quit = true;
             continue;
         }
-        emulator->emulateFrame();
+        uint32_t currentTicks = SDL_GetTicks();
+        if (initTicks + interval < currentTicks) {
+            emulator->emulateFrame();
+            initTicks = SDL_GetTicks();
+        }
     }
 }
