@@ -40,3 +40,7 @@ uint32_t Controller::getStatusRegister() {
     status.ackInputLevel = false;
     return value;
 }
+
+uint16_t Controller::getControlRegister() {
+    return control._value;
+}

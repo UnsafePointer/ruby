@@ -12,6 +12,9 @@ inline T Controller::load(uint32_t offset) {
         case 0x4: {
             return getStatusRegister();
         }
+        case 0xa: {
+            return getControlRegister();
+        }
         default: {
             printError("Unhandled Controller read at offset: %#x", offset);
             break;

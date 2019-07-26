@@ -159,6 +159,7 @@ public:
 
     uint8_t getRxDataRegister();
     uint32_t getStatusRegister();
+    uint16_t getControlRegister();
 
     template <typename T>
     inline T load(uint32_t offset);
