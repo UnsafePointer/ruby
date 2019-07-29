@@ -1,6 +1,5 @@
-
-# Created by https://www.gitignore.io/api/c++,linux,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=c++,linux,visualstudiocode
+# Created by https://www.gitignore.io/api/c++,linux,visualstudiocode,cmake
+# Edit at https://www.gitignore.io/?templates=c++,linux,visualstudiocode,cmake
 
 ### C++ ###
 # Prerequisites
@@ -36,6 +35,23 @@
 *.out
 *.app
 
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+### CMake Patch ###
+# External projects
+*-prefix/
+
 ### Linux ###
 *~
 
@@ -62,28 +78,13 @@
 # Ignore all local history of files
 .history
 
-# End of https://www.gitignore.io/api/c++,linux,visualstudiocode
+# End of https://www.gitignore.io/api/c++,linux,visualstudiocode,cmake
 
 # PlayStation BIOS (MD5: 924e392ed05558ffdb115408c263dccf)
 SCPH1001.BIN
+
 # Hopper Disassembler project
 SCPH1001.hop
-
-# Binary
-bin/
-
-# Valgrind
-valgrind-out.txt
-
-# glad
-glad/
-
-# hana
-include/libHana.h
-lib/libHana
-
-# CPU tests
-tests.exe
 
 # RAM dump
 ram.bin
@@ -93,3 +94,6 @@ ruby.log
 
 ## Dear ImGui Ini files
 imgui.ini
+
+# build dir
+build/

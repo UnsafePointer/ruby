@@ -26,25 +26,26 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 #### Prerequisites
 
 - PlayStation BIOS: SCPH1001 (SHA1: 10155d8d6e6e832d6ea66db9bc098321fb5e8ebf)
-- Python 2.7
-- [glad](https://github.com/Dav1dde/glad)
 - C++17
 - OpenGL 4.5
 - SDL2
-- Go 1.12 (only for GDB support)
 
 #### Compiling
 
 ```
-$ make
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j8
 ```
 
 #### Compiling with GDB support
 
 ```
-$ git submodule update --init --recursive
-$ make -f x86_64_with_debugger.mk install_hana
-$ make -f x86_64_with_debugger.mk
+$ mkdir build
+$ cd build
+$ cmake -DHANA=ON ..
+$ make -j8
 ```
 
 #### GDB support
@@ -71,12 +72,27 @@ $ (gdb) info registers
 
 For a comprehensive list of supported GDB features, see [libHana](https://github.com/Ruenzuo/libHana).
 
+#### Compiling release build
+
+```
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make -j8
+```
+
+### Running
+
+```
+$ ./build/ruby # with SCPH1001.BIN in $PWD
+```
+
 ### Tests
 
 #### Running
 
 ```
-./bin/ruby --exe TESTNAME.exe
+$ ./build/ruby --exe TESTNAME.exe
 ```
 
 #### CPU Tests
