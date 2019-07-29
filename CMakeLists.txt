@@ -3,14 +3,13 @@ project(ruby)
 
 option(HANA "Compile with GDB support")
 
-file(GLOB_RECURSE RUBY_INCLUDE inlude/*.hpp inlude/*.tcc)
 file(GLOB_RECURSE RUBY_SOURCES src/*.cpp)
 
 include_directories(include)
 
 add_subdirectory(imgui)
 
-add_executable(ruby ${RUBY_INCLUDE} ${RUBY_SOURCES})
+add_executable(ruby ${RUBY_SOURCES})
 target_link_libraries(ruby imgui)
 if (HANA)
     find_package(Threads)
