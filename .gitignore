@@ -81,7 +81,7 @@ _deps
 # End of https://www.gitignore.io/api/c++,linux,visualstudiocode,cmake
 
 # PlayStation BIOS (MD5: 924e392ed05558ffdb115408c263dccf)
-SCPH1001.BIN
+*.BIN
 
 # Hopper Disassembler project
 SCPH1001.hop
