@@ -97,3 +97,6 @@ imgui.ini
 
 # build dir
 build/
+
+# configuration
+config.yaml
