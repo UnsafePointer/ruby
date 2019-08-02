@@ -90,7 +90,7 @@ SCPH1001.hop
 ram.bin
 
 # log
-ruby.log
+*.log
 
 ## Dear ImGui Ini files
 imgui.ini
