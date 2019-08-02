@@ -49,6 +49,7 @@ union CDROMInterrupt {
 
 class CDROM {
     std::unique_ptr<InterruptController> &interruptController;
+    bool logActivity;
 
     CDROMStatus status;
     CDROMInterrupt interrupt;
@@ -123,8 +124,9 @@ Command          Parameters      Response(s)
     void operationTest();
 
     void operationGetstat();
+    void logMessage(std::string message) const;
 public:
-    CDROM(std::unique_ptr<InterruptController> &interruptController);
+    CDROM(std::unique_ptr<InterruptController> &interruptController, bool logActivity);
     ~CDROM();
 
     void step();

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController) : interruptController(interruptController), status(), parameters(), response(), interruptQueue() {
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), parameters(), response(), interruptQueue() {
 
 }
 
@@ -20,14 +20,17 @@ void CDROM::step() {
 }
 
 void CDROM::setStatusRegister(uint8_t value) {
+    logMessage(format("STATUS [W]: %#x", value));
     status.index = value & 0x3;
 }
 
 void CDROM::setInterruptRegister(uint8_t value) {
+    logMessage(format("INTE [W]: %#x", value));
     interrupt.enable = value;
 }
 
 void CDROM::setInterruptFlagRegister(uint8_t value) {
+    logMessage(format("INTF [W]: %#x", value));
     if (value & 0x40) {
         clearParameters();
         updateStatusRegister();
@@ -58,6 +61,7 @@ void CDROM::execute(uint8_t value) {
 }
 
 uint8_t CDROM::getStatusRegister() const {
+    logMessage(format("STATUS [R]: %#x", status._value));
     return status._value;
 }
 
@@ -66,6 +70,7 @@ uint8_t CDROM::getInterruptFlagRegister() const {
     if (!interruptQueue.empty()) {
         flags |= interruptQueue.front() & 0x7;
     }
+    logMessage(format("INTF [R]: %#x", flags));
     return flags;
 }
 
@@ -76,6 +81,7 @@ uint8_t CDROM::getReponse() {
         response.pop();
         updateStatusRegister();
     }
+    logMessage(format("RESPONSE [R]: %#x", value));
     return value;
 }
 
@@ -179,9 +185,18 @@ void CDROM::operationTest() {
             printError("Unhandled CDROM operation test with subfunction: %#x", subfunction);
         }
     }
+    logMessage(format("CMD Test [%#x]", subfunction));
 }
 
 void CDROM::operationGetstat() {
+    logMessage("CMD Getstat");
     pushResponse(status._value);
     interruptQueue.push(0x3);
+}
+
+void CDROM::logMessage(std::string message) const {
+    if (!logActivity) {
+        return;
+    }
+    printWarning("  CD-ROM: %s", message.c_str());
 }
