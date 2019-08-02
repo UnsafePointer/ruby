@@ -18,4 +18,5 @@ public:
     bool shouldShowDebugInfoWindow();
     bool shouldLogBiosFunctionCalls();
     bool shouldLogCDROMActivity();
+    bool shouldTraceLogs();
 };

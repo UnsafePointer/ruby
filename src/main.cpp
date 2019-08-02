@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(emulator->getCPU());
     Logger *logger = Logger::getInstance();
-    logger->configure(testRunner->shouldRunTests(), configurationManager->shouldLogVerbose());
+    logger->configure(configurationManager->shouldTraceLogs(), configurationManager->shouldLogVerbose());
     logger->setupTraceFile();
     bool quit = false;
     uint32_t initTicks = SDL_GetTicks();

@@ -53,6 +53,7 @@ void ConfigurationManager::setupConfigurationFile() {
     logConfigurationRef["bios"] = "false";
     logConfigurationRef["cdrom"] = "false";
     logConfigurationRef["verbose"] = "false";
+    logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
     configurationRef["log"] = logConfiguration;
@@ -84,4 +85,8 @@ bool ConfigurationManager::shouldLogBiosFunctionCalls() {
 
 bool ConfigurationManager::shouldLogCDROMActivity() {
     return configuration["log"]["cdrom"].As<bool>();
+}
+
+bool ConfigurationManager::shouldTraceLogs() {
+    return configuration["log"]["trace"].As<bool>();
 }
