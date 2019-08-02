@@ -7,13 +7,13 @@
 #include "Output.hpp"
 #include "Framebuffer.hpp"
 #include "GPU.hpp"
-#include "TestRunner.hpp"
+#include "ConfigurationManager.hpp"
 
 using namespace std;
 
 Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : mode(GL_TRIANGLES) {
-    TestRunner *testRunner = TestRunner::getInstance();
-    resizeToFitFramebuffer = testRunner->shouldResizeWindowToFitFramebuffer();
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
     textureRendererProgram = make_unique<RendererProgram>("./glsl/texture_load_vertex.glsl", "./glsl/texture_load_fragment.glsl");
 

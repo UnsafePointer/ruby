@@ -1,7 +1,6 @@
 #include "ConfigurationManager.hpp"
 #include <fstream>
 #include "Output.hpp"
-#include <yaml/Yaml.hpp>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -12,7 +11,7 @@ using namespace std;
 
 const string configurationFile = "config.yaml";
 
-ConfigurationManager::ConfigurationManager() : filePath() {}
+ConfigurationManager::ConfigurationManager() : filePath(), configuration() {}
 
 ConfigurationManager* ConfigurationManager::instance = nullptr;
 
@@ -61,4 +60,28 @@ void ConfigurationManager::setupConfigurationFile() {
     configurationRef["showFramebuffer"] = "false";
     Yaml::Serialize(configuration, globalConfigurationPath.c_str());
     filePath = globalConfigurationPath;
+}
+
+void ConfigurationManager::loadConfiguration() {
+    Yaml::Parse(configuration, filePath.c_str());
+}
+
+bool ConfigurationManager::shouldResizeWindowToFitFramebuffer() {
+    return configuration["showFramebuffer"].As<bool>();
+}
+
+bool ConfigurationManager::shouldLogVerbose() {
+    return configuration["log"]["verbose"].As<bool>();
+}
+
+bool ConfigurationManager::shouldShowDebugInfoWindow() {
+    return configuration["debugInfoWindow"].As<bool>();
+}
+
+bool ConfigurationManager::shouldLogBiosFunctionCalls() {
+    return configuration["log"]["bios"].As<bool>();
+}
+
+bool ConfigurationManager::shouldLogCDROMActivity() {
+    return configuration["log"]["cdrom"].As<bool>();
 }

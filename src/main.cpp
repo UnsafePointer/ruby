@@ -15,12 +15,13 @@ int main(int argc, char* argv[]) {
     testRunner->configure(argc, argv);
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     configurationManager->setupConfigurationFile();
+    configurationManager->loadConfiguration();
     std::unique_ptr<Emulator> emulator = std::make_unique<Emulator>();
     testRunner->setEmulator(emulator.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(emulator->getCPU());
     Logger *logger = Logger::getInstance();
-    logger->configure(testRunner->shouldRunTests(), testRunner->shouldLogVerbose());
+    logger->configure(testRunner->shouldRunTests(), configurationManager->shouldLogVerbose());
     logger->setupTraceFile();
     bool quit = false;
     uint32_t initTicks = SDL_GetTicks();

@@ -35,10 +35,6 @@ class TestRunner {
 
     Emulator *emulator;
     bool runTests;
-    bool resizeToFitFramebuffer;
-    bool verbose;
-    bool dbginfo;
-    bool bios;
     std::string exeFile;
     uint8_t header[TEST_HEADER_SIZE];
 
@@ -58,10 +54,6 @@ public:
     void configure(int argc, char* argv[]);
     void setEmulator(Emulator *emulator);
     bool shouldRunTests();
-    bool shouldResizeWindowToFitFramebuffer();
-    bool shouldLogVerbose();
-    bool shouldShowDebugInfoWindow();
-    bool shouldLogBiosFunctionCalls();
     uint32_t programCounter();
     uint32_t globalPointer();
     uint32_t initialStackFramePointerBase();

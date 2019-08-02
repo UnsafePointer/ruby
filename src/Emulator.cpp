@@ -1,5 +1,6 @@
 #include "Emulator.hpp"
 #include "TestRunner.hpp"
+#include "ConfigurationManager.hpp"
 #include <iostream>
 #include "Constants.h"
 #include <SDL2/SDL.h>
@@ -14,15 +15,15 @@ const uint32_t SCREEN_HEIGHT = 768;
 Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
     setupSDL();
     uint32_t screenHeight = SCREEN_HEIGHT;
-    TestRunner *testRunner = TestRunner::getInstance();
-    if (testRunner->shouldResizeWindowToFitFramebuffer()) {
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    if (configurationManager->shouldResizeWindowToFitFramebuffer()) {
         screenHeight = 512;
     }
-    showDebugInfoWindow = testRunner->shouldShowDebugInfoWindow();
+    showDebugInfoWindow = configurationManager->shouldShowDebugInfoWindow();
     if (showDebugInfoWindow) {
         debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT);
     }
-    logBiosFunctionCalls = testRunner->shouldLogBiosFunctionCalls();
+    logBiosFunctionCalls = configurationManager->shouldLogBiosFunctionCalls();
     mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
     mainWindow->makeCurrent();
     setupOpenGL();
@@ -53,7 +54,6 @@ CPU* Emulator::getCPU() {
 }
 
 void Emulator::emulateFrame() {
-    TestRunner *testRunner = TestRunner::getInstance();
     uint32_t systemClockStep = 21;
     uint32_t videoSystemClockStep = systemClockStep*11/7;
     uint32_t totalSystemClocksThisFrame = 0;
@@ -63,6 +63,7 @@ void Emulator::emulateFrame() {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
             checkBIOSFunctions();
             if (!cpu->executeNextInstruction()) {
+                TestRunner *testRunner = TestRunner::getInstance();
                 testRunner->setup();
             }
             totalSystemClocksThisFrame++;

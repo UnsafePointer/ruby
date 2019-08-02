@@ -43,22 +43,6 @@ void TestRunner::configure(int argc, char* argv[]) {
         exeFile = string(path);
         argumentFound = true;
     }
-    if (checkOption(argv, argv + argc, "--framebuffer")) {
-        resizeToFitFramebuffer = true;
-        argumentFound = true;
-    }
-    if (checkOption(argv, argv + argc, "--verbose")) {
-        verbose = true;
-        argumentFound = true;
-    }
-    if (checkOption(argv, argv + argc, "--dbginfo")) {
-        dbginfo = true;
-        argumentFound = true;
-    }
-    if (checkOption(argv, argv + argc, "--bios")) {
-        bios = true;
-        argumentFound = true;
-    }
     if (!argumentFound) {
         printError("Incorrect argument passed. See README.md for usage.");
     }
@@ -92,22 +76,6 @@ uint32_t TestRunner::loadWord(uint32_t offset) {
 
 bool TestRunner::shouldRunTests() {
     return runTests;
-}
-
-bool TestRunner::shouldResizeWindowToFitFramebuffer() {
-    return resizeToFitFramebuffer;
-}
-
-bool TestRunner::shouldLogVerbose() {
-    return verbose;
-}
-
-bool TestRunner::shouldShowDebugInfoWindow() {
-    return dbginfo;
-}
-
-bool TestRunner::shouldLogBiosFunctionCalls() {
-    return bios;
 }
 
 uint32_t TestRunner::programCounter() {
