@@ -1,7 +1,6 @@
 #include "Emulator.hpp"
 #include "TestRunner.hpp"
 #include "ConfigurationManager.hpp"
-#include <iostream>
 #include "Constants.h"
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
@@ -137,11 +136,12 @@ void Emulator::toggleDebugInfoWindow() {
 }
 
 void Emulator::checkTTY(char c) {
-    ttyBuffer.append(1, c);
     if (c == '\n') {
-        cout << ttyBuffer;
+        printWarning("%s", ttyBuffer.c_str());
         ttyBuffer.clear();
+        return;
     }
+    ttyBuffer.append(1, c);
 }
 
 void Emulator::checkBIOSFunctions() {
