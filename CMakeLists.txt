@@ -8,9 +8,11 @@ file(GLOB_RECURSE RUBY_SOURCES src/*.cpp)
 include_directories(include)
 
 add_subdirectory(imgui)
+add_subdirectory(mini-yaml)
 
 add_executable(ruby ${RUBY_SOURCES})
 target_link_libraries(ruby imgui)
+target_link_libraries(ruby yaml)
 if (HANA)
     find_package(Threads)
     include_directories(hana/include)
