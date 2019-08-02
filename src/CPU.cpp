@@ -8,7 +8,7 @@
 
 using namespace std;
 
-CPU::CPU(unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0) : programCounter(0xbfc00000),
+CPU::CPU(unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls) : programCounter(0xbfc00000),
              jumpDestination(0),
              isBranching(false),
              runningException(false),
@@ -17,7 +17,8 @@ CPU::CPU(unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0) : progr
              lowRegister(0),
              interconnect(interconnect),
              cop0(cop0),
-             currentInstruction(Instruction(0x0))
+             currentInstruction(Instruction(0x0)),
+             logBiosFunctionCalls(logBiosFunctionCalls)
 {
     fill_n(registers, 32, 0);
 }
@@ -544,8 +545,7 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
 }
 
 void CPU::operationSystemCall(Instruction instruction) {
-    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
-    if (configurationManager->shouldLogBiosFunctionCalls()) {
+    if (logBiosFunctionCalls) {
         printWarning("  SYSCALL: %#x", registers[4]);
     }
     triggerException(ExceptionType::SysCall);

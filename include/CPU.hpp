@@ -42,6 +42,7 @@ class CPU {
     std::unique_ptr<Interconnect> &interconnect;
     std::unique_ptr<COP0> &cop0;
     Instruction currentInstruction;
+    bool logBiosFunctionCalls;
 
     void moveLoadDelaySlots();
     void loadDelaySlot(uint32_t registerIndex, uint32_t value);
@@ -131,7 +132,7 @@ class CPU {
 
     void operationIllegal(Instruction instruction);
 public:
-    CPU(std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0);
+    CPU(std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls);
     ~CPU();
 
     std::unique_ptr<COP0>& cop0Ref();

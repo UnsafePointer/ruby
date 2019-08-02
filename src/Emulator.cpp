@@ -44,7 +44,7 @@ Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
     timer2 = make_unique<Timer2>();
     controller = make_unique<Controller>();
     interconnect = make_unique<Interconnect>(cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller);
-    cpu = make_unique<CPU>(interconnect, cop0);
+    cpu = make_unique<CPU>(interconnect, cop0, logBiosFunctionCalls);
 }
 
 Emulator::~Emulator() {}
