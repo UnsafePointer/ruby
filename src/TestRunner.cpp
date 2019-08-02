@@ -47,10 +47,6 @@ void TestRunner::configure(int argc, char* argv[]) {
         resizeToFitFramebuffer = true;
         argumentFound = true;
     }
-    if (checkOption(argv, argv + argc, "--sleep")) {
-        sleepAtStartup = true;
-        argumentFound = true;
-    }
     if (checkOption(argv, argv + argc, "--verbose")) {
         verbose = true;
         argumentFound = true;
@@ -100,10 +96,6 @@ bool TestRunner::shouldRunTests() {
 
 bool TestRunner::shouldResizeWindowToFitFramebuffer() {
     return resizeToFitFramebuffer;
-}
-
-bool TestRunner::shouldSleepAtStartup() {
-    return sleepAtStartup;
 }
 
 bool TestRunner::shouldLogVerbose() {

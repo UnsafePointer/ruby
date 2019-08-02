@@ -36,7 +36,6 @@ class TestRunner {
     Emulator *emulator;
     bool runTests;
     bool resizeToFitFramebuffer;
-    bool sleepAtStartup;
     bool verbose;
     bool dbginfo;
     bool bios;
@@ -60,7 +59,6 @@ public:
     void setEmulator(Emulator *emulator);
     bool shouldRunTests();
     bool shouldResizeWindowToFitFramebuffer();
-    bool shouldSleepAtStartup();
     bool shouldLogVerbose();
     bool shouldShowDebugInfoWindow();
     bool shouldLogBiosFunctionCalls();
