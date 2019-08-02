@@ -5,25 +5,24 @@
 #include "Debugger.hpp"
 #include "TestRunner.hpp"
 #include "Logger.hpp"
-#include <chrono>
-#include <thread>
 #include "Constants.h"
+#include "ConfigurationManager.hpp"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
     TestRunner *testRunner = TestRunner::getInstance();
     testRunner->configure(argc, argv);
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    configurationManager->setupConfigurationFile();
+    configurationManager->loadConfiguration();
     std::unique_ptr<Emulator> emulator = std::make_unique<Emulator>();
     testRunner->setEmulator(emulator.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(emulator->getCPU());
     Logger *logger = Logger::getInstance();
-    logger->configure(testRunner->shouldRunTests(), testRunner->shouldLogVerbose());
+    logger->configure(testRunner->shouldRunTests(), configurationManager->shouldLogVerbose());
     logger->setupTraceFile();
-    if (testRunner->shouldSleepAtStartup()) {
-        this_thread::sleep_for(chrono::milliseconds(10 * 1000));
-    }
     bool quit = false;
     uint32_t initTicks = SDL_GetTicks();
     float interval = 1000;
