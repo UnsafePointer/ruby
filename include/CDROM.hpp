@@ -47,12 +47,41 @@ union CDROMInterrupt {
     CDROMInterrupt() : _value(0) {}
 };
 
+/*
+Status code (stat)
+0  Error         Invalid Command/parameters (followed by Error Byte)
+1  Spindle Motor (0=Motor off, or in spin-up phase, 1=Motor on)
+2  SeekError     (0=Okay, 1=Seek error)     (followed by Error Byte)
+3  IdError       (0=Okay, 1=GetID denied) (also set when Setmode.Bit4=1)
+4  ShellOpen     Once shell open (0=Closed, 1=Is/was Open)
+5  Read          Reading data sectors  ;/set until after Seek completion)
+6  Seek          Seeking               ; at a time (ie. Read/Play won't get
+7  Play          Playing CD-DA         ;\only ONE of these bits can be set
+*/
+union CDROMStatusCode {
+    struct {
+        uint8_t error : 1;
+        uint8_t spindleMotor : 1;
+        uint8_t seekError : 1;
+        uint8_t getIdError : 1;
+        uint8_t shellOpen : 1;
+        uint8_t read : 1;
+        uint8_t seek : 1;
+        uint8_t play : 1;
+    };
+
+    uint8_t _value;
+
+    CDROMStatusCode() : _value(0x10) {}
+};
+
 class CDROM {
     std::unique_ptr<InterruptController> &interruptController;
     bool logActivity;
 
     CDROMStatus status;
     CDROMInterrupt interrupt;
+    CDROMStatusCode statusCode;
 
     std::queue<uint8_t> parameters;
     std::queue<uint8_t> response;

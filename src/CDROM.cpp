@@ -190,7 +190,7 @@ void CDROM::operationTest() {
 
 void CDROM::operationGetstat() {
     logMessage("CMD Getstat");
-    pushResponse(status._value);
+    pushResponse(statusCode._value);
     interruptQueue.push(0x3);
 }
 
