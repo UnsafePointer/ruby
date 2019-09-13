@@ -1,5 +1,5 @@
 #include "Emulator.hpp"
-#include "TestRunner.hpp"
+#include "EmulatorRunner.hpp"
 #include "ConfigurationManager.hpp"
 #include "Constants.h"
 #include <SDL2/SDL.h>
@@ -62,8 +62,8 @@ void Emulator::emulateFrame() {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
             checkBIOSFunctions();
             if (!cpu->executeNextInstruction()) {
-                TestRunner *testRunner = TestRunner::getInstance();
-                testRunner->setup();
+                EmulatorRunner *emulatorRunner = EmulatorRunner::getInstance();
+                emulatorRunner->setup();
             }
             totalSystemClocksThisFrame++;
         }

@@ -1,4 +1,4 @@
-#include "TestRunner.hpp"
+#include "EmulatorRunner.hpp"
 #include <fstream>
 #include <algorithm>
 #include "Output.hpp"
@@ -6,22 +6,22 @@
 
 using namespace std;
 
-TestRunner::TestRunner() : emulator(nullptr), runTests(false), exeFile(), header() {}
+EmulatorRunner::EmulatorRunner() : emulator(nullptr), runTests(false), exeFile(), header() {}
 
-TestRunner* TestRunner::instance = nullptr;
+EmulatorRunner* EmulatorRunner::instance = nullptr;
 
-TestRunner* TestRunner::getInstance() {
+EmulatorRunner* EmulatorRunner::getInstance() {
     if (instance == nullptr) {
-        instance = new TestRunner();
+        instance = new EmulatorRunner();
     }
     return instance;
 }
 
-bool TestRunner::checkOption(char** begin, char** end, const std::string &option) {
+bool EmulatorRunner::checkOption(char** begin, char** end, const std::string &option) {
     return find(begin, end, option) != end;
 }
 
-char* TestRunner::getOptionValue(char** begin, char** end, const std::string &option) {
+char* EmulatorRunner::getOptionValue(char** begin, char** end, const std::string &option) {
     char **iterator = find(begin, end, option);
     if (iterator != end && iterator++ != end) {
         return *iterator;
@@ -29,7 +29,7 @@ char* TestRunner::getOptionValue(char** begin, char** end, const std::string &op
     return NULL;
 }
 
-void TestRunner::configure(int argc, char* argv[]) {
+void EmulatorRunner::configure(int argc, char* argv[]) {
     if (argc <= 1) {
         return;
     }
@@ -48,11 +48,11 @@ void TestRunner::configure(int argc, char* argv[]) {
     }
 }
 
-void TestRunner::setEmulator(Emulator *emulator) {
+void EmulatorRunner::setEmulator(Emulator *emulator) {
     this->emulator = emulator;
 }
 
-void TestRunner::readHeader() {
+void EmulatorRunner::readHeader() {
     ifstream file = ifstream(exeFile, ios::in|ios::binary|ios::ate);
     if (!file.is_open()) {
         printError("Unable to tests.exe binary");
@@ -62,11 +62,11 @@ void TestRunner::readHeader() {
     file.close();
 }
 
-string TestRunner::id() {
+string EmulatorRunner::id() {
     return string(reinterpret_cast<char *>(header), 8);
 }
 
-uint32_t TestRunner::loadWord(uint32_t offset) {
+uint32_t EmulatorRunner::loadWord(uint32_t offset) {
     uint32_t value = 0;
     for (uint8_t i = 0; i < 4; i++) {
         value |= (((uint32_t)header[offset + i]) << (i * 8));
@@ -74,35 +74,35 @@ uint32_t TestRunner::loadWord(uint32_t offset) {
     return value;
 }
 
-bool TestRunner::shouldRunTests() {
+bool EmulatorRunner::shouldRunTests() {
     return runTests;
 }
 
-uint32_t TestRunner::programCounter() {
+uint32_t EmulatorRunner::programCounter() {
     return loadWord(0x10);
 }
 
-uint32_t TestRunner::globalPointer() {
+uint32_t EmulatorRunner::globalPointer() {
     return loadWord(0x14);
 }
 
-uint32_t TestRunner::initialStackFramePointerBase() {
+uint32_t EmulatorRunner::initialStackFramePointerBase() {
     return loadWord(0x30);
 }
 
-uint32_t TestRunner::initialStackFramePointeroffset() {
+uint32_t EmulatorRunner::initialStackFramePointeroffset() {
     return loadWord(0x34);
 }
 
-uint32_t TestRunner::destinationAddress() {
+uint32_t EmulatorRunner::destinationAddress() {
     return loadWord(0x18);
 }
 
-uint32_t TestRunner::fileSize() {
+uint32_t EmulatorRunner::fileSize() {
     return loadWord(0x1C);
 }
 
-void TestRunner::setup() {
+void EmulatorRunner::setup() {
     if (!shouldRunTests()) {
         return;
     }

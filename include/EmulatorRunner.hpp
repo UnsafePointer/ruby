@@ -30,8 +30,8 @@
 
 const uint32_t TEST_HEADER_SIZE = 2048;
 
-class TestRunner {
-    static TestRunner* instance;
+class EmulatorRunner {
+    static EmulatorRunner* instance;
 
     Emulator *emulator;
     bool runTests;
@@ -47,9 +47,9 @@ class TestRunner {
     bool checkOption(char** begin, char** end, const std::string &option);
     char* getOptionValue(char** begin, char** end, const std::string &option);
 
-    TestRunner();
+    EmulatorRunner();
 public:
-    static TestRunner* getInstance();
+    static EmulatorRunner* getInstance();
 
     void configure(int argc, char* argv[]);
     void setEmulator(Emulator *emulator);

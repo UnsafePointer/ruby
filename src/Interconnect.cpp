@@ -1,6 +1,6 @@
 #include "Interconnect.hpp"
 #include "Range.hpp"
-#include "TestRunner.hpp"
+#include "EmulatorRunner.hpp"
 
 using namespace std;
 
@@ -17,8 +17,8 @@ const uint32_t regionMask[8] = {
 
 Interconnect::Interconnect(std::unique_ptr<COP0> &cop0, unique_ptr<BIOS> &bios, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<DMA> &dma, unique_ptr<Scratchpad> &scratchpad, unique_ptr<CDROM> &cdrom, unique_ptr<InterruptController> &interruptController, unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller) : cop0(cop0), bios(bios), ram(ram), gpu(gpu), dma(dma), scratchpad(scratchpad), cdrom(cdrom), interruptController(interruptController), expansion1(expansion1), timer0(timer0), timer1(timer1), timer2(timer2), controller(controller) {
     bios->loadBin("SCPH1001.BIN");
-    TestRunner *testRunner = TestRunner::getInstance();
-    if (testRunner->shouldRunTests()) {
+    EmulatorRunner *emulatorRunner = EmulatorRunner::getInstance();
+    if (emulatorRunner->shouldRunTests()) {
         expansion1->loadBin("expansion/EXPNSION.BIN");
     }
 }

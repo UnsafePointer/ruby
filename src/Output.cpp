@@ -1,6 +1,6 @@
 #include "Output.hpp"
 #include <cstdarg>
-#include "TestRunner.hpp"
+#include "EmulatorRunner.hpp"
 #include "Logger.hpp"
 #include <sstream>
 

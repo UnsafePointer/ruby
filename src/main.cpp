@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "Emulator.hpp"
 #include "Debugger.hpp"
-#include "TestRunner.hpp"
+#include "EmulatorRunner.hpp"
 #include "Logger.hpp"
 #include "Constants.h"
 #include "ConfigurationManager.hpp"
@@ -11,13 +11,13 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    TestRunner *testRunner = TestRunner::getInstance();
-    testRunner->configure(argc, argv);
+    EmulatorRunner *emulatorRunner = EmulatorRunner::getInstance();
+    emulatorRunner->configure(argc, argv);
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     configurationManager->setupConfigurationFile();
     configurationManager->loadConfiguration();
     std::unique_ptr<Emulator> emulator = std::make_unique<Emulator>();
-    testRunner->setEmulator(emulator.get());
+    emulatorRunner->setEmulator(emulator.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(emulator->getCPU());
     Logger *logger = Logger::getInstance();
