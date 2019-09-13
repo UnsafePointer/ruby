@@ -52,6 +52,10 @@ void CDROM::execute(uint8_t value) {
             operationTest();
             break;
         }
+        case 0x1A: {
+            operationGetID();
+            break;
+        }
         default: {
             printError("Unhandled CDROM operation value: %#x", value);
         }
@@ -192,6 +196,33 @@ void CDROM::operationGetstat() {
     logMessage("CMD Getstat");
     pushResponse(statusCode._value);
     interruptQueue.push(0x3);
+}
+
+/*
+1st byte: stat  (as usually, but with bit3 same as bit7 in 2nd byte)
+2nd byte: flags (bit7=denied, bit4=audio... or reportedly import, uh?)
+  bit7: Licensed (0=Licensed Data CD, 1=Denied Data CD or Audio CD)
+  bit6: Missing  (0=Disk Present, 1=Disk Missing)
+  bit4: Audio CD (0=Data CD, 1=Audio CD) (always 0 when Modchip installed)
+3rd byte: Disk type (from TOC Point=A0h) (eg. 00h=Audio or Mode1, 20h=Mode2)
+4th byte: Usually 00h (or 8bit ATIP from Point=C0h, if session info exists)
+  that 8bit ATIP value is taken form the middle 8bit of the 24bit ATIP value
+5th-8th byte: SCEx region (eg. ASCII "SCEE" = Europe) (0,0,0,0 = Unlicensed)
+*/
+void CDROM::operationGetID() {
+    // TODO: timming issue?
+    // pushResponse(statusCode._value);
+    // interruptQueue.push(INT3);
+
+    pushResponse(statusCode._value);
+    pushResponse(0x00);
+    pushResponse(0x20);
+    pushResponse(0x00);
+    pushResponse('S');
+    pushResponse('C');
+    pushResponse('E');
+    pushResponse('A');
+    interruptQueue.push(0x2);
 }
 
 void CDROM::logMessage(std::string message) const {

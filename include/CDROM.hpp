@@ -192,6 +192,7 @@ Command          Parameters      Response(s)
     void operationTest();
 
     void operationGetstat();
+    void operationGetID();
     void logMessage(std::string message) const;
 public:
     CDROM(std::unique_ptr<InterruptController> &interruptController, bool logActivity);
