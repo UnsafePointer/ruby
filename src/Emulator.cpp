@@ -135,6 +135,10 @@ void Emulator::toggleDebugInfoWindow() {
     debugWindow->toggleHidden();
 }
 
+void Emulator::loadCDROMImageFile(string filePath) {
+    cdrom->loadCDROMImageFile(filePath);
+}
+
 void Emulator::checkTTY(char c) {
     if (c == '\n') {
         printWarning("%s", ttyBuffer.c_str());

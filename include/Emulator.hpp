@@ -17,6 +17,7 @@
 #include "DebugInfoRenderer.hpp"
 #include <vector>
 #include "Controller.hpp"
+#include <string>
 
 class Emulator {
     std::unique_ptr<Window> mainWindow;
@@ -61,4 +62,5 @@ public:
     void handleSDLEvent(SDL_Event event);
     bool shouldTerminate();
     void toggleDebugInfoWindow();
+    void loadCDROMImageFile(std::string filePath);
 };

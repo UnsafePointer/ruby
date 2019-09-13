@@ -36,6 +36,7 @@ class EmulatorRunner {
     Emulator *emulator;
     bool runTests;
     std::string exeFile;
+    std::string binFile;
     uint8_t header[TEST_HEADER_SIZE];
 
     void readHeader();

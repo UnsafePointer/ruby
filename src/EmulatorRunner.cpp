@@ -43,6 +43,14 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
         exeFile = string(path);
         argumentFound = true;
     }
+    if (checkOption(argv, argv + argc, "--bin")) {
+        char *path = getOptionValue(argv, argv + argc, "--bin");
+        if (path == NULL) {
+            printError("Incorrect argument passed. See README.md for usage.");
+        }
+        binFile = string(path);
+        argumentFound = true;
+    }
     if (!argumentFound) {
         printError("Incorrect argument passed. See README.md for usage.");
     }
@@ -50,6 +58,7 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
 
 void EmulatorRunner::setEmulator(Emulator *emulator) {
     this->emulator = emulator;
+    this->emulator->loadCDROMImageFile(binFile);
 }
 
 void EmulatorRunner::readHeader() {

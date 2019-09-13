@@ -200,3 +200,7 @@ void CDROM::logMessage(std::string message) const {
     }
     printWarning("  CD-ROM: %s", message.c_str());
 }
+
+void CDROM::loadCDROMImageFile(string message) {
+    statusCode.setShellOpen(false);
+}

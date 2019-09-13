@@ -47,6 +47,13 @@ union CDROMInterrupt {
     CDROMInterrupt() : _value(0) {}
 };
 
+enum CDROMState : uint8_t {
+    Unknown = 0,
+    Reading = 5,
+    Seeking = 6,
+    Playing = 7,
+};
+
 /*
 Status code (stat)
 0  Error         Invalid Command/parameters (followed by Error Byte)
@@ -73,6 +80,25 @@ union CDROMStatusCode {
     uint8_t _value;
 
     CDROMStatusCode() : _value(0x10) {}
+
+    void setState(CDROMState state) {
+        error = false;
+        spindleMotor = true;
+        seekError = false;
+        getIdError = false;
+        if (state == Unknown) {
+            return;
+        }
+        uint8_t mask = 1 << state;
+        _value |= mask;
+    }
+
+    void setShellOpen(bool open) {
+        shellOpen = open;
+        if (!shellOpen) {
+            setState(CDROMState::Unknown);
+        }
+    }
 };
 
 class CDROM {
@@ -164,4 +190,6 @@ public:
     inline T load(uint32_t offset);
     template <typename T>
     inline void store(uint32_t offset, T value);
+
+    void loadCDROMImageFile(std::string message);
 };
