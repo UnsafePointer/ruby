@@ -125,6 +125,47 @@ union CDROMStatusCode {
     }
 };
 
+enum CDROMModeSectorSize : uint8_t {
+    DataOnly800h = 0,
+    WholeSector924h = 1,
+};
+
+enum CDROMModeSpeed : uint8_t {
+    Normal = 0,
+    Double = 1,
+};
+
+/*
+Setmode
+0   CDDA        (0=Off, 1=Allow to Read CD-DA Sectors; ignore missing EDC)
+1   AutoPause   (0=Off, 1=Auto Pause upon End of Track) ;for Audio Play
+2   Report      (0=Off, 1=Enable Report-Interrupts for Audio Play)
+3   XA-Filter   (0=Off, 1=Process only XA-ADPCM sectors that match Setfilter)
+4   Ignore Bit  (0=Normal, 1=Ignore Sector Size and Setloc position)
+5   Sector Size (0=800h=DataOnly, 1=924h=WholeSectorExceptSyncBytes)
+6   XA-ADPCM    (0=Off, 1=Send XA-ADPCM sectors to SPU Audio Input)
+7   Speed       (0=Normal speed, 1=Double speed)
+*/
+union CDROMMode {
+    struct {
+        uint8_t CDDASectorsReadEnable : 1;
+        uint8_t endOfTrackAutoPauseEnable : 1;
+        uint8_t reportInterruptsForAudioPlayEnable : 1;
+        uint8_t XAFilterEnable : 1;
+        uint8_t unknown : 1;
+        uint8_t _sectorSize : 1;
+        uint8_t XAADPCMEnable : 1;
+        uint8_t _speed : 1;
+    };
+
+    uint8_t _value;
+
+    CDROMMode() : _value(0x0) {}
+
+    CDROMModeSectorSize sectorSize() { return CDROMModeSectorSize(_sectorSize); }
+    CDROMModeSpeed speed() { return CDROMModeSpeed(_speed); }
+};
+
 class CDROM {
     std::unique_ptr<InterruptController> &interruptController;
     bool logActivity;
@@ -132,6 +173,7 @@ class CDROM {
     CDROMStatus status;
     CDROMInterrupt interrupt;
     CDROMStatusCode statusCode;
+    CDROMMode mode;
 
     std::queue<uint8_t> parameters;
     std::queue<uint8_t> response;
@@ -209,6 +251,7 @@ Command          Parameters      Response(s)
     void operationGetID();
     void operationSetloc();
     void operationSeekL();
+    void operationSetmode();
     void logMessage(std::string message) const;
 public:
     CDROM(std::unique_ptr<InterruptController> &interruptController, bool logActivity);
