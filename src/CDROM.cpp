@@ -214,6 +214,9 @@ void CDROM::operationTest() {
     logMessage(format("CMD Test [%#x]", subfunction));
 }
 
+/*
+Getstat - Command 01h --> INT3(stat)
+*/
 void CDROM::operationGetstat() {
     logMessage("CMD Getstat");
     pushResponse(statusCode._value);
@@ -221,6 +224,8 @@ void CDROM::operationGetstat() {
 }
 
 /*
+GetID - Command 1Ah --> INT3(stat) --> INT2/5 (stat,flags,type,atip,"SCEx")
+
 1st byte: stat  (as usually, but with bit3 same as bit7 in 2nd byte)
 2nd byte: flags (bit7=denied, bit4=audio... or reportedly import, uh?)
   bit7: Licensed (0=Licensed Data CD, 1=Denied Data CD or Audio CD)
@@ -247,6 +252,9 @@ void CDROM::operationGetID() {
     interruptQueue.push(INT2);
 }
 
+/*
+Setloc - Command 02h,amm,ass,asect --> INT3(stat)
+*/
 void CDROM::operationSetloc() {
     uint8_t minute = decimalFromBCDEncodedInt(popParameter());
     uint8_t second = decimalFromBCDEncodedInt(popParameter());
@@ -260,6 +268,9 @@ void CDROM::operationSetloc() {
     logMessage(format("CMD Setloc(%d, %d, %d)", minute, second, sector));
 }
 
+/*
+SeekL - Command 15h --> INT3(stat) --> INT2(stat)
+*/
 void CDROM::operationSeekL() {
     readSector = seekSector;
 
