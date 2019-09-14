@@ -14,3 +14,11 @@ void readBinary(const string& path, uint8_t *data) {
     file.read(reinterpret_cast<char *>(data), size);
     file.close();
 }
+
+uint8_t decimalFromBCDEncodedInt(uint8_t bcdEncoded) {
+    uint8_t high = (bcdEncoded >> 4) & 0xF;
+    uint8_t low = bcdEncoded & 0xF;
+
+    uint8_t value = high * 10 + low;
+    return value;
+}

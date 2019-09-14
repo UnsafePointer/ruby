@@ -125,6 +125,7 @@ INT6   N/A
 INT7   N/A
 */
     std::queue<uint8_t> interruptQueue;
+    uint32_t seekSector;
 
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
@@ -140,6 +141,7 @@ INT7   N/A
     void clearResponse();
     void pushParameter(uint8_t value);
     void pushResponse(uint8_t value);
+    uint8_t popParameter();
 
     void updateStatusRegister();
 
@@ -193,6 +195,7 @@ Command          Parameters      Response(s)
 
     void operationGetstat();
     void operationGetID();
+    void operationSetloc();
     void logMessage(std::string message) const;
 public:
     CDROM(std::unique_ptr<InterruptController> &interruptController, bool logActivity);

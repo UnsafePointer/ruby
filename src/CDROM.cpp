@@ -1,9 +1,13 @@
 #include "CDROM.hpp"
 #include "Output.hpp"
+#include "Helpers.hpp"
 
 using namespace std;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), interrupt(), statusCode(), parameters(), response(), interruptQueue() {
+const uint32_t SecondsPerMinute = 60;
+const uint32_t SectorsPerSecond = 75;
+
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), interrupt(), statusCode(), parameters(), response(), interruptQueue(), seekSector() {
 
 }
 
@@ -46,6 +50,10 @@ void CDROM::execute(uint8_t value) {
     switch (value) {
         case 0x01: {
             operationGetstat();
+            break;
+        }
+        case 0x02: {
+            operationSetloc();
             break;
         }
         case 0x19: {
@@ -118,6 +126,16 @@ void CDROM::pushResponse(uint8_t value) {
     }
     response.push(value);
     updateStatusRegister();
+}
+
+uint8_t CDROM::popParameter() {
+    uint8_t value = 0;
+    if (!parameters.empty()) {
+        value = parameters.front();
+        parameters.pop();
+        updateStatusRegister();
+    }
+    return value;
 }
 
 void CDROM::updateStatusRegister() {
@@ -223,6 +241,19 @@ void CDROM::operationGetID() {
     pushResponse('E');
     pushResponse('A');
     interruptQueue.push(0x2);
+}
+
+void CDROM::operationSetloc() {
+    uint8_t minute = decimalFromBCDEncodedInt(popParameter());
+    uint8_t second = decimalFromBCDEncodedInt(popParameter());
+    uint8_t sector = decimalFromBCDEncodedInt(popParameter());
+
+    seekSector = (minute * SecondsPerMinute * SectorsPerSecond) + (second * SectorsPerSecond) + sector;
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(0x3);
+
+    logMessage(format("CMD Setloc(%d, %d, %d)", minute, second, sector));
 }
 
 void CDROM::logMessage(std::string message) const {
