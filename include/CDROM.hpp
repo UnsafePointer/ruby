@@ -4,7 +4,29 @@
 #include <memory>
 #include "InterruptController.hpp"
 
-
+/*
+INT0   No response received (no interrupt request)
+INT1   Received SECOND (or further) response to ReadS/ReadN (and Play+Report)
+INT2   Received SECOND response (to various commands)
+INT3   Received FIRST response (to any command)
+INT4   DataEnd (when Play/Forward reaches end of disk) (maybe also for Read?)
+INT5   Received error-code (in FIRST or SECOND response)
+        INT5 also occurs on SECOND GetID response, on unlicensed disks
+        INT5 also occurs when opening the drive door (even if no command
+        was sent, ie. even if no read-command or other command is active)
+INT6   N/A
+INT7   N/A
+*/
+enum CDROMInterruptNumber : uint8_t {
+    INT0 = 0,
+    INT1 = 1,
+    INT2 = 2,
+    INT3 = 3,
+    INT4 = 4,
+    INT5 = 5,
+    INT6 = 6,
+    INT7 = 7,
+};
 
 /*
 1F801800h - Index/Status Register (Bit0-1 R/W) (Bit2-7 Read Only)
@@ -113,20 +135,7 @@ class CDROM {
 
     std::queue<uint8_t> parameters;
     std::queue<uint8_t> response;
-/*
-INT0   No response received (no interrupt request)
-INT1   Received SECOND (or further) response to ReadS/ReadN (and Play+Report)
-INT2   Received SECOND response (to various commands)
-INT3   Received FIRST response (to any command)
-INT4   DataEnd (when Play/Forward reaches end of disk) (maybe also for Read?)
-INT5   Received error-code (in FIRST or SECOND response)
-        INT5 also occurs on SECOND GetID response, on unlicensed disks
-        INT5 also occurs when opening the drive door (even if no command
-        was sent, ie. even if no read-command or other command is active)
-INT6   N/A
-INT7   N/A
-*/
-    std::queue<uint8_t> interruptQueue;
+    std::queue<CDROMInterruptNumber> interruptQueue;
     uint32_t seekSector;
     uint32_t readSector;
 

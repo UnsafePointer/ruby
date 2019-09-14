@@ -107,7 +107,7 @@ void CDROM::clearParameters() {
 }
 
 void CDROM::clearInterruptQueue() {
-    queue<uint8_t> empty;
+    queue<CDROMInterruptNumber> empty;
     swap(interruptQueue, empty);
 }
 
@@ -204,7 +204,7 @@ void CDROM::operationTest() {
             pushResponse(0x09); // 9
             pushResponse(0x19); // 25
             pushResponse(0xc0); // 192
-            interruptQueue.push(0x3);
+            interruptQueue.push(INT3);
             break;
         }
         default: {
@@ -217,7 +217,7 @@ void CDROM::operationTest() {
 void CDROM::operationGetstat() {
     logMessage("CMD Getstat");
     pushResponse(statusCode._value);
-    interruptQueue.push(0x3);
+    interruptQueue.push(INT3);
 }
 
 /*
@@ -244,7 +244,7 @@ void CDROM::operationGetID() {
     pushResponse('C');
     pushResponse('E');
     pushResponse('A');
-    interruptQueue.push(0x2);
+    interruptQueue.push(INT2);
 }
 
 void CDROM::operationSetloc() {
@@ -255,7 +255,7 @@ void CDROM::operationSetloc() {
     seekSector = (minute * SecondsPerMinute * SectorsPerSecond) + (second * SectorsPerSecond) + sector;
 
     pushResponse(statusCode._value);
-    interruptQueue.push(0x3);
+    interruptQueue.push(INT3);
 
     logMessage(format("CMD Setloc(%d, %d, %d)", minute, second, sector));
 }
@@ -264,12 +264,12 @@ void CDROM::operationSeekL() {
     readSector = seekSector;
 
     pushResponse(statusCode._value);
-    interruptQueue.push(0x3);
+    interruptQueue.push(INT3);
 
     statusCode.setState(CDROMState::Seeking);
 
     pushResponse(statusCode._value);
-    interruptQueue.push(0x2);
+    interruptQueue.push(INT2);
 
     logMessage("CMD SeekL");
 }
