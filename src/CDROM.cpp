@@ -7,7 +7,7 @@ using namespace std;
 const uint32_t SecondsPerMinute = 60;
 const uint32_t SectorsPerSecond = 75;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), interrupt(), statusCode(), parameters(), response(), interruptQueue(), seekSector() {
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), interrupt(), statusCode(), parameters(), response(), interruptQueue(), seekSector(), readSector() {
 
 }
 
@@ -54,6 +54,10 @@ void CDROM::execute(uint8_t value) {
         }
         case 0x02: {
             operationSetloc();
+            break;
+        }
+        case 0x15: {
+            operationSeekL();
             break;
         }
         case 0x19: {
@@ -254,6 +258,20 @@ void CDROM::operationSetloc() {
     interruptQueue.push(0x3);
 
     logMessage(format("CMD Setloc(%d, %d, %d)", minute, second, sector));
+}
+
+void CDROM::operationSeekL() {
+    readSector = seekSector;
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(0x3);
+
+    statusCode.setState(CDROMState::Seeking);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(0x2);
+
+    logMessage("CMD SeekL");
 }
 
 void CDROM::logMessage(std::string message) const {

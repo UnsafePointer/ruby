@@ -4,6 +4,8 @@
 #include <memory>
 #include "InterruptController.hpp"
 
+
+
 /*
 1F801800h - Index/Status Register (Bit0-1 R/W) (Bit2-7 Read Only)
 0-1 Index   Port 1F801801h-1F801803h index (0..3 = Index0..Index3)   (R/W)
@@ -126,6 +128,7 @@ INT7   N/A
 */
     std::queue<uint8_t> interruptQueue;
     uint32_t seekSector;
+    uint32_t readSector;
 
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
@@ -196,6 +199,7 @@ Command          Parameters      Response(s)
     void operationGetstat();
     void operationGetID();
     void operationSetloc();
+    void operationSeekL();
     void logMessage(std::string message) const;
 public:
     CDROM(std::unique_ptr<InterruptController> &interruptController, bool logActivity);
