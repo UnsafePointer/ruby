@@ -3,7 +3,7 @@
 
 using namespace std;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), parameters(), response(), interruptQueue() {
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), interrupt(), statusCode(), parameters(), response(), interruptQueue() {
 
 }
 
