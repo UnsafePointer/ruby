@@ -56,6 +56,10 @@ void CDROM::execute(uint8_t value) {
             operationSetloc();
             break;
         }
+        case 0x06: {
+            operationReadN();
+            break;
+        }
         case 0x0E: {
             operationSetmode();
             break;
@@ -300,6 +304,20 @@ void CDROM::operationSetmode() {
     interruptQueue.push(INT3);
 
     logMessage("CMD Setmode");
+}
+
+/*
+ReadN - Command 06h --> INT3(stat) --> INT1(stat) --> datablock
+*/
+void CDROM::operationReadN() {
+    readSector = seekSector;
+
+    statusCode.setState(CDROMState::Reading);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    logMessage("CMD ReadN");
 }
 
 void CDROM::logMessage(std::string message) const {

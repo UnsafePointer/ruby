@@ -252,6 +252,7 @@ Command          Parameters      Response(s)
     void operationSetloc();
     void operationSeekL();
     void operationSetmode();
+    void operationReadN();
     void logMessage(std::string message) const;
 public:
     CDROM(std::unique_ptr<InterruptController> &interruptController, bool logActivity);
