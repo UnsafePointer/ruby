@@ -6,7 +6,7 @@
 
 using namespace std;
 
-EmulatorRunner::EmulatorRunner() : emulator(nullptr), runTests(false), exeFile(), header() {}
+EmulatorRunner::EmulatorRunner() : emulator(nullptr), runTests(false), exeFile(), binFile(), header() {}
 
 EmulatorRunner* EmulatorRunner::instance = nullptr;
 
