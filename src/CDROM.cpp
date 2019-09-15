@@ -7,7 +7,7 @@ using namespace std;
 const uint32_t SecondsPerMinute = 60;
 const uint32_t SectorsPerSecond = 75;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), logActivity(logActivity), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector() {
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), image(), logActivity(logActivity), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector() {
 
 }
 
@@ -327,6 +327,10 @@ void CDROM::logMessage(std::string message) const {
     printWarning("  CD-ROM: %s", message.c_str());
 }
 
-void CDROM::loadCDROMImageFile(string message) {
+void CDROM::loadCDROMImageFile(string filePath) {
     statusCode.setShellOpen(false);
+    if (filePath.empty()) {
+        return;
+    }
+    image.open(filePath);
 }

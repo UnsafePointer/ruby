@@ -3,6 +3,7 @@
 #include <queue>
 #include <memory>
 #include "InterruptController.hpp"
+#include "CDImage.hpp"
 
 /*
 INT0   No response received (no interrupt request)
@@ -168,6 +169,7 @@ union CDROMMode {
 
 class CDROM {
     std::unique_ptr<InterruptController> &interruptController;
+    CDImage image;
     bool logActivity;
 
     CDROMStatus status;
@@ -265,5 +267,5 @@ public:
     template <typename T>
     inline void store(uint32_t offset, T value);
 
-    void loadCDROMImageFile(std::string message);
+    void loadCDROMImageFile(std::string filePath);
 };
