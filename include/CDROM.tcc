@@ -88,6 +88,10 @@ inline void CDROM::store(uint32_t offset, T value) {
         }
         case 3: {
             switch (status.index) {
+                case 0: {
+                    setRequestRegister(value);
+                    break;
+                }
                 case 1: {
                     setInterruptFlagRegister(value);
                     break;

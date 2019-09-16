@@ -183,10 +183,14 @@ class CDROM {
     uint32_t seekSector;
     uint32_t readSector;
     uint32_t counter;
+    CDSector currentSector;
+    std::vector<uint32_t> readBuffer;
+    uint32_t readBufferIndex;
 
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
     void setInterruptFlagRegister(uint8_t value);
+    void setRequestRegister(uint8_t value);
     void execute(uint8_t value);
 
     uint8_t getStatusRegister() const;
@@ -200,6 +204,7 @@ class CDROM {
     void pushParameter(uint8_t value);
     void pushResponse(uint8_t value);
     uint8_t popParameter();
+    bool isReadBufferEmpty();
 
     void updateStatusRegister();
 

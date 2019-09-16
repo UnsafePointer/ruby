@@ -16,7 +16,7 @@ should be: SystemClock*930h/4/44100Hz for Single Speed (and half as much for Dou
 const uint32_t SystemClocksPerCDROMInt1SingleSpeed=2352;
 const uint32_t SystemClocksPerCDROMInt1DoubleSpeed=2352/2;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), image(), logActivity(logActivity), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter() {
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), image(), logActivity(logActivity), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex() {
 
 }
 
@@ -36,7 +36,7 @@ void CDROM::step() {
         pushResponse(statusCode._value);
         counter = 0;
 
-        CDSector sector = image.readSector(readSector);
+        currentSector = image.readSector(readSector);
         readSector++;
     }
 }
@@ -59,6 +59,26 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
     }
     if (!interruptQueue.empty()) {
         interruptQueue.pop();
+    }
+}
+
+void CDROM::setRequestRegister(uint8_t value) {
+    logMessage(format("REQ [W]: %#x", value));
+    if (value & 0x80) {
+        if (isReadBufferEmpty()) {
+            CDROMModeSectorSize sectorSize = mode.sectorSize();
+            if (sectorSize == DataOnly800h) {
+                copy(&currentSector.data[0], &currentSector.data[0x800], back_inserter(readBuffer));
+            } else { // WholeSector924h
+                copy(&currentSector.header[0], &currentSector.ECC[276], back_inserter(readBuffer));
+            }
+            readBufferIndex = 0;
+            status.dataFifoEmpty = 1;
+        } else {
+            readBuffer.clear();
+            readBufferIndex = 0;
+            status.dataFifoEmpty = 0;
+        }
     }
 }
 
@@ -171,6 +191,19 @@ uint8_t CDROM::popParameter() {
         updateStatusRegister();
     }
     return value;
+}
+
+bool CDROM::isReadBufferEmpty() {
+    if (readBuffer.empty()) {
+        return true;
+    }
+
+    CDROMModeSectorSize sectorSize = mode.sectorSize();
+    if (sectorSize == DataOnly800h) {
+        return readBufferIndex >= 0x800;
+    } else { // WholeSector924h
+        return readBufferIndex >= 0x924;
+    }
 }
 
 void CDROM::updateStatusRegister() {
