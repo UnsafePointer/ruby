@@ -26,8 +26,14 @@ inline T CDROM::load(uint32_t offset) {
         }
         case 3: {
             switch (status.index) {
+                case 0: {
+                    return getInterruptRegister();
+                }
                 case 1: {
                     return getInterruptFlagRegister();
+                }
+                case 2: {
+                    return getInterruptRegister();
                 }
                 case 3: {
                     return getInterruptFlagRegister();

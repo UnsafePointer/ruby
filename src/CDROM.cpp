@@ -127,6 +127,11 @@ uint8_t CDROM::getReponse() {
     return value;
 }
 
+uint8_t CDROM::getInterruptRegister() const {
+    logMessage(format("INTE [R]: %#x", interrupt.enable));
+    return interrupt.enable;
+}
+
 void CDROM::clearParameters() {
     queue<uint8_t> empty;
     swap(parameters, empty);

@@ -192,6 +192,7 @@ class CDROM {
     uint8_t getStatusRegister() const;
     uint8_t getInterruptFlagRegister() const;
     uint8_t getReponse();
+    uint8_t getInterruptRegister() const;
 
     void clearParameters();
     void clearInterruptQueue();
