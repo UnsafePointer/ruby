@@ -11,6 +11,27 @@ Port portWithIndex(uint32_t index) {
     return Port(index);
 }
 
+string portDescription(Port port) {
+    switch (port) {
+        case MDECin:
+            return "MDECin";
+        case MDECout:
+            return "MDECout";
+        case GPUP:
+            return "GPU";
+        case CDROMP:
+            return "CDROM";
+        case SPU:
+            return "SPU";
+        case PIO:
+            return "PIO";
+        case OTC:
+            return "OTC";
+        case None:
+            return "None";
+    }
+}
+
 DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu) : ram(ram), gpu(gpu) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel();
@@ -70,11 +91,11 @@ void DMA::execute(Port port) {
 
 void DMA::executeLinkedList(Port port, Channel& channel) {
     uint32_t address = channel.baseAddressRegister() & 0x1ffffc;
-    if (channel.direction() == Direction::ToRam) {
-        printError("Unhandled DMA direction");
-    }
     if (port != Port::GPUP) {
-        printError("Unhandled DMA port");
+        printError("Unhandled DMA linked-list transfer with port: %s", portDescription(port).c_str());
+    }
+    if (channel.direction() == Direction::ToRam) {
+        printError("Unhandled DMA linked-list transfer to RAM");
     }
     while (true) {
         uint32_t header = ram->load<uint32_t>(address);
@@ -116,7 +137,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                     default: {
-                        printError("Unhandled DMA source port");
+                        printError("Unhandled DMA block transfer from RAM to source port: %s", portDescription(port).c_str());
                         break;
                     }
                 }
@@ -139,7 +160,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                     default: {
-                        printError("Unhandled DMA source port");
+                        printError("Unhandled DMA block transfer to RAM from source port: %s", portDescription(port).c_str());
                         break;
                     }
                 }

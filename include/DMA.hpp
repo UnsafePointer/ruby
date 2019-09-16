@@ -4,6 +4,7 @@
 #include "Channel.hpp"
 #include "RAM.hpp"
 #include "GPU.hpp"
+#include <string>
 
 enum Port {
     MDECin = 0,
@@ -17,6 +18,7 @@ enum Port {
 };
 
 Port portWithIndex(uint32_t index);
+std::string portDescription(Port port);
 
 // 1F8010F0h - DPCR - DMA Control Register (R/W)
 // 0-2   DMA0, MDECin  Priority      (0..7; 0=Highest, 7=Lowest)
