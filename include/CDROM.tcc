@@ -29,6 +29,9 @@ inline T CDROM::load(uint32_t offset) {
                 case 1: {
                     return getInterruptFlagRegister();
                 }
+                case 3: {
+                    return getInterruptFlagRegister();
+                }
                 default: {
                    printError("Unhandled CDROM read at offset: %#x, with index: %d", offset, status.index);
                    break;
