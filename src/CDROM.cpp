@@ -4,10 +4,19 @@
 
 using namespace std;
 
-const uint32_t SecondsPerMinute = 60;
-const uint32_t SectorsPerSecond = 75;
+/*
+INT1 Rate
+Command                Average   Min       Max
+Read (single speed)    006e1cdh  00686dah..0072732h
+Read (double speed)    0036cd2h  00322dfh..003ab2bh
+The INT1 rate needs to be precise for CD-DA and CD-XA Audio streaming, exact clock cycle values
+should be: SystemClock*930h/4/44100Hz for Single Speed (and half as much for Double Speed)
+(the "Average" values are AVERAGE values, not exact values).
+*/
+const uint32_t SystemClocksPerCDROMInt1SingleSpeed=2352;
+const uint32_t SystemClocksPerCDROMInt1DoubleSpeed=2352/2;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), image(), logActivity(logActivity), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector() {
+CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), image(), logActivity(logActivity), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter() {
 
 }
 
@@ -20,6 +29,15 @@ void CDROM::step() {
         if ((interrupt.enable & 0x7) & (interruptQueue.front() & 0x7)) {
             interruptController->trigger(InterruptRequestNumber::CDROMIRQ);
         }
+    }
+    counter++;
+    if ((statusCode.play || statusCode.read) && counter >= SystemClocksPerCDROMInt1DoubleSpeed) {
+        interruptQueue.push(INT1);
+        pushResponse(statusCode._value);
+        counter = 0;
+
+        CDSector sector = image.readSector(readSector);
+        readSector++;
     }
 }
 

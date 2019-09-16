@@ -182,6 +182,7 @@ class CDROM {
     std::queue<CDROMInterruptNumber> interruptQueue;
     uint32_t seekSector;
     uint32_t readSector;
+    uint32_t counter;
 
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
