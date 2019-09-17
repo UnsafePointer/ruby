@@ -207,6 +207,7 @@ class CDROM {
     bool isReadBufferEmpty();
 
     void updateStatusRegister();
+    uint8_t loadByteFromReadBuffer();
 
 /*
 Command          Parameters      Response(s)
@@ -275,4 +276,5 @@ public:
     inline void store(uint32_t offset, T value);
 
     void loadCDROMImageFile(std::string filePath);
+    uint32_t loadWordFromReadBuffer();
 };

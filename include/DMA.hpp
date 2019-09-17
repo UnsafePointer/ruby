@@ -5,6 +5,7 @@
 #include "RAM.hpp"
 #include "GPU.hpp"
 #include <string>
+#include "CDROM.hpp"
 
 enum Port {
     MDECin = 0,
@@ -134,6 +135,7 @@ union DMAInterrupt {
 class DMA {
     std::unique_ptr<RAM> &ram;
     std::unique_ptr<GPU> &gpu;
+    std::unique_ptr<CDROM> &cdrom;
 
     DMAControl control;
     DMAInterrupt interrupt;
@@ -152,7 +154,7 @@ class DMA {
     void executeBlock(Port port, Channel& channel);
     void executeLinkedList(Port port, Channel& channel);
 public:
-    DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu);
+    DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom);
     ~DMA();
 
     template <typename T>

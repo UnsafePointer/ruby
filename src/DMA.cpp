@@ -32,7 +32,7 @@ string portDescription(Port port) {
     }
 }
 
-DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu) : ram(ram), gpu(gpu) {
+DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : ram(ram), gpu(gpu), cdrom(cdrom) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel();
     }
@@ -157,6 +157,11 @@ void DMA::executeBlock(Port port, Channel& channel) {
                                 break;
                             }
                         }
+                        break;
+                    }
+                    case Port::CDROMP: {
+                        uint32_t value = cdrom->loadWordFromReadBuffer();
+                        ram->store<uint32_t>(currentAddress, value);
                         break;
                     }
                     default: {

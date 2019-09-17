@@ -390,3 +390,38 @@ void CDROM::loadCDROMImageFile(string filePath) {
     }
     image.open(filePath);
 }
+
+uint8_t CDROM::loadByteFromReadBuffer() {
+    if (readBuffer.empty()) {
+        return 0;
+    }
+
+    /*
+    The PSX hardware allows to read 800h-byte or 924h-byte sectors, indexed as [000h..7FFh] or
+    [000h..923h], when trying to read further bytes, then the PSX will repeat the byte at
+    index [800h-8] or [924h-4] as padding value.
+    */
+    CDROMModeSectorSize sectorSize = mode.sectorSize();
+    if (sectorSize == DataOnly800h && readBufferIndex >= 0x800) {
+        return readBuffer[0x800 - 0x8];
+    } else if (sectorSize == WholeSector924h && readBufferIndex >= 0x924) {
+        return readBuffer[0x924 - 0x4];
+    }
+
+    uint8_t value = readBuffer[readBufferIndex];
+    readBufferIndex++;
+    if (isReadBufferEmpty()) {
+        status.dataFifoEmpty = 0;
+    }
+
+    return value;
+}
+
+uint32_t CDROM::loadWordFromReadBuffer() {
+    uint32_t value = 0;
+    for (uint8_t i = 0; i < sizeof(uint32_t); i++) {
+        uint8_t byte = loadByteFromReadBuffer();
+        value |= (((uint32_t)byte) << (i * 8));
+    }
+    return value;
+}
