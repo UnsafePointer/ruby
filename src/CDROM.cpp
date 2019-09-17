@@ -98,6 +98,10 @@ void CDROM::execute(uint8_t value) {
             operationReadN();
             break;
         }
+        case 0x09: {
+            operationPause();
+            break;
+        }
         case 0x0E: {
             operationSetmode();
             break;
@@ -374,6 +378,18 @@ void CDROM::operationReadN() {
     interruptQueue.push(INT3);
 
     logMessage("CMD ReadN");
+}
+
+/*
+Pause - Command 09h --> INT3(stat) --> INT2(stat)
+*/
+void CDROM::operationPause() {
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    statusCode.setState(CDROMState::Unknown);
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT2);
 }
 
 void CDROM::logMessage(std::string message) const {
