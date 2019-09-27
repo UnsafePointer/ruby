@@ -100,3 +100,6 @@ build/
 
 # configuration
 config.yaml
+
+# gprof output
+ruby_exec_profile.txt
