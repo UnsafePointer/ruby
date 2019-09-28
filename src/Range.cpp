@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Range::Range(uint32_t start, uint32_t length) : start(start), length(length) {
+Range::Range(RangeIdentifier identifier, uint32_t start, uint32_t length) : identifier(identifier), start(start), length(length) {
 
 }
 
@@ -10,11 +10,17 @@ Range::~Range() {
 
 }
 
-std::optional<uint32_t> Range::contains(uint32_t address) const {
+int32_t Range::contains(uint32_t address) const {
     if (address >= start && address < (start + length)) {
-        uint32_t offset = address - start;
-        return { offset };
+        return 0;
+    } else if (address < start) {
+        return -1;
     } else {
-        return nullopt;
+        return 1;
     }
  }
+
+ uint32_t Range::offset(uint32_t address) const {
+     return address - start;
+ }
+

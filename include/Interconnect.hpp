@@ -14,24 +14,6 @@
 #include "Timer.hpp"
 #include "Controller.hpp"
 
-const Range ramRange = Range(0x00000000, RAM_SIZE);
-const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
-const Range biosRange = Range(0x1fc00000, 512 * 1024);
-const Range memoryControlRange = Range(0x1f801000, 36);
-const Range ramSizeRange = Range(0x1f801060, 4);
-const Range cacheControlRange = Range(0xfffe0130, 4);
-const Range soundProcessingUnitRange = Range(0x1f801c00, 640);
-const Range expansion2Range = Range(0x1f802000, 66);
-const Range expansion1Range = Range(0x1f000000, EXPANSION1_SIZE);
-const Range interruptRequestControlRange = Range(0x1f801070, 8);
-const Range timer0RegisterRange = Range(0x1f801100, 16);
-const Range timer1RegisterRange = Range(0x1f801110, 16);
-const Range timer2RegisterRange = Range(0x1f801120, 16);
-const Range dmaRegisterRange = Range(0x1f801080, 0x80);
-const Range gpuRegisterRange = Range(0x1f801810, 8);
-const Range cdromRegisterRange = Range(0x1f801800, 4);
-const Range controllerRegisterRange = Range(0x1f801040, 16);
-
 /*
 Memory Map
 KUSEG     KSEG0     KSEG1
@@ -60,7 +42,9 @@ class Interconnect {
     std::unique_ptr<Timer1> &timer1;
     std::unique_ptr<Timer2> &timer2;
     std::unique_ptr<Controller> &controller;
+    std::vector<Range> ranges;
     uint32_t maskRegion(uint32_t address) const;
+    std::optional<Range> findRangeForAddress(uint32_t address, std::vector<Range> const *ranges, uint32_t bottom, uint32_t top) const;
 public:
     Interconnect(std::unique_ptr<COP0> &cop0, std::unique_ptr<BIOS> &bios, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<DMA> &dma, std::unique_ptr<Scratchpad> &scratchpad, std::unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller);
     ~Interconnect();
