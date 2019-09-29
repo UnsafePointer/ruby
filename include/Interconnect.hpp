@@ -13,6 +13,7 @@
 #include "Expansion1.hpp"
 #include "Timer.hpp"
 #include "Controller.hpp"
+#include <array>
 
 /*
 Memory Map
@@ -42,9 +43,9 @@ class Interconnect {
     std::unique_ptr<Timer1> &timer1;
     std::unique_ptr<Timer2> &timer2;
     std::unique_ptr<Controller> &controller;
-    std::vector<Range> ranges;
+    std::array<Range, 17> ranges;
     uint32_t maskRegion(uint32_t address) const;
-    std::optional<Range> findRangeForAddress(uint32_t address, std::vector<Range> const *ranges, uint32_t bottom, uint32_t top) const;
+    std::optional<Range> findRangeForAddress(uint32_t address, std::array<Range, 17> const *ranges, uint32_t bottom, uint32_t top) const;
 public:
     Interconnect(std::unique_ptr<COP0> &cop0, std::unique_ptr<BIOS> &bios, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<DMA> &dma, std::unique_ptr<Scratchpad> &scratchpad, std::unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller);
     ~Interconnect();
