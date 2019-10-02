@@ -66,5 +66,6 @@ int main(int argc, char* argv[]) {
             initTicks = SDL_GetTicks();
         }
     }
+    ConfigurationManager::removeInstance();
     EmulatorRunner::removeInstance();
 }

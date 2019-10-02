@@ -8,8 +8,10 @@ class ConfigurationManager {
     Yaml::Node configuration;
 
     ConfigurationManager();
+    ~ConfigurationManager();
 public:
     static ConfigurationManager* getInstance();
+    static void removeInstance();
 
     void setupConfigurationFile();
     void loadConfiguration();

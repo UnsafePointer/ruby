@@ -13,6 +13,8 @@ const string configurationFile = "config.yaml";
 
 ConfigurationManager::ConfigurationManager() : filePath(), configuration() {}
 
+ConfigurationManager::~ConfigurationManager() {}
+
 ConfigurationManager* ConfigurationManager::instance = nullptr;
 
 ConfigurationManager* ConfigurationManager::getInstance() {
@@ -20,6 +22,11 @@ ConfigurationManager* ConfigurationManager::getInstance() {
         instance = new ConfigurationManager();
     }
     return instance;
+}
+
+void ConfigurationManager::removeInstance() {
+    delete instance;
+    instance == nullptr;
 }
 
 void ConfigurationManager::setupConfigurationFile() {
