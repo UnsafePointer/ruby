@@ -8,6 +8,8 @@ using namespace std;
 
 EmulatorRunner::EmulatorRunner() : emulator(nullptr), runTests(false), exeFile(), binFile(), header() {}
 
+EmulatorRunner::~EmulatorRunner() {}
+
 EmulatorRunner* EmulatorRunner::instance = nullptr;
 
 EmulatorRunner* EmulatorRunner::getInstance() {
@@ -15,6 +17,11 @@ EmulatorRunner* EmulatorRunner::getInstance() {
         instance = new EmulatorRunner();
     }
     return instance;
+}
+
+void EmulatorRunner::removeInstance() {
+    delete instance;
+    instance = nullptr;
 }
 
 bool EmulatorRunner::checkOption(char** begin, char** end, const std::string &option) {

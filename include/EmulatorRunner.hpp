@@ -49,8 +49,10 @@ class EmulatorRunner {
     char* getOptionValue(char** begin, char** end, const std::string &option);
 
     EmulatorRunner();
+    ~EmulatorRunner();
 public:
     static EmulatorRunner* getInstance();
+    static void removeInstance();
 
     void configure(int argc, char* argv[]);
     void setEmulator(Emulator *emulator);
