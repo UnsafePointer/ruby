@@ -5,6 +5,7 @@
 using namespace std;
 
 Logger::Logger() : shouldTrace(false), stream(), bufferSize(0) {}
+Logger::~Logger() {}
 
 Logger* Logger::instance = nullptr;
 
@@ -13,6 +14,11 @@ Logger* Logger::getInstance() {
         instance = new Logger();
     }
     return instance;
+}
+
+void Logger::removeInstance() {
+    delete instance;
+    instance = nullptr;
 }
 
 void Logger::configure(bool enableTrace, bool enableVerbose) {

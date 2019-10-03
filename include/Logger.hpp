@@ -11,8 +11,10 @@ class Logger {
     uint16_t bufferSize;
     void traceMessage(std::string message);
     Logger();
+    ~Logger();
 public:
     static Logger* getInstance();
+    static void removeInstance();
     void configure(bool enableTrace, bool enableVerbose);
     void setupTraceFile();
     void logMessage(std::string message);
