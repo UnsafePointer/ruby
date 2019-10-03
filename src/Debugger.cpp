@@ -11,6 +11,8 @@ using namespace std;
 Debugger::Debugger() : breakpoints(), loadWatchpoints(), storeWatchpoints(), stopped(false), attached(false) {
 }
 
+Debugger::~Debugger() {}
+
 Debugger* Debugger::instance = nullptr;
 
 Debugger* Debugger::getInstance() {
@@ -18,6 +20,11 @@ Debugger* Debugger::getInstance() {
         instance = new Debugger();
     }
     return instance;
+}
+
+void Debugger::removeInstance() {
+    delete instance;
+    instance = nullptr;
 }
 
 void Debugger::setCPU(CPU *cpu) {

@@ -17,8 +17,10 @@ class Debugger {
     bool attached;
     bool step;
     Debugger();
+    ~Debugger();
 public:
     static Debugger* getInstance();
+    static void removeInstance();
 
     void setCPU(CPU *cpu);
     CPU* getCPU();
