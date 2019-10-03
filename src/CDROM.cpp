@@ -318,6 +318,8 @@ void CDROM::operationGetID() {
     pushResponse('E');
     pushResponse('A');
     interruptQueue.push(INT2);
+
+    logMessage("CMD GetID");
 }
 
 /*
@@ -390,6 +392,8 @@ void CDROM::operationPause() {
     statusCode.setState(CDROMState::Unknown);
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
+
+    logMessage("CMD Pause");
 }
 
 void CDROM::logMessage(std::string message) const {
