@@ -160,8 +160,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                     case Port::CDROMP: {
-                        uint32_t value = cdrom->loadWordFromReadBuffer();
-                        ram->store<uint32_t>(currentAddress, value);
+                        source = cdrom->loadWordFromReadBuffer();
                         break;
                     }
                     default: {
