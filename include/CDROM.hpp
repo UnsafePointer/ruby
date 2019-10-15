@@ -111,11 +111,11 @@ union CDROMStatusCode {
         spindleMotor = true;
         seekError = false;
         getIdError = false;
+        _value &= ~(0xE0); // Always clear status: read, seek and play
         if (state == Unknown) {
             return;
         }
-        uint8_t mask = 1 << state;
-        _value |= mask;
+        _value |= (1 << state);
     }
 
     void setShellOpen(bool open) {
