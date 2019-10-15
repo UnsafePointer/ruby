@@ -426,10 +426,10 @@ void CDROM::logMessage(std::string message) const {
 }
 
 void CDROM::loadCDROMImageFile(string filePath) {
-    statusCode.setShellOpen(false);
     if (filePath.empty()) {
         return;
     }
+    statusCode.setShellOpen(false);
     image.open(filePath);
 }
 
