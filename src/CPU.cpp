@@ -1369,7 +1369,7 @@ void CPU::operationLoadWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationLoadWordCoprocessor2(Instruction instruction) {
-    printError("Unhandled GTE LWC: %#x", instruction.value);
+    printWarning("Unhandled GTE LWC: %#x", instruction.value);
 }
 
 void CPU::operationLoadWordCoprocessor3(Instruction instruction) {
@@ -1385,7 +1385,7 @@ void CPU::operationStoreWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
-    printError("Unhandled GTE SWC: %#x", instruction.value);
+    printWarning("Unhandled GTE SWC: %#x", instruction.value);
 }
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
