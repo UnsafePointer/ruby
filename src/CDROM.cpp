@@ -74,10 +74,10 @@ void CDROM::setRequestRegister(uint8_t value) {
                 copy(&currentSector.header[0], &currentSector.ECC[276], back_inserter(readBuffer));
             }
             readBufferIndex = 0;
-            status.dataFifoEmpty = 1;
+            status.setDataFifoEmpty(DataFifoNotEmpty);
         } else {
             readBufferIndex = 0;
-            status.dataFifoEmpty = 0;
+            status.setDataFifoEmpty(DataFifoEmpty);
         }
     }
 }
@@ -211,9 +211,9 @@ bool CDROM::isReadBufferEmpty() {
 }
 
 void CDROM::updateStatusRegister() {
-    status.parameterFifoEmpty = parameters.empty();
-    status.parameterFifoFull = !(parameters.size() >= 16);
-    status.responseFifoEmpty = !response.empty();
+    status.setParameterFifoEmpty(parameters.empty() ? ParameterFifoEmpty : ParameterFifoNotEmpty);
+    status.setParameterFifoFull(parameters.size() >= 16 ? ParameterFifoFull : ParameterFifoNotFull);
+    status.setResponseFifoEmpty(response.empty() ? ResponseFifoEmpty : ResponseFifoNotEmpty);
 }
 
 /*
@@ -430,9 +430,8 @@ uint8_t CDROM::loadByteFromReadBuffer() {
 
     uint8_t value = readBuffer[readBufferIndex];
     readBufferIndex++;
-    if (isReadBufferEmpty()) {
-        status.dataFifoEmpty = 0;
-    }
+
+    status.setDataFifoEmpty(isReadBufferEmpty() ? DataFifoEmpty : DataFifoNotEmpty);
 
     return value;
 }

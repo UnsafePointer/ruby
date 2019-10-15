@@ -29,6 +29,36 @@ enum CDROMInterruptNumber : uint8_t {
     INT7 = 7,
 };
 
+enum XAADCPMFifoStatus : uint8_t {
+    XAADCPMFifoEmpty = 0,
+    XAADCPMFifoNotEmpty = 1,
+};
+
+enum ParameterFifoEmptyStatus : uint8_t {
+    ParameterFifoNotEmpty = 0,
+    ParameterFifoEmpty = 1,
+};
+
+enum ParameterFifoFullStatus : uint8_t {
+    ParameterFifoFull = 0,
+    ParameterFifoNotFull = 1,
+};
+
+enum ResponseFifoStatus : uint8_t {
+    ResponseFifoEmpty = 0,
+    ResponseFifoNotEmpty = 1,
+};
+
+enum DataFifoStatus : uint8_t {
+    DataFifoEmpty = 0,
+    DataFifoNotEmpty = 1,
+};
+
+enum TransmissionStatus : uint8_t {
+    TransmissionNotBusy = 0,
+    TransmissionBusy = 1,
+};
+
 /*
 1F801800h - Index/Status Register (Bit0-1 R/W) (Bit2-7 Read Only)
 0-1 Index   Port 1F801801h-1F801803h index (0..3 = Index0..Index3)   (R/W)
@@ -42,17 +72,33 @@ enum CDROMInterruptNumber : uint8_t {
 union CDROMStatus {
     struct {
         uint8_t index : 2;
-        uint8_t XAADCPMFifoEmpty : 1;
-        uint8_t parameterFifoEmpty : 1;
-        uint8_t parameterFifoFull : 1;
-        uint8_t responseFifoEmpty : 1;
-        uint8_t dataFifoEmpty : 1;
-        uint8_t transmissionBusy : 1;
+        uint8_t _XAADCPMFifoEmpty : 1;
+        uint8_t _parameterFifoEmpty : 1;
+        uint8_t _parameterFifoFull : 1;
+        uint8_t _responseFifoEmpty : 1;
+        uint8_t _dataFifoEmpty : 1;
+        uint8_t _transmissionBusy : 1;
     };
 
     uint8_t _value;
 
     CDROMStatus() : _value(0x18) {}
+
+    XAADCPMFifoStatus XAADCPMFifoEmpty() { return XAADCPMFifoStatus(_XAADCPMFifoEmpty); }
+
+    ParameterFifoEmptyStatus parameterFifoEmpty() { return ParameterFifoEmptyStatus(_parameterFifoEmpty); }
+    void setParameterFifoEmpty(ParameterFifoEmptyStatus status) { _parameterFifoEmpty = status; }
+
+    ParameterFifoFullStatus parameterFifoFull() { return ParameterFifoFullStatus(_parameterFifoFull); }
+    void setParameterFifoFull(ParameterFifoFullStatus status) { _parameterFifoFull = status; }
+
+    ResponseFifoStatus responseFifoEmpty() { return ResponseFifoStatus(_responseFifoEmpty); }
+    void setResponseFifoEmpty(ResponseFifoStatus status) { _responseFifoEmpty = status; }
+
+    DataFifoStatus dataFifoEmpty() { return DataFifoStatus(_dataFifoEmpty); }
+    void setDataFifoEmpty(DataFifoStatus status) { _dataFifoEmpty = status; }
+
+    TransmissionStatus transmissionBusy() { return TransmissionStatus(_transmissionBusy); }
 };
 
 /*
