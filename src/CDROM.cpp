@@ -65,6 +65,7 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
 void CDROM::setRequestRegister(uint8_t value) {
     logMessage(format("REQ [W]: %#x", value));
     if (value & 0x80) {
+        readBuffer.clear();
         if (isReadBufferEmpty()) {
             CDROMModeSectorSize sectorSize = mode.sectorSize();
             if (sectorSize == DataOnly800h) {
@@ -75,7 +76,6 @@ void CDROM::setRequestRegister(uint8_t value) {
             readBufferIndex = 0;
             status.dataFifoEmpty = 1;
         } else {
-            readBuffer.clear();
             readBufferIndex = 0;
             status.dataFifoEmpty = 0;
         }
