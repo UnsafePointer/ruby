@@ -102,6 +102,10 @@ void CDROM::execute(uint8_t value) {
             operationPause();
             break;
         }
+        case 0x0A: {
+            operationInit();
+            break;
+        }
         case 0x0E: {
             operationSetmode();
             break;
@@ -394,6 +398,24 @@ void CDROM::operationPause() {
     interruptQueue.push(INT2);
 
     logMessage("CMD Pause");
+}
+
+/*
+Init - Command 0Ah --> INT3(stat) --> INT2(stat)
+*/
+void CDROM::operationInit() {
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    statusCode.spindleMotor = 1;
+    statusCode.setState(CDROMState::Unknown);
+
+    mode._value = 0x0;
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT2);
+
+    logMessage("CMD Init");
 }
 
 void CDROM::logMessage(std::string message) const {
