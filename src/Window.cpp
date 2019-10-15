@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include "Logger.hpp"
 
 using namespace std;
 
@@ -38,6 +39,10 @@ void Window::handleSDLEvent(SDL_Event event) {
             hidden = !hidden;
             if (hidden && !mainWindow) {
                 SDL_HideWindow(window);
+            }
+            if (mainWindow) {
+                Logger *logger = Logger::getInstance();
+                logger->flush();
             }
             break;
         }

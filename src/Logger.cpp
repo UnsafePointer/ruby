@@ -41,7 +41,7 @@ void Logger::traceMessage(std::string message) {
         return;
     }
     this->stream << message << endl;
-    this->bufferSize++;
+    this->bufferSize += message.length();
     if (bufferSize < 8192) {
         return;
     }
