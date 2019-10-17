@@ -10,7 +10,7 @@ const uint32_t BIOS_C_FUNCTIONS_STEP = 0xC0;
 
 using namespace std;
 
-BIOS::BIOS() : data() {
+BIOS::BIOS(LogLevel logLevel) : data(), logger(logLevel) {
 
 }
 
@@ -24,7 +24,7 @@ void BIOS::loadBin(const string& path) {
 
 std::string BIOS::formatBIOSFunction(std::string function, uint argc, std::array<uint32_t, 4> subroutineArguments) {
     if (argc > 4) {
-        printError("BIOS formatting incorrect function with argc: %d", argc);
+        logger.logError(format("BIOS formatting incorrect function with argc: %d", argc));
     }
 
     stringstream ss;
@@ -1019,18 +1019,31 @@ optional<string> BIOS::checkCFunctions(uint32_t r9, array<uint32_t, 4> subroutin
 }
 
 optional<string> BIOS::checkFunctions(uint32_t programCounter, uint32_t r9, array<uint32_t, 4> subroutineArguments) {
+    optional<string> result;
     switch (programCounter) {
         case BIOS_A_FUNCTIONS_STEP: {
-            return checkAFunctions(r9, subroutineArguments);
+            result = checkAFunctions(r9, subroutineArguments);
+            break;
         }
         case BIOS_B_FUNCTIONS_STEP: {
-            return checkBFunctions(r9, subroutineArguments);
+            result = checkBFunctions(r9, subroutineArguments);
+            break;
         }
         case BIOS_C_FUNCTIONS_STEP: {
-            return checkCFunctions(r9, subroutineArguments);
+            result = checkCFunctions(r9, subroutineArguments);
+            break;
         }
         default: {
-            return { nullopt };
+            result = { nullopt };
         }
     }
+    if (!result) {
+        return result;
+    }
+    string functionCallLog = (*result);
+    bool functionCallLogIsRFE = functionCallLog.find("ReturnFromException()") == 0;
+    if (functionCallLogIsRFE) {
+        return result;
+    }
+    logger.logMessage(format("  BIOS: %s", functionCallLog.c_str()));
 }

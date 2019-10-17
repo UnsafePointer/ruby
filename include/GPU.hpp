@@ -6,6 +6,7 @@
 #include "Renderer.hpp"
 #include "GPUImageBuffer.hpp"
 #include "Window.hpp"
+#include "Logger.hpp"
 
 enum TexturePageColors {
     T4Bit = 0,
@@ -78,6 +79,7 @@ enum GP0Mode {
 31    Drawing even/odd lines in interlace mode (0=Even or Vblank, 1=Odd)
 */
 class GPU {
+    Logger logger;
     uint8_t texturePageBaseX;
     uint8_t texturePageBaseY;
     uint8_t semiTransparency;
@@ -250,7 +252,7 @@ GP1(07h) - Vertical Display range (on Screen)
 
     void executeGp1(uint32_t value);
 public:
-    GPU(std::unique_ptr<Window> &mainWindow);
+    GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow);
     ~GPU();
     template <typename T>
     inline T load(uint32_t offset) const;

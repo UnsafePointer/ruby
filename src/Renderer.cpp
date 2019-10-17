@@ -11,7 +11,7 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : mode(GL_TRIANGLES) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog), mode(GL_TRIANGLES) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -65,7 +65,7 @@ void Renderer::checkForceDraw(uint verticesToRender, GLenum newMode) {
 void Renderer::pushLine(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 2) {
-        printError("Unhandled line with %d vertices", size);
+        logger.logError(format("Unhandled line with %d vertices", size));
         return;
     }
     checkForceDraw(size, GL_LINES);
@@ -77,7 +77,7 @@ void Renderer::pushLine(std::vector<Vertex> vertices) {
 void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 3 || size > 4) {
-        printError("Unhandled polygon with %d vertices", size);
+        logger.logError(format("Unhandled polygon with %d vertices", size));
         return;
     }
     checkForceDraw(size, GL_TRIANGLES);

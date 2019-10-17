@@ -6,6 +6,7 @@
 #include "GPU.hpp"
 #include <string>
 #include "CDROM.hpp"
+#include "Logger.hpp"
 
 enum Port {
     MDECin = 0,
@@ -133,6 +134,7 @@ union DMAInterrupt {
 // 1F8010F0h DPCR - DMA Control register
 // 1F8010F4h DICR - DMA Interrupt register
 class DMA {
+    Logger logger;
     std::unique_ptr<RAM> &ram;
     std::unique_ptr<GPU> &gpu;
     std::unique_ptr<CDROM> &cdrom;

@@ -20,9 +20,6 @@ int main(int argc, char* argv[]) {
     emulatorRunner->setEmulator(emulator.get());
     Debugger *debugger = Debugger::getInstance();
     debugger->setCPU(emulator->getCPU());
-    Logger *logger = Logger::getInstance();
-    logger->configure(configurationManager->shouldTraceLogs(), configurationManager->shouldLogVerbose());
-    logger->setupTraceFile();
     bool quit = false;
     uint32_t initTicks = SDL_GetTicks();
     float interval = 1000;

@@ -1,6 +1,7 @@
 #include "Texture.hpp"
 #include "RendererDebugger.hpp"
 #include "Output.hpp"
+#include <iostream>
 
 using namespace std;
 
@@ -33,7 +34,8 @@ void Texture::bind(GLenum texture) {
 
 void Texture::setImageFromBuffer(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     if (!imageBuffer->isValid()) {
-        printError("Invalid image buffer");
+        cout << "Invalid image buffer" << endl;
+        exit(1);
     }
     uint16_t x, y, width, height;
     tie(x, y) = imageBuffer->destination();

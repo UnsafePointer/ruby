@@ -8,7 +8,8 @@
 
 using namespace std;
 
-CPU::CPU(unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls) : programCounter(0xbfc00000),
+CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls) : logger(logLevel),
+             programCounter(0xbfc00000),
              jumpDestination(0),
              isBranching(false),
              runningException(false),
@@ -84,16 +85,16 @@ array<uint32_t, 4> CPU::getSubroutineArguments() {
 }
 
 void CPU::printAllRegisters() {
-    printWarning("CPU Registers: ");
+    logger.logDebug("CPU Registers: ");
     for (uint i = 0; i < 32; i++) {
-        printWarning("r%02d: %#x", i, registers[i]);
+        logger.logDebug(format("r%02d: %#x", i, registers[i]));
     }
-    printWarning("status: %#x", getStatusRegister());
-    printWarning("lo: %#x", lowRegister);
-    printWarning("hi: %#x", highRegister);
-    printWarning("badvaddr: %#x", getReturnAddressFromTrap());
-    printWarning("cause: %#x", getCauseRegister());
-    printWarning("pc: %#x", programCounter);
+    logger.logDebug(format("status: %#x", getStatusRegister()));
+    logger.logDebug(format("lo: %#x", lowRegister));
+    logger.logDebug(format("hi: %#x", highRegister));
+    logger.logDebug(format("badvaddr: %#x", getReturnAddressFromTrap()));
+    logger.logDebug(format("cause: %#x", getCauseRegister()));
+    logger.logDebug(format("pc: %#x", programCounter));
 }
 
 bool CPU::executeNextInstruction() {
@@ -546,7 +547,7 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
 
 void CPU::operationSystemCall(Instruction instruction) {
     if (logBiosFunctionCalls) {
-        printWarning("  SYSCALL: %#x", registers[4]);
+        logger.logWarning(format("  SYSCALL: %#x", registers[4]));
     }
     triggerException(ExceptionType::SysCall);
 }
@@ -936,7 +937,7 @@ void CPU::operationCoprocessor0(Instruction instruction) {
             break;
         }
         default: {
-            printError("Unhandled coprocessor0 instruction %#x", instruction.value);
+            logger.logError(format("Unhandled coprocessor0 instruction %#x", instruction.value));
         }
     }
 }
@@ -992,7 +993,7 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
             break;
         }
         default: {
-            printError("Unhandled MFC0 at index %#x", copRegisterIndex);
+            logger.logError(format("Unhandled MFC0 at index %#x", copRegisterIndex));
         }
     }
     loadDelaySlot(cpuRegisterIndex, value);
@@ -1042,14 +1043,14 @@ void CPU::operationMoveToCoprocessor0(Instruction instruction) {
             break;
         }
         default: {
-            printError("Unhandled MTC0 at index %d", copRegisterIndex);
+            logger.logError(format("Unhandled MTC0 at index %d", copRegisterIndex));
         }
     }
 }
 
 void CPU::operationReturnFromException(Instruction instruction) {
     if (instruction.subfunct != 0b010000) {
-        printError("Unhandled cop0 instruction (0b010000) with last 6 bits: %#x", instruction.subfunct);
+        logger.logError(format("Unhandled cop0 instruction (0b010000) with last 6 bits: %#x", instruction.subfunct));
     }
     cop0->status.currentInterruptEnable = cop0->status.previousInterruptEnable;
     cop0->status._currentOperationMode = cop0->status._previousOperationMode;
@@ -1063,7 +1064,7 @@ void CPU::operationCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationCoprocessor2(Instruction instruction) {
-    printWarning("Unhandled Geometry Transformation Engine instruction: %#x", instruction.value);
+    logger.logWarning(format("Unhandled Geometry Transformation Engine instruction: %#x", instruction.value));
 }
 
 void CPU::operationCoprocessor3(Instruction instruction) {
@@ -1369,7 +1370,7 @@ void CPU::operationLoadWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationLoadWordCoprocessor2(Instruction instruction) {
-    printWarning("Unhandled GTE LWC: %#x", instruction.value);
+    logger.logWarning(format("Unhandled GTE LWC: %#x", instruction.value));
 }
 
 void CPU::operationLoadWordCoprocessor3(Instruction instruction) {
@@ -1385,7 +1386,7 @@ void CPU::operationStoreWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
-    printWarning("Unhandled GTE SWC: %#x", instruction.value);
+    logger.logWarning(format("Unhandled GTE SWC: %#x", instruction.value));
 }
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {

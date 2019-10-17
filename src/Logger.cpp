@@ -1,24 +1,32 @@
 #include "Logger.hpp"
 #include <fstream>
 #include <iostream>
+#include "ConfigurationManager.hpp"
 
 using namespace std;
 
-Logger::Logger() : shouldTrace(false), stream(), bufferSize(0) {}
+const uint32_t BUFFER_SIZE_LIMIT = 8192;
 
-Logger* Logger::instance = nullptr;
+std::stringstream stream = std::stringstream();
+uint16_t bufferSize = 0;
 
-Logger* Logger::getInstance() {
-    if (instance == nullptr) {
-        instance = new Logger();
+LogLevel logLevelWithValue(std::string value) {
+    if (value.compare("WAR") == 0) {
+        return LogLevel::Warning;
+    } else if (value.compare("MSG") == 0) {
+        return LogLevel::Message;
+    } else if (value.compare("NOLOG") == 0) {
+        return LogLevel::NoLog;
     }
-    return instance;
+    return LogLevel::NoLog;
 }
 
-void Logger::configure(bool enableTrace, bool enableVerbose) {
-    shouldTrace = enableTrace;
-    shouldLogVerbose = enableVerbose;
+Logger::Logger(LogLevel level) : level(level) {
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    shouldTrace = configurationManager->shouldTraceLogs();
 }
+
+Logger::Logger(LogLevel level, bool shouldTrace) : level(level), shouldTrace(shouldTrace) {}
 
 void Logger::setupTraceFile() {
     if (!shouldTrace) {
@@ -27,42 +35,51 @@ void Logger::setupTraceFile() {
     remove("ruby.log");
 }
 
-void Logger::flush() {
+void Logger::flush() const {
     ofstream logfile = ofstream();
     logfile.open("ruby.log", ios::out | ios::app);
-    logfile << this->stream.str();
+    logfile << stream.str();
     logfile.close();
-    this->stream.str(string());
-    this->bufferSize = 0;
+    stream.str(string());
+    bufferSize = 0;
 }
 
-void Logger::traceMessage(std::string message) {
+void Logger::traceMessage(std::string message) const {
     if (!shouldTrace) {
         return;
     }
-    this->stream << message << endl;
-    this->bufferSize += message.length();
-    if (bufferSize < 8192) {
+    stream << message << endl;
+    bufferSize += message.length();
+    if (bufferSize < BUFFER_SIZE_LIMIT) {
         return;
     }
     flush();
 }
 
-void Logger::logMessage(std::string message) {
-    if (!shouldLogVerbose) {
+void Logger::logDebug(std::string message) const {
+    cout << message << endl;
+    traceMessage(message);
+}
+
+void Logger::logMessage(std::string message) const {
+    if (level < LogLevel::Message) {
         return;
     }
     cout << message << endl;
     traceMessage(message);
 }
 
-void Logger::logWarning(std::string message) {
+void Logger::logWarning(std::string message) const {
+    if (level < LogLevel::Warning) {
+        return;
+    }
     cout << message << endl;
     traceMessage(message);
 }
 
-void Logger::logError(std::string message) {
+void Logger::logError(std::string message) const {
     cout << message << endl;
     traceMessage(message);
     flush();
+    exit(1);
 }

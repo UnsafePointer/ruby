@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <cstdint>
+#include "Logger.hpp"
 
 const uint32_t SecondsPerMinute = 60;
 const uint32_t SectorsPerSecond = 75;
@@ -28,6 +29,7 @@ struct CDSector {
 
 class CDImage {
     std::ifstream file;
+    Logger logger;
 public:
     CDImage();
     ~CDImage();

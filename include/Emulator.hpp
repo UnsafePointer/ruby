@@ -18,8 +18,10 @@
 #include <vector>
 #include "Controller.hpp"
 #include <string>
+#include "Logger.hpp"
 
 class Emulator {
+    Logger logger;
     std::unique_ptr<Window> mainWindow;
     std::unique_ptr<Window> debugWindow;
 

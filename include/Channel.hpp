@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <optional>
+#include "Logger.hpp"
 
 enum Direction {
     ToRam = 0,
@@ -103,6 +104,7 @@ class Channel {
     ChannelControl control;
     ChannelBaseAddress baseAddress;
     ChannelBlockControl blockControl;
+    Logger logger;
 public:
     Channel();
     ~Channel();

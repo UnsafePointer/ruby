@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "Logger.hpp"
 
 enum Timer0SyncMode {
     PauseDuringHblank = 0,
@@ -158,6 +159,7 @@ union TimerCounterTarget {
 };
 
 class Timer {
+    Logger logger;
 protected:
     uint8_t identity;
     TimerCounterValue counterValue;

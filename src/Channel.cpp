@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Channel::Channel() {
+Channel::Channel() : control(), baseAddress(), blockControl(), logger(LogLevel::NoLog) {
 
 }
 
@@ -91,7 +91,7 @@ optional<uint32_t> Channel::transferSize() const {
             return { blockControl.blockSize * blockControl.blockCount };
         }
         default: {
-            printError("Unknown DMA sync mode");
+            logger.logError("Unknown DMA sync mode");
             return {0};
         }
     }

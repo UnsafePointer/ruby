@@ -3,8 +3,10 @@
 #include <string>
 #include <cstdint>
 #include <Vertex.hpp>
+#include "Logger.hpp"
 
 class Window {
+    Logger logger;
     bool mainWindow;
     std::string title;
     uint32_t width;

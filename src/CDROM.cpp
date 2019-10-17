@@ -1,6 +1,7 @@
 #include "CDROM.hpp"
 #include "Output.hpp"
 #include "Helpers.hpp"
+#include "ConfigurationManager.hpp"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ should be: SystemClock*930h/4/44100Hz for Single Speed (and half as much for Dou
 const uint32_t SystemClocksPerCDROMInt1SingleSpeed=2352;
 const uint32_t SystemClocksPerCDROMInt1DoubleSpeed=2352/2;
 
-CDROM::CDROM(unique_ptr<InterruptController> &interruptController, bool logActivity) : interruptController(interruptController), image(), logActivity(logActivity), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex() {
+CDROM::CDROM(LogLevel logLevel, unique_ptr<InterruptController> &interruptController) : logger(logLevel), interruptController(interruptController), image(), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex() {
 
 }
 
@@ -42,17 +43,17 @@ void CDROM::step() {
 }
 
 void CDROM::setStatusRegister(uint8_t value) {
-    logMessage(format("STATUS [W]: %#x", value));
+    logger.logMessage(format("STATUS [W]: %#x", value));
     status.index = value & 0x3;
 }
 
 void CDROM::setInterruptRegister(uint8_t value) {
-    logMessage(format("INTE [W]: %#x", value));
+    logger.logMessage(format("INTE [W]: %#x", value));
     interrupt.enable = value;
 }
 
 void CDROM::setInterruptFlagRegister(uint8_t value) {
-    logMessage(format("INTF [W]: %#x", value));
+    logger.logMessage(format("INTF [W]: %#x", value));
     if (value & 0x40) {
         clearParameters();
         updateStatusRegister();
@@ -63,7 +64,7 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
 }
 
 void CDROM::setRequestRegister(uint8_t value) {
-    logMessage(format("REQ [W]: %#x", value));
+    logger.logMessage(format("REQ [W]: %#x", value));
     if (value & 0x80) {
         readBuffer.clear();
         if (isReadBufferEmpty()) {
@@ -123,7 +124,7 @@ void CDROM::execute(uint8_t value) {
             break;
         }
         default: {
-            printError("Unhandled CDROM operation value: %#x", value);
+            logger.logError(format("Unhandled CDROM operation value: %#x", value));
         }
     }
     clearParameters();
@@ -131,7 +132,7 @@ void CDROM::execute(uint8_t value) {
 }
 
 uint8_t CDROM::getStatusRegister() const {
-    logMessage(format("STATUS [R]: %#x", status._value));
+    logger.logMessage(format("STATUS [R]: %#x", status._value));
     return status._value;
 }
 
@@ -140,7 +141,7 @@ uint8_t CDROM::getInterruptFlagRegister() const {
     if (!interruptQueue.empty()) {
         flags |= interruptQueue.front() & 0x7;
     }
-    logMessage(format("INTF [R]: %#x", flags));
+    logger.logMessage(format("INTF [R]: %#x", flags));
     return flags;
 }
 
@@ -151,12 +152,12 @@ uint8_t CDROM::getReponse() {
         response.pop();
         updateStatusRegister();
     }
-    logMessage(format("RESPONSE [R]: %#x", value));
+    logger.logMessage(format("RESPONSE [R]: %#x", value));
     return value;
 }
 
 uint8_t CDROM::getInterruptRegister() const {
-    logMessage(format("INTE [R]: %#x", interrupt.enable));
+    logger.logMessage(format("INTE [R]: %#x", interrupt.enable));
     return interrupt.enable;
 }
 
@@ -177,7 +178,7 @@ void CDROM::clearResponse() {
 
 void CDROM::pushParameter(uint8_t value) {
     if (parameters.size() >= 16) {
-        printError("Parameter FIFO full");
+        logger.logError("Parameter FIFO full");
     }
     parameters.push(value);
     updateStatusRegister();
@@ -185,7 +186,7 @@ void CDROM::pushParameter(uint8_t value) {
 
 void CDROM::pushResponse(uint8_t value) {
     if (response.size() >= 16) {
-        printError("Response FIFO full");
+        logger.logError("Response FIFO full");
     }
     response.push(value);
     updateStatusRegister();
@@ -280,17 +281,17 @@ void CDROM::operationTest() {
             break;
         }
         default: {
-            printError("Unhandled CDROM operation test with subfunction: %#x", subfunction);
+            logger.logError(format("Unhandled CDROM operation test with subfunction: %#x", subfunction));
         }
     }
-    logMessage(format("CMD Test [%#x]", subfunction));
+    logger.logMessage(format("CMD Test [%#x]", subfunction));
 }
 
 /*
 Getstat - Command 01h --> INT3(stat)
 */
 void CDROM::operationGetstat() {
-    logMessage("CMD Getstat");
+    logger.logMessage("CMD Getstat");
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 }
@@ -323,7 +324,7 @@ void CDROM::operationGetID() {
     pushResponse('A');
     interruptQueue.push(INT2);
 
-    logMessage("CMD GetID");
+    logger.logMessage("CMD GetID");
 }
 
 /*
@@ -339,7 +340,7 @@ void CDROM::operationSetloc() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
-    logMessage(format("CMD Setloc(%d, %d, %d)", minute, second, sector));
+    logger.logMessage(format("CMD Setloc(%d, %d, %d)", minute, second, sector));
 }
 
 /*
@@ -356,7 +357,7 @@ void CDROM::operationSeekL() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
 
-    logMessage("CMD SeekL");
+    logger.logMessage("CMD SeekL");
 }
 
 /*
@@ -369,7 +370,7 @@ void CDROM::operationSetmode() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
-    logMessage("CMD Setmode");
+    logger.logMessage("CMD Setmode");
 }
 
 /*
@@ -383,7 +384,7 @@ void CDROM::operationReadN() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
-    logMessage("CMD ReadN");
+    logger.logMessage("CMD ReadN");
 }
 
 /*
@@ -397,7 +398,7 @@ void CDROM::operationPause() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
 
-    logMessage("CMD Pause");
+    logger.logMessage("CMD Pause");
 }
 
 /*
@@ -415,14 +416,7 @@ void CDROM::operationInit() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
 
-    logMessage("CMD Init");
-}
-
-void CDROM::logMessage(std::string message) const {
-    if (!logActivity) {
-        return;
-    }
-    printWarning("  CD-ROM: %s", message.c_str());
+    logger.logMessage("CMD Init");
 }
 
 void CDROM::loadCDROMImageFile(string filePath) {

@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <memory>
 #include "COP0.hpp"
+#include "Logger.hpp"
 
 enum InterruptRequestNumber : uint16_t {
     VBLANK = 0,
@@ -57,6 +58,7 @@ Mask: Read/Write I_MASK (0=Disabled, 1=Enabled)
   16-31 Garbage
 */
 class InterruptController {
+    Logger logger;
     std::unique_ptr<COP0> &cop0;
 
     IRQ status;

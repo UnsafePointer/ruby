@@ -6,7 +6,7 @@
 
 using namespace std;
 
-EmulatorRunner::EmulatorRunner() : emulator(nullptr), runTests(false), exeFile(), binFile(), header() {}
+EmulatorRunner::EmulatorRunner() : logger(LogLevel::NoLog), emulator(nullptr), runTests(false), exeFile(), binFile(), header() {}
 
 EmulatorRunner* EmulatorRunner::instance = nullptr;
 
@@ -37,7 +37,7 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
     if (checkOption(argv, argv + argc, "--exe")) {
         char *path = getOptionValue(argv, argv + argc, "--exe");
         if (path == NULL) {
-            printError("Incorrect argument passed. See README.md for usage.");
+            logger.logError("Incorrect argument passed. See README.md for usage.");
         }
         runTests = true;
         exeFile = string(path);
@@ -46,13 +46,13 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
     if (checkOption(argv, argv + argc, "--bin")) {
         char *path = getOptionValue(argv, argv + argc, "--bin");
         if (path == NULL) {
-            printError("Incorrect argument passed. See README.md for usage.");
+            logger.logError("Incorrect argument passed. See README.md for usage.");
         }
         binFile = string(path);
         argumentFound = true;
     }
     if (!argumentFound) {
-        printError("Incorrect argument passed. See README.md for usage.");
+        logger.logError("Incorrect argument passed. See README.md for usage.");
     }
 }
 
@@ -64,7 +64,7 @@ void EmulatorRunner::setEmulator(Emulator *emulator) {
 void EmulatorRunner::readHeader() {
     ifstream file = ifstream(exeFile, ios::in|ios::binary|ios::ate);
     if (!file.is_open()) {
-        printError("Unable to tests.exe binary");
+        logger.logError("Unable to tests.exe binary");
     }
     file.seekg(0, ios::beg);
     file.read(reinterpret_cast<char *>(header), TEST_HEADER_SIZE);
@@ -118,12 +118,12 @@ void EmulatorRunner::setup() {
     readHeader();
     string identifier = id();
     if (identifier.compare("PS-X EXE") != 0) {
-        printError("Invalid identifier found in file header");
+        logger.logError("Invalid identifier found in file header");
     }
     uint32_t destinationAddress = this->destinationAddress();
     uint32_t fileSize = this->fileSize();
     if (fileSize % 0x800 != 0) {
-        printError("Invalid file size found in file header");
+        logger.logError("Invalid file size found in file header");
     }
     emulator->transferToRAM(exeFile, 0x800, fileSize, destinationAddress);
 

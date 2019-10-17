@@ -2,7 +2,7 @@
 
 using namespace std;
 
-InterruptController::InterruptController(unique_ptr<COP0> &cop0) : cop0(cop0), status(), mask() {
+InterruptController::InterruptController(unique_ptr<COP0> &cop0) : logger(LogLevel::NoLog), cop0(cop0), status(), mask() {
 
 }
 

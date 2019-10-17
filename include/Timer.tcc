@@ -16,7 +16,7 @@ inline T Timer::load(uint32_t offset) {
             return counterTargetRegister();
         }
         default: {
-            printError("Unhandled Timer load at offset: %#x", offset);
+            logger.logError(format("Unhandled Timer load at offset: %#x", offset));
             return 0;
         }
     }
@@ -40,7 +40,7 @@ inline void Timer::store(uint32_t offset, T value) {
             return;
         }
         default: {
-            printError("Unhandled Timer load at offset: %#x", offset);
+            logger.logError(format("Unhandled Timer load at offset: %#x", offset));
             return;
         }
     }

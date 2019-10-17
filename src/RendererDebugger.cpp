@@ -37,7 +37,7 @@ string debugSourceDescription(DebugSource source) {
             return "Other";
         }
         default: {
-            printError("Invalid source");
+            // printError("Invalid source");
             return "";
         }
     }
@@ -73,7 +73,7 @@ string debugTypeDescription(DebugType type) {
             return "Other";
         }
         default: {
-            printError("Invalid type");
+            // printError("Invalid type");
             return "";
         }
     }
@@ -101,7 +101,7 @@ string debugSeverityDescription(DebugSeverity severity) {
             return "Notification";
         }
         default: {
-            printError("Invalid severity");
+            // printError("Invalid severity");
             return "";
         }
     }
@@ -132,12 +132,12 @@ void checkForOpenGLErrors() {
              << "|" << debugTypeDescription(debugType)
              << "|0x" << hex << id << "|"
              << message;
-        printWarning(stream.str().c_str());
+        // printWarning(stream.str().c_str());
         if (debugSeverity == DebugSeverity::High) {
             highSeverityFound = true;
         }
     }
     if (highSeverityFound) {
-        printError("Encountered high severity OpenGL error");
+        // printError("Encountered high severity OpenGL error");
     }
 }

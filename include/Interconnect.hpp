@@ -13,6 +13,7 @@
 #include "Expansion1.hpp"
 #include "Timer.hpp"
 #include "Controller.hpp"
+#include "Logger.hpp"
 
 const Range ramRange = Range(0x00000000, RAM_SIZE);
 const Range scratchpadRange = Range(0x1f800000, SCRATCHPAD_SIZE);
@@ -47,6 +48,7 @@ KUSEG     KSEG0     KSEG1
 See IOMap.md for I/O register mapping
 */
 class Interconnect {
+    Logger logger;
     std::unique_ptr<COP0> &cop0;
     std::unique_ptr<BIOS> &bios;
     std::unique_ptr<RAM> &ram;
@@ -62,7 +64,7 @@ class Interconnect {
     std::unique_ptr<Controller> &controller;
     uint32_t maskRegion(uint32_t address) const;
 public:
-    Interconnect(std::unique_ptr<COP0> &cop0, std::unique_ptr<BIOS> &bios, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<DMA> &dma, std::unique_ptr<Scratchpad> &scratchpad, std::unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller);
+    Interconnect(LogLevel logLevel, std::unique_ptr<COP0> &cop0, std::unique_ptr<BIOS> &bios, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<DMA> &dma, std::unique_ptr<Scratchpad> &scratchpad, std::unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller);
     ~Interconnect();
 
     template <typename T>

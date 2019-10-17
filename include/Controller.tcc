@@ -16,7 +16,7 @@ inline T Controller::load(uint32_t offset) {
             return getControlRegister();
         }
         default: {
-            printError("Unhandled Controller read at offset: %#x", offset);
+            logger.logError(format("Unhandled Controller read at offset: %#x", offset));
             break;
         }
     }
@@ -44,7 +44,7 @@ inline void Controller::store(uint32_t offset, T value) {
             break;
         }
         default: {
-            printError("Unhandled Controller write at offset: %#x", offset);
+            logger.logError(format("Unhandled Controller write at offset: %#x", offset));
             break;
         }
     }

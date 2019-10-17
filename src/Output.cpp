@@ -33,33 +33,3 @@ string format(const char *fmt, ...) {
     va_end(args);
     return formatted;
 }
-
-void printMessage(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    string formatted = format(fmt, args);
-    va_end(args);
-    Logger *logger = Logger::getInstance();
-    logger->logMessage(formatted);
-}
-
-void printWarning(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    string formatted = format(fmt, args);
-    va_end(args);
-    Logger *logger = Logger::getInstance();
-    logger->logWarning(formatted);
-}
-
-void printError(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    string formatted = format(fmt, args);
-    va_end(args);
-    Logger *logger = Logger::getInstance();
-    logger->logError(formatted);
-    Debugger *debugger = Debugger::getInstance();
-    debugger->debug();
-    exit(1);
-}

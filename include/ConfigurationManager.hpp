@@ -1,11 +1,22 @@
 #pragma once
 #include <string>
 #include <yaml/Yaml.hpp>
+#include "Logger.hpp"
 
 class ConfigurationManager {
     static ConfigurationManager *instance;
+    Logger logger;
     std::string filePath;
-    Yaml::Node configuration;
+
+    bool resizeWindowToFitFramefuffer;
+    bool showDebugInfoWindow;
+
+    LogLevel bios;
+    LogLevel cdrom;
+    LogLevel interconnect;
+    LogLevel cpu;
+    LogLevel gpu;
+    bool trace;
 
     ConfigurationManager();
 public:
@@ -13,10 +24,14 @@ public:
 
     void setupConfigurationFile();
     void loadConfiguration();
+
     bool shouldResizeWindowToFitFramebuffer();
-    bool shouldLogVerbose();
     bool shouldShowDebugInfoWindow();
-    bool shouldLogBiosFunctionCalls();
-    bool shouldLogCDROMActivity();
+
+    LogLevel biosLogLevel();
+    LogLevel cdromLogLevel();
+    LogLevel interconnectLogLevel();
+    LogLevel cpuLogLevel();
+    LogLevel gpuLogLevel();
     bool shouldTraceLogs();
 };

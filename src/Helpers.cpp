@@ -1,13 +1,15 @@
 #include "Helpers.hpp"
 #include <fstream>
 #include "Output.hpp"
+#include <iostream>
 
 using namespace std;
 
 void readBinary(const string& path, uint8_t *data) {
     ifstream file = ifstream(path, ios::in|ios::binary|ios::ate);
     if (!file.is_open()) {
-        printError("Unable to load BIOS");
+        cout << format("Unable to load binary at path %s", path.c_str()) << endl;
+        exit(1);
     }
     streampos size = file.tellg();
     file.seekg(0, ios::beg);

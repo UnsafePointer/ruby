@@ -11,7 +11,7 @@ using namespace std;
 
 const string configurationFile = "config.yaml";
 
-ConfigurationManager::ConfigurationManager() : filePath(), configuration() {}
+ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, false), filePath(), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), trace(false) {}
 
 ConfigurationManager* ConfigurationManager::instance = nullptr;
 
@@ -29,7 +29,7 @@ void ConfigurationManager::setupConfigurationFile() {
         filePath = localConfigurationPath;
         return;
     }
-    printWarning("Local configuration file not found");
+    logger.logWarning("Local configuration file not found");
     const char *homedir;
     if ((homedir = getenv("HOME")) == NULL) {
         homedir = getpwuid(getuid())->pw_dir;
@@ -41,18 +41,20 @@ void ConfigurationManager::setupConfigurationFile() {
         filePath = globalConfigurationPath;
         return;
     }
-    printWarning("Global configuration file not found");
-    printWarning("Generating default configuration at global path");
+    logger.logWarning("Global configuration file not found");
+    logger.logWarning("Generating default configuration at global path");
     if (mkdir(globalConfigurationDir.c_str(), 0777) == -1) {
         if (errno != EEXIST) {
-            printError("Couldn't create a directory for global config with errno: %s", strerror(errno));
+            logger.logError(format("Couldn't create a directory for global config with errno: %s", strerror(errno)));
         }
     }
     Yaml::Node logConfiguration = Yaml::Node();
     Yaml::Node &logConfigurationRef = logConfiguration;
-    logConfigurationRef["bios"] = "false";
-    logConfigurationRef["cdrom"] = "false";
-    logConfigurationRef["verbose"] = "false";
+    logConfigurationRef["bios"] = "OFF";
+    logConfigurationRef["cdrom"] = "OFF";
+    logConfigurationRef["interconnect"] = "OFF";
+    logConfigurationRef["cpu"] = "OFF";
+    logConfigurationRef["gpu"] = "OFF";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
@@ -64,29 +66,46 @@ void ConfigurationManager::setupConfigurationFile() {
 }
 
 void ConfigurationManager::loadConfiguration() {
+    Yaml::Node configuration = Yaml::Node();
     Yaml::Parse(configuration, filePath.c_str());
+    resizeWindowToFitFramefuffer = configuration["showFramebuffer"].As<bool>();
+    showDebugInfoWindow = configuration["debugInfoWindow"].As<bool>();
+    bios = logLevelWithValue(configuration["log"]["bios"].As<string>());
+    cdrom = logLevelWithValue(configuration["log"]["cdrom"].As<string>());
+    interconnect = logLevelWithValue(configuration["log"]["interconnect"].As<string>());
+    cpu = logLevelWithValue(configuration["log"]["cpu"].As<string>());
+    gpu = logLevelWithValue(configuration["log"]["gpu"].As<string>());
+    trace = configuration["log"]["trace"].As<bool>();
 }
 
 bool ConfigurationManager::shouldResizeWindowToFitFramebuffer() {
-    return configuration["showFramebuffer"].As<bool>();
-}
-
-bool ConfigurationManager::shouldLogVerbose() {
-    return configuration["log"]["verbose"].As<bool>();
+    return resizeWindowToFitFramefuffer;
 }
 
 bool ConfigurationManager::shouldShowDebugInfoWindow() {
-    return configuration["debugInfoWindow"].As<bool>();
+    return showDebugInfoWindow;
 }
 
-bool ConfigurationManager::shouldLogBiosFunctionCalls() {
-    return configuration["log"]["bios"].As<bool>();
+LogLevel ConfigurationManager::biosLogLevel() {
+    return bios;
 }
 
-bool ConfigurationManager::shouldLogCDROMActivity() {
-    return configuration["log"]["cdrom"].As<bool>();
+LogLevel ConfigurationManager::cdromLogLevel() {
+    return cdrom;
+}
+
+LogLevel ConfigurationManager::interconnectLogLevel() {
+    return interconnect;
+}
+
+LogLevel ConfigurationManager::cpuLogLevel() {
+    return cpu;
+}
+
+LogLevel ConfigurationManager::gpuLogLevel() {
+    return gpu;
 }
 
 bool ConfigurationManager::shouldTraceLogs() {
-    return configuration["log"]["trace"].As<bool>();
+    return trace;
 }
