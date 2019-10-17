@@ -76,6 +76,9 @@ void ConfigurationManager::loadConfiguration() {
     cpu = logLevelWithValue(configuration["log"]["cpu"].As<string>());
     gpu = logLevelWithValue(configuration["log"]["gpu"].As<string>());
     trace = configuration["log"]["trace"].As<bool>();
+    if (trace) {
+        remove("ruby.log");
+    }
 }
 
 bool ConfigurationManager::shouldResizeWindowToFitFramebuffer() {

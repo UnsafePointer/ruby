@@ -18,7 +18,6 @@ class Logger {
 public:
     Logger(LogLevel level);
     Logger(LogLevel level, bool shouldTrace);
-    void setupTraceFile();
     void logDebug(std::string message) const;
     void logMessage(std::string message) const;
     void logWarning(std::string message) const;

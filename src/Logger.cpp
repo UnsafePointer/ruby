@@ -28,13 +28,6 @@ Logger::Logger(LogLevel level) : level(level) {
 
 Logger::Logger(LogLevel level, bool shouldTrace) : level(level), shouldTrace(shouldTrace) {}
 
-void Logger::setupTraceFile() {
-    if (!shouldTrace) {
-        return;
-    }
-    remove("ruby.log");
-}
-
 void Logger::flush() const {
     ofstream logfile = ofstream();
     logfile.open("ruby.log", ios::out | ios::app);
