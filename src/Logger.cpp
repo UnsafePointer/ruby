@@ -22,12 +22,17 @@ LogLevel logLevelWithValue(std::string value) {
     return LogLevel::NoLog;
 }
 
-Logger::Logger(LogLevel level) : level(level) {
+Logger::Logger(LogLevel level) : level(level), prefix("") {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     shouldTrace = configurationManager->shouldTraceLogs();
 }
 
-Logger::Logger(LogLevel level, bool shouldTrace) : level(level), shouldTrace(shouldTrace) {}
+Logger::Logger(LogLevel level, string prefix) : level(level), prefix(prefix) {
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    shouldTrace = configurationManager->shouldTraceLogs();
+}
+
+Logger::Logger(LogLevel level, string prefix, bool shouldTrace) : level(level), prefix(prefix), shouldTrace(shouldTrace) {}
 
 void Logger::flush() const {
     ofstream logfile = ofstream();
@@ -56,6 +61,7 @@ void Logger::logDebug(const char *fmt, ...) const {
     string formatted = format(fmt, args);
     va_end(args);
 
+    formatted.insert(0, prefix);
     cout << formatted << endl;
     traceMessage(formatted);
 }
@@ -69,6 +75,7 @@ void Logger::logMessage(const char *fmt, ...) const {
     string formatted = format(fmt, args);
     va_end(args);
 
+    formatted.insert(0, prefix);
     cout << formatted << endl;
     traceMessage(formatted);
 }
@@ -82,6 +89,7 @@ void Logger::logWarning(const char *fmt, ...) const {
     string formatted = format(fmt, args);
     va_end(args);
 
+    formatted.insert(0, prefix);
     cout << formatted << endl;
     traceMessage(formatted);
 }
@@ -92,6 +100,7 @@ void Logger::logError(const char *fmt, ...) const {
     string formatted = format(fmt, args);
     va_end(args);
 
+    formatted.insert(0, prefix);
     cout << formatted << endl;
     traceMessage(formatted);
     flush();

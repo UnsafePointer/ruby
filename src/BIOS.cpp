@@ -8,7 +8,7 @@ const uint32_t BIOS_C_FUNCTIONS_STEP = 0xC0;
 
 using namespace std;
 
-BIOS::BIOS(LogLevel logLevel) : data(), logger(logLevel) {
+BIOS::BIOS(LogLevel logLevel) : data(), logger(logLevel, "  BIOS: ") {
 
 }
 
@@ -1043,5 +1043,5 @@ optional<string> BIOS::checkFunctions(uint32_t programCounter, uint32_t r9, arra
     if (functionCallLogIsRFE) {
         return result;
     }
-    logger.logMessage("  BIOS: %s", functionCallLog.c_str());
+    logger.logMessage(functionCallLog.c_str());
 }

@@ -10,7 +10,7 @@ using namespace std;
 
 const string configurationFile = "config.yaml";
 
-ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, false), filePath(), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), trace(false) {}
+ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, "", false), filePath(), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), trace(false) {}
 
 ConfigurationManager* ConfigurationManager::instance = nullptr;
 
