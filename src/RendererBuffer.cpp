@@ -50,7 +50,8 @@ void RendererBuffer<T>::draw(GLenum mode) {
         }
     }
     clean();
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 template <class T>

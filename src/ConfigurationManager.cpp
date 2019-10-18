@@ -55,6 +55,7 @@ void ConfigurationManager::setupConfigurationFile() {
     logConfigurationRef["interconnect"] = "OFF";
     logConfigurationRef["cpu"] = "OFF";
     logConfigurationRef["gpu"] = "OFF";
+    logConfigurationRef["opengl"] = "OFF";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
@@ -75,6 +76,7 @@ void ConfigurationManager::loadConfiguration() {
     interconnect = logLevelWithValue(configuration["log"]["interconnect"].As<string>());
     cpu = logLevelWithValue(configuration["log"]["cpu"].As<string>());
     gpu = logLevelWithValue(configuration["log"]["gpu"].As<string>());
+    opengl = logLevelWithValue(configuration["log"]["opengl"].As<string>());
     trace = configuration["log"]["trace"].As<bool>();
     if (trace) {
         remove("ruby.log");
@@ -107,6 +109,10 @@ LogLevel ConfigurationManager::cpuLogLevel() {
 
 LogLevel ConfigurationManager::gpuLogLevel() {
     return gpu;
+}
+
+LogLevel ConfigurationManager::openGLLogLevel() {
+    return opengl;
 }
 
 bool ConfigurationManager::shouldTraceLogs() {

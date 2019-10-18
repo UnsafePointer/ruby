@@ -4,19 +4,23 @@
 #include <string>
 #include "Output.hpp"
 #include <sstream>
+#include "ConfigurationManager.hpp"
 
 using namespace std;
 
-enum DebugSource {
-    API = 0x8246,
-    WindowSystem = 0x8247,
-    ShaderCompiler = 0x8248,
-    ThirdParty = 0x8249,
-    Application = 0x824A,
-    OtherSource = 0x824B
-};
+RendererDebugger::RendererDebugger(LogLevel logLevel) : logger(logLevel) {}
 
-string debugSourceDescription(DebugSource source) {
+RendererDebugger* RendererDebugger::instance = nullptr;
+
+RendererDebugger* RendererDebugger::getInstance() {
+    if (instance == nullptr) {
+        ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+        instance = new RendererDebugger(configurationManager->openGLLogLevel());
+    }
+    return instance;
+}
+
+string RendererDebugger::debugSourceDescription(DebugSource source) const {
     switch (source) {
         case API: {
             return "API";
@@ -37,22 +41,13 @@ string debugSourceDescription(DebugSource source) {
             return "Other";
         }
         default: {
-            // printError("Invalid source");
+            logger.logError("Invalid source");
             return "";
         }
     }
 }
 
-enum DebugType {
-    Error = 0x824C,
-    DeprecatedBehaviour = 0x824D,
-    UndefinedBehaviour = 0x824E,
-    Portability = 0x824F,
-    Performance = 0x8250,
-    OtherType = 0x8251
-};
-
-string debugTypeDescription(DebugType type) {
+string RendererDebugger::debugTypeDescription(DebugType type) const {
     switch (type) {
         case Error: {
             return "Error";
@@ -73,20 +68,13 @@ string debugTypeDescription(DebugType type) {
             return "Other";
         }
         default: {
-            // printError("Invalid type");
+            logger.logError("Invalid type");
             return "";
         }
     }
 }
 
-enum DebugSeverity {
-    High = 0x9146,
-    Medium = 0x9147,
-    Low = 0x9148,
-    Notification = 0x826B
-};
-
-string debugSeverityDescription(DebugSeverity severity) {
+string RendererDebugger::debugSeverityDescription(DebugSeverity severity) const {
     switch (severity) {
         case High: {
             return "High";
@@ -101,13 +89,13 @@ string debugSeverityDescription(DebugSeverity severity) {
             return "Notification";
         }
         default: {
-            // printError("Invalid severity");
+            logger.logError("Invalid severity");
             return "";
         }
     }
 }
 
-void checkForOpenGLErrors() {
+void RendererDebugger::checkForOpenGLErrors() const {
     bool highSeverityFound = false;
     while (true) {
         vector<GLchar> buffer(4096);
@@ -132,12 +120,12 @@ void checkForOpenGLErrors() {
              << "|" << debugTypeDescription(debugType)
              << "|0x" << hex << id << "|"
              << message;
-        // printWarning(stream.str().c_str());
+        logger.logWarning(stream.str().c_str());
         if (debugSeverity == DebugSeverity::High) {
             highSeverityFound = true;
         }
     }
     if (highSeverityFound) {
-        // printError("Encountered high severity OpenGL error");
+        logger.logError("Encountered high severity OpenGL error");
     }
 }

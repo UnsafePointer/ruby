@@ -41,7 +41,8 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog
 
     Dimensions screenDimensions = mainWindow->getDimensions();
     screenTexture = make_unique<Texture>(((GLsizei) screenDimensions.width), ((GLsizei) screenDimensions.height));
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 Renderer::~Renderer() {
@@ -103,7 +104,8 @@ void Renderer::prepareFrame() {
 void Renderer::renderFrame() {
     Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->draw(mode);
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 void Renderer::finalizeFrame(GPU *gpu) {
@@ -129,7 +131,8 @@ void Renderer::finalizeFrame(GPU *gpu) {
     }
     screenBuffer->addData(pixels);
     screenBuffer->draw(GL_TRIANGLE_STRIP);
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
@@ -147,5 +150,6 @@ void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     textureBuffer->addData(data);
     Framebuffer framebuffer = Framebuffer(screenTexture);
     textureBuffer->draw(GL_TRIANGLE_STRIP);
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
