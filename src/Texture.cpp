@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Texture::Texture(GLsizei width, GLsizei height) : width(width), height(height) {
+Texture::Texture(GLsizei width, GLsizei height) : logger(LogLevel::NoLog), width(width), height(height) {
     glGenTextures(1, &object);
     glBindTexture(GL_TEXTURE_2D, object);
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB5_A1, width, height);
@@ -33,8 +33,7 @@ void Texture::bind(GLenum texture) {
 
 void Texture::setImageFromBuffer(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     if (!imageBuffer->isValid()) {
-        cout << "Invalid image buffer" << endl;
-        exit(1);
+        logger.logError("Invalid image buffer");
     }
     uint16_t x, y, width, height;
     tie(x, y) = imageBuffer->destination();
