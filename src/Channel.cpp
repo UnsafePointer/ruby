@@ -2,7 +2,9 @@
 
 using namespace std;
 
-Channel::Channel() : control(), baseAddress(), blockControl(), logger(LogLevel::NoLog) {
+Channel::Channel() : logger(NoLog) {}
+
+Channel::Channel(LogLevel logLevel, DMAPort port) : control(), baseAddress(), blockControl(), logger(logLevel), port(port) {
 
 }
 

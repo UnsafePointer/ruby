@@ -7,17 +7,7 @@
 #include <string>
 #include "CDROM.hpp"
 #include "Logger.hpp"
-
-enum Port {
-    MDECin = 0,
-    MDECout = 1,
-    GPUP = 2,
-    CDROMP = 3,
-    SPU = 4,
-    PIO = 5,
-    OTC = 6,
-    None = 1337
-};
+#include "DMAPort.hpp"
 
 // 1F8010F0h - DPCR - DMA Control Register (R/W)
 // 0-2   DMA0, MDECin  Priority      (0..7; 0=Highest, 7=Lowest)
@@ -140,7 +130,7 @@ class DMA {
     DMAInterrupt interrupt;
 
     Channel channels[7];
-    Channel& channelForPort(Port port);
+    Channel& channelForPort(DMAPort port);
 
     uint32_t controlRegister() const;
     void setControlRegister(uint32_t value);
@@ -149,12 +139,12 @@ class DMA {
 
     bool interruptRequestStatus() const;
 
-    void execute(Port port);
-    void executeBlock(Port port, Channel& channel);
-    void executeLinkedList(Port port, Channel& channel);
+    void execute(DMAPort port);
+    void executeBlock(DMAPort port, Channel& channel);
+    void executeLinkedList(DMAPort port, Channel& channel);
 
-    Port portWithIndex(uint32_t index);
-    std::string portDescription(Port port);
+    DMAPort portWithIndex(uint32_t index);
+    std::string portDescription(DMAPort port);
 public:
     DMA(LogLevel logLevel, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom);
     ~DMA();

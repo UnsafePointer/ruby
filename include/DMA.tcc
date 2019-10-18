@@ -17,7 +17,7 @@ inline T DMA::load(uint32_t offset) {
         case 4:
         case 5:
         case 6: {
-            Port port = portWithIndex(upper);
+            DMAPort port = portWithIndex(upper);
             Channel channel = channelForPort(port);
             switch (lower) {
                 case 0: {
@@ -64,7 +64,7 @@ inline void DMA::store(uint32_t offset, T value) {
     }
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
-    Port activePort = Port::None;
+    DMAPort activePort = DMAPort::None;
     switch (upper) {
         case 0:
         case 1:
@@ -73,7 +73,7 @@ inline void DMA::store(uint32_t offset, T value) {
         case 4:
         case 5:
         case 6: {
-            Port port = portWithIndex(upper);
+            DMAPort port = portWithIndex(upper);
             Channel& channel = channelForPort(port);
             switch (lower) {
                 case 0: {
@@ -120,7 +120,7 @@ inline void DMA::store(uint32_t offset, T value) {
             return;
         }
     }
-    if (activePort != Port::None) {
+    if (activePort != DMAPort::None) {
         execute(activePort);
     }
 }

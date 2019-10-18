@@ -6,7 +6,7 @@ using namespace std;
 
 DMA::DMA(LogLevel logLevel, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : logger(logLevel), ram(ram), gpu(gpu), cdrom(cdrom) {
     for (int i = 0; i < 7; i++) {
-        channels[i] = Channel();
+        channels[i] = Channel(logLevel, DMAPort(i));
     }
 }
 
@@ -51,11 +51,11 @@ void DMA::setInterruptRegister(uint32_t value) {
     }
 }
 
-Channel& DMA::channelForPort(Port port) {
+Channel& DMA::channelForPort(DMAPort port) {
     return channels[port];
 }
 
-void DMA::execute(Port port) {
+void DMA::execute(DMAPort port) {
     Channel& channel = channels[port];
     if (channel.sync() == Sync::LinkedList) {
         executeLinkedList(port, channel);
@@ -65,9 +65,9 @@ void DMA::execute(Port port) {
     return;
 }
 
-void DMA::executeLinkedList(Port port, Channel& channel) {
+void DMA::executeLinkedList(DMAPort port, Channel& channel) {
     uint32_t address = channel.baseAddressRegister() & 0x1ffffc;
-    if (port != Port::GPUP) {
+    if (port != DMAPort::GPUP) {
         logger.logError("Unhandled DMA linked-list transfer with port: %s", portDescription(port).c_str());
     }
     if (channel.direction() == Direction::ToRam) {
@@ -91,7 +91,7 @@ void DMA::executeLinkedList(Port port, Channel& channel) {
     return;
 }
 
-void DMA::executeBlock(Port port, Channel& channel) {
+void DMA::executeBlock(DMAPort port, Channel& channel) {
     int8_t step = 4;
     if (channel.step() == Step::Decrement) {
         step *= -1;
@@ -108,7 +108,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
             case Direction::FromRam: {
                 uint32_t source = ram->load<uint32_t>(currentAddress);
                 switch (port) {
-                    case Port::GPUP: {
+                    case DMAPort::GPUP: {
                         gpu->executeGp0(source);
                         break;
                     }
@@ -122,7 +122,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
             case Direction::ToRam: {
                 uint32_t source = 0;
                 switch (port) {
-                    case Port::OTC: {
+                    case DMAPort::OTC: {
                         switch (remainingTransferSize) {
                             case 1: {
                                 source = 0xffffff;
@@ -135,7 +135,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         }
                         break;
                     }
-                    case Port::CDROMP: {
+                    case DMAPort::CDROMP: {
                         source = cdrom->loadWordFromReadBuffer();
                         break;
                     }
@@ -155,14 +155,14 @@ void DMA::executeBlock(Port port, Channel& channel) {
     return;
 }
 
-Port DMA::portWithIndex(uint32_t index) {
-    if (index > Port::OTC) {
+DMAPort DMA::portWithIndex(uint32_t index) {
+    if (index > DMAPort::OTC) {
         logger.logError("Attempting to get port with out-of-bounds index: %d", index);
     }
-    return Port(index);
+    return DMAPort(index);
 }
 
-string DMA::portDescription(Port port) {
+string DMA::portDescription(DMAPort port) {
     switch (port) {
         case MDECin:
             return "MDECin";

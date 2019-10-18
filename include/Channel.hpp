@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <optional>
 #include "Logger.hpp"
+#include "DMAPort.hpp"
 
 enum Direction {
     ToRam = 0,
@@ -105,8 +106,10 @@ class Channel {
     ChannelBaseAddress baseAddress;
     ChannelBlockControl blockControl;
     Logger logger;
+    DMAPort port;
 public:
     Channel();
+    Channel(LogLevel logLevel, DMAPort port);
     ~Channel();
 
     uint32_t controlRegister() const;
