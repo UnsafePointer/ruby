@@ -14,7 +14,7 @@ RAM::~RAM() {
 
 void RAM::receiveTransfer(std::string path, uint32_t origin, uint32_t size, uint32_t destination) {
     uint8_t *dataDestination = &data[destination];
-    readBinary(path, dataDestination, origin);
+    readBinary(path, dataDestination, origin, size);
 }
 
 void RAM::dump() {

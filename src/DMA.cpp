@@ -116,7 +116,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                 break;
             }
             case Direction::ToRam: {
-                uint32_t source;
+                uint32_t source = 0;
                 switch (port) {
                     case Port::OTC: {
                         switch (remainingTransferSize) {
@@ -174,7 +174,7 @@ string DMA::portDescription(Port port) {
             return "PIO";
         case OTC:
             return "OTC";
-        case None:
+        default:
             return "None";
     }
 }

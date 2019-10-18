@@ -545,6 +545,8 @@ void CPU::operationJumpAndLinkRegister(Instruction instruction) {
 }
 
 void CPU::operationSystemCall(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     if (logBiosFunctionCalls) {
         logger.logWarning("  SYSCALL: %#x", registers[4]);
     }
@@ -552,6 +554,8 @@ void CPU::operationSystemCall(Instruction instruction) {
 }
 
 void CPU::operationBreak(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Breakpoint);
 }
 
@@ -752,6 +756,8 @@ void CPU::operationSetOnLessThanUnsigned(Instruction instruction) {
 }
 
 void CPU::operationIllegal(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Illegal);
 }
 
@@ -945,7 +951,7 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
     uint32_t cpuRegisterIndex = instruction.rt;
     uint32_t copRegisterIndex = instruction.rd;
 
-    uint32_t value;
+    uint32_t value = 0;
     switch (copRegisterIndex) {
         case 3: {
             value = cop0->breakPointOnExecute;
@@ -1059,14 +1065,20 @@ void CPU::operationReturnFromException(Instruction instruction) {
 }
 
 void CPU::operationCoprocessor1(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }
 
 void CPU::operationCoprocessor2(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     logger.logWarning("Unhandled Geometry Transformation Engine instruction: %#x", instruction.value);
 }
 
 void CPU::operationCoprocessor3(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }
 
@@ -1361,33 +1373,49 @@ void CPU::triggerException(ExceptionType exceptionType) {
 }
 
 void CPU::operationLoadWordCoprocessor0(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }
 
 void CPU::operationLoadWordCoprocessor1(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }
 
 void CPU::operationLoadWordCoprocessor2(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     logger.logWarning("Unhandled GTE LWC: %#x", instruction.value);
 }
 
 void CPU::operationLoadWordCoprocessor3(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }
 
 void CPU::operationStoreWordCoprocessor0(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }
 
 void CPU::operationStoreWordCoprocessor1(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }
 
 void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     logger.logWarning("Unhandled GTE SWC: %#x", instruction.value);
 }
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
+    // TODO: unused
+    (void)instruction;
     triggerException(ExceptionType::Coprocessor);
 }

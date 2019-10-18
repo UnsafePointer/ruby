@@ -156,7 +156,6 @@ void Emulator::checkBIOSFunctions() {
         return;
     }
     string functionCallLog = (*result);
-    bool functionCallLogIsRFE = functionCallLog.find("ReturnFromException()") == 0;
     if (functionCallLog.find("std_out_putchar(char)") == 0) {
         checkTTY(registers[4]);
     }
