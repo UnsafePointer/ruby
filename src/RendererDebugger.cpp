@@ -2,7 +2,6 @@
 #include <glad/glad.h>
 #include <vector>
 #include <string>
-#include "Output.hpp"
 #include <sstream>
 #include "ConfigurationManager.hpp"
 

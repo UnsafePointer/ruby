@@ -1,6 +1,7 @@
 #include "Logger.hpp"
 #include <fstream>
 #include <iostream>
+#include "Output.hpp"
 #include "ConfigurationManager.hpp"
 
 using namespace std;
@@ -49,30 +50,50 @@ void Logger::traceMessage(std::string message) const {
     flush();
 }
 
-void Logger::logDebug(std::string message) const {
-    cout << message << endl;
-    traceMessage(message);
+void Logger::logDebug(const char *fmt, ...) const {
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    cout << formatted << endl;
+    traceMessage(formatted);
 }
 
-void Logger::logMessage(std::string message) const {
+void Logger::logMessage(const char *fmt, ...) const {
     if (level < LogLevel::Message) {
         return;
     }
-    cout << message << endl;
-    traceMessage(message);
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    cout << formatted << endl;
+    traceMessage(formatted);
 }
 
-void Logger::logWarning(std::string message) const {
+void Logger::logWarning(const char *fmt, ...) const {
     if (level < LogLevel::Warning) {
         return;
     }
-    cout << message << endl;
-    traceMessage(message);
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    cout << formatted << endl;
+    traceMessage(formatted);
 }
 
-void Logger::logError(std::string message) const {
-    cout << message << endl;
-    traceMessage(message);
+void Logger::logError(const char *fmt, ...) const {
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    cout << formatted << endl;
+    traceMessage(formatted);
     flush();
     exit(1);
 }

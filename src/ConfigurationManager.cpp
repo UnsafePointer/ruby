@@ -1,6 +1,5 @@
 #include "ConfigurationManager.hpp"
 #include <fstream>
-#include "Output.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -45,7 +44,7 @@ void ConfigurationManager::setupConfigurationFile() {
     logger.logWarning("Generating default configuration at global path");
     if (mkdir(globalConfigurationDir.c_str(), 0777) == -1) {
         if (errno != EEXIST) {
-            logger.logError(format("Couldn't create a directory for global config with errno: %s", strerror(errno)));
+            logger.logError("Couldn't create a directory for global config with errno: %s", strerror(errno));
         }
     }
     Yaml::Node logConfiguration = Yaml::Node();

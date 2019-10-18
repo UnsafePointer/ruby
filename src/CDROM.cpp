@@ -1,5 +1,4 @@
 #include "CDROM.hpp"
-#include "Output.hpp"
 #include "Helpers.hpp"
 #include "ConfigurationManager.hpp"
 
@@ -43,17 +42,17 @@ void CDROM::step() {
 }
 
 void CDROM::setStatusRegister(uint8_t value) {
-    logger.logMessage(format("STATUS [W]: %#x", value));
+    logger.logMessage("STATUS [W]: %#x", value);
     status.index = value & 0x3;
 }
 
 void CDROM::setInterruptRegister(uint8_t value) {
-    logger.logMessage(format("INTE [W]: %#x", value));
+    logger.logMessage("INTE [W]: %#x", value);
     interrupt.enable = value;
 }
 
 void CDROM::setInterruptFlagRegister(uint8_t value) {
-    logger.logMessage(format("INTF [W]: %#x", value));
+    logger.logMessage("INTF [W]: %#x", value);
     if (value & 0x40) {
         clearParameters();
         updateStatusRegister();
@@ -64,7 +63,7 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
 }
 
 void CDROM::setRequestRegister(uint8_t value) {
-    logger.logMessage(format("REQ [W]: %#x", value));
+    logger.logMessage("REQ [W]: %#x", value);
     if (value & 0x80) {
         readBuffer.clear();
         if (isReadBufferEmpty()) {
@@ -124,7 +123,7 @@ void CDROM::execute(uint8_t value) {
             break;
         }
         default: {
-            logger.logError(format("Unhandled CDROM operation value: %#x", value));
+            logger.logError("Unhandled CDROM operation value: %#x", value);
         }
     }
     clearParameters();
@@ -132,7 +131,7 @@ void CDROM::execute(uint8_t value) {
 }
 
 uint8_t CDROM::getStatusRegister() const {
-    logger.logMessage(format("STATUS [R]: %#x", status._value));
+    logger.logMessage("STATUS [R]: %#x", status._value);
     return status._value;
 }
 
@@ -141,7 +140,7 @@ uint8_t CDROM::getInterruptFlagRegister() const {
     if (!interruptQueue.empty()) {
         flags |= interruptQueue.front() & 0x7;
     }
-    logger.logMessage(format("INTF [R]: %#x", flags));
+    logger.logMessage("INTF [R]: %#x", flags);
     return flags;
 }
 
@@ -152,12 +151,12 @@ uint8_t CDROM::getReponse() {
         response.pop();
         updateStatusRegister();
     }
-    logger.logMessage(format("RESPONSE [R]: %#x", value));
+    logger.logMessage("RESPONSE [R]: %#x", value);
     return value;
 }
 
 uint8_t CDROM::getInterruptRegister() const {
-    logger.logMessage(format("INTE [R]: %#x", interrupt.enable));
+    logger.logMessage("INTE [R]: %#x", interrupt.enable);
     return interrupt.enable;
 }
 
@@ -281,10 +280,10 @@ void CDROM::operationTest() {
             break;
         }
         default: {
-            logger.logError(format("Unhandled CDROM operation test with subfunction: %#x", subfunction));
+            logger.logError("Unhandled CDROM operation test with subfunction: %#x", subfunction);
         }
     }
-    logger.logMessage(format("CMD Test [%#x]", subfunction));
+    logger.logMessage("CMD Test [%#x]", subfunction);
 }
 
 /*
@@ -340,7 +339,7 @@ void CDROM::operationSetloc() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
-    logger.logMessage(format("CMD Setloc(%d, %d, %d)", minute, second, sector));
+    logger.logMessage("CMD Setloc(%d, %d, %d)", minute, second, sector);
 }
 
 /*

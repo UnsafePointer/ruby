@@ -19,9 +19,6 @@ enum Port {
     None = 1337
 };
 
-Port portWithIndex(uint32_t index);
-std::string portDescription(Port port);
-
 // 1F8010F0h - DPCR - DMA Control Register (R/W)
 // 0-2   DMA0, MDECin  Priority      (0..7; 0=Highest, 7=Lowest)
 // 3     DMA0, MDECin  Master Enable (0=Disable, 1=Enable)
@@ -155,6 +152,9 @@ class DMA {
     void execute(Port port);
     void executeBlock(Port port, Channel& channel);
     void executeLinkedList(Port port, Channel& channel);
+
+    Port portWithIndex(uint32_t index);
+    std::string portDescription(Port port);
 public:
     DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom);
     ~DMA();

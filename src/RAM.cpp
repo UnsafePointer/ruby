@@ -1,7 +1,6 @@
 #include "RAM.hpp"
 #include <algorithm>
 #include <fstream>
-#include "Output.hpp"
 #include "Helpers.hpp"
 
 using namespace std;

@@ -4,7 +4,6 @@
 #include <streambuf>
 #include <vector>
 #include "RendererDebugger.hpp"
-#include "Output.hpp"
 #include "Framebuffer.hpp"
 #include "GPU.hpp"
 #include "ConfigurationManager.hpp"
@@ -66,7 +65,7 @@ void Renderer::checkForceDraw(uint verticesToRender, GLenum newMode) {
 void Renderer::pushLine(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 2) {
-        logger.logError(format("Unhandled line with %d vertices", size));
+        logger.logError("Unhandled line with %d vertices", size);
         return;
     }
     checkForceDraw(size, GL_LINES);
@@ -78,7 +77,7 @@ void Renderer::pushLine(std::vector<Vertex> vertices) {
 void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 3 || size > 4) {
-        logger.logError(format("Unhandled polygon with %d vertices", size));
+        logger.logError("Unhandled polygon with %d vertices", size);
         return;
     }
     checkForceDraw(size, GL_TRIANGLES);

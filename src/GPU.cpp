@@ -1,23 +1,10 @@
 #include "GPU.hpp"
-#include "Output.hpp"
 #include "Vertex.hpp"
 #include <iostream>
 
 using namespace std;
 
 const uint32_t GP0_COMMAND_TERMINATION_CODE = 0x55555555;
-
-uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) {
-    return ((value2 & 1) | ((value1 & 3) << 1));
-}
-
-TexturePageColors texturePageColorsWithValue(uint32_t value) {
-    if (value > TexturePageColors::T15Bit) {
-        cout << format("Attempting to create Texture Page Colors out-of-bounds value: %#x", value) << endl;
-        exit(1);
-    }
-    return TexturePageColors(value);
-}
 
 GPU::GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow) : logger(logLevel),
              texturePageBaseX(0),
@@ -565,7 +552,7 @@ void GPU::executeGp0(uint32_t value) {
                 break;
             }
             default: {
-                logger.logError(format("Unhandled gp0 instruction %#x", opCode));
+                logger.logError("Unhandled gp0 instruction %#x", opCode);
             }
         }
         gp0InstructionBuffer.clear();
@@ -673,7 +660,7 @@ void GPU::executeGp1(uint32_t value) {
             break;
         }
         default: {
-            logger.logError(format("Unhandled gp1 instruction %#x", opCode));
+            logger.logError("Unhandled gp1 instruction %#x", opCode);
         }
     }
 }
@@ -963,7 +950,7 @@ void GPU::operationGp0CopyRectangleVRAMToCPU() {
     uint32_t width = resolution & 0xffff;
     uint32_t height = resolution >> 16;
 
-    logger.logWarning(format("Unhandled GP0 Copy Rectangle VRAM to CPU with with resolution: %d x %d", width, height));
+    logger.logWarning("Unhandled GP0 Copy Rectangle VRAM to CPU with with resolution: %d x %d", width, height);
 }
 
 /*
@@ -1925,4 +1912,15 @@ void GPU::shadedLine(uint numberOfPoints, bool opaque) {
         renderer->pushLine(lines);
         lines.clear();
     }
+}
+
+uint8_t GPU::horizontalResolutionFromValues(uint8_t value1, uint8_t value2) const {
+    return ((value2 & 1) | ((value1 & 3) << 1));
+}
+
+TexturePageColors GPU::texturePageColorsWithValue(uint32_t value) const {
+    if (value > TexturePageColors::T15Bit) {
+        logger.logError("Attempting to create Texture Page Colors out-of-bounds value: %#x", value);
+    }
+    return TexturePageColors(value);
 }

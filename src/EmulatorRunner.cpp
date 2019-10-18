@@ -1,7 +1,6 @@
 #include "EmulatorRunner.hpp"
 #include <fstream>
 #include <algorithm>
-#include "Output.hpp"
 #include "CPU.hpp"
 
 using namespace std;

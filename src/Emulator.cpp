@@ -4,7 +4,6 @@
 #include "Constants.h"
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
-#include "Output.hpp"
 
 using namespace std;
 
@@ -103,7 +102,7 @@ void Emulator::dumpRAM() {
 
 void Emulator::setupSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        logger.logError(format("Error initializing SDL: %s", SDL_GetError()));
+        logger.logError("Error initializing SDL: %s", SDL_GetError());
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
@@ -112,7 +111,7 @@ void Emulator::setupSDL() {
 
 void Emulator::setupOpenGL() {
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
-        logger.logError(format("Failed to initialize the OpenGL context."));
+        logger.logError("Failed to initialize the OpenGL context.");
     }
 }
 
@@ -141,7 +140,7 @@ void Emulator::loadCDROMImageFile(string filePath) {
 
 void Emulator::checkTTY(char c) {
     if (c == '\n') {
-        logger.logDebug(format("%s", ttyBuffer.c_str()));
+        logger.logDebug("%s", ttyBuffer.c_str());
         ttyBuffer.clear();
         return;
     }

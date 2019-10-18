@@ -1,8 +1,4 @@
 #include "Output.hpp"
-#include <cstdarg>
-#include "EmulatorRunner.hpp"
-#include "Logger.hpp"
-#include <sstream>
 
 using namespace std;
 

@@ -251,6 +251,8 @@ GP1(07h) - Vertical Display range (on Screen)
     void shadedLine(uint numberOfPoints, bool opaque);
 
     void executeGp1(uint32_t value);
+    TexturePageColors texturePageColorsWithValue(uint32_t value) const;
+    uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) const;
 public:
     GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow);
     ~GPU();
@@ -265,5 +267,3 @@ public:
     Dimensions getResolution();
     Point getDisplayAreaStart();
 };
-
-TexturePageColors texturePageColorsWithValue(uint32_t value);

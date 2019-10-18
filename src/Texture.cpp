@@ -1,6 +1,5 @@
 #include "Texture.hpp"
 #include "RendererDebugger.hpp"
-#include "Output.hpp"
 #include <iostream>
 
 using namespace std;

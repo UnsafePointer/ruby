@@ -1,5 +1,4 @@
 #include "Channel.hpp"
-#include "Output.hpp"
 
 using namespace std;
 

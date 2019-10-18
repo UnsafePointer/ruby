@@ -18,9 +18,9 @@ class Logger {
 public:
     Logger(LogLevel level);
     Logger(LogLevel level, bool shouldTrace);
-    void logDebug(std::string message) const;
-    void logMessage(std::string message) const;
-    void logWarning(std::string message) const;
-    void logError(std::string message) const;
+    void logDebug(const char *fmt, ...) const;
+    void logMessage(const char *fmt, ...) const;
+    void logWarning(const char *fmt, ...) const;
+    void logError(const char *fmt, ...) const;
     void flush() const;
 };

@@ -1,7 +1,5 @@
 #include "BIOS.hpp"
-#include "Output.hpp"
 #include "Helpers.hpp"
-#include "Output.hpp"
 #include <sstream>
 
 const uint32_t BIOS_A_FUNCTIONS_STEP = 0xA0;
@@ -24,7 +22,7 @@ void BIOS::loadBin(const string& path) {
 
 std::string BIOS::formatBIOSFunction(std::string function, uint argc, std::array<uint32_t, 4> subroutineArguments) {
     if (argc > 4) {
-        logger.logError(format("BIOS formatting incorrect function with argc: %d", argc));
+        logger.logError("BIOS formatting incorrect function with argc: %d", argc);
     }
 
     stringstream ss;
@@ -1045,5 +1043,5 @@ optional<string> BIOS::checkFunctions(uint32_t programCounter, uint32_t r9, arra
     if (functionCallLogIsRFE) {
         return result;
     }
-    logger.logMessage(format("  BIOS: %s", functionCallLog.c_str()));
+    logger.logMessage("  BIOS: %s", functionCallLog.c_str());
 }

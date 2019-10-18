@@ -2,7 +2,6 @@
 #include <stddef.h>
 #include "Vertex.hpp"
 #include "RendererDebugger.hpp"
-#include "Output.hpp"
 
 using namespace std;
 

@@ -1,6 +1,5 @@
 #include "Timer.hpp"
 #include "Constants.h"
-#include "Output.hpp"
 
 Timer::Timer(uint8_t identity) : logger(LogLevel::NoLog), identity(identity), counterValue(), counterMode(), counterTarget(), counter() {}
 
@@ -118,5 +117,5 @@ void Timer::checkTargetsAndOverflows() {
 }
 
 void Timer::checkInterruptRequest() {
-    logger.logWarning(format("Unhandled interrupt trigger for timer %d", identity));
+    logger.logWarning("Unhandled interrupt trigger for timer %d", identity);
 }

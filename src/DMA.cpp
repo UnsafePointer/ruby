@@ -1,38 +1,8 @@
 #include "DMA.hpp"
-#include "Output.hpp"
 #include "RAM.tcc"
 #include <iostream>
 
 using namespace std;
-
-Port portWithIndex(uint32_t index) {
-    if (index > Port::OTC) {
-        cout << format("Attempting to get port with out-of-bounds index: %d", index) << endl;
-        exit(1);
-    }
-    return Port(index);
-}
-
-string portDescription(Port port) {
-    switch (port) {
-        case MDECin:
-            return "MDECin";
-        case MDECout:
-            return "MDECout";
-        case GPUP:
-            return "GPU";
-        case CDROMP:
-            return "CDROM";
-        case SPU:
-            return "SPU";
-        case PIO:
-            return "PIO";
-        case OTC:
-            return "OTC";
-        case None:
-            return "None";
-    }
-}
 
 DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : logger(LogLevel::NoLog), ram(ram), gpu(gpu), cdrom(cdrom) {
     for (int i = 0; i < 7; i++) {
@@ -94,7 +64,7 @@ void DMA::execute(Port port) {
 void DMA::executeLinkedList(Port port, Channel& channel) {
     uint32_t address = channel.baseAddressRegister() & 0x1ffffc;
     if (port != Port::GPUP) {
-        logger.logError(format("Unhandled DMA linked-list transfer with port: %s", portDescription(port).c_str()));
+        logger.logError("Unhandled DMA linked-list transfer with port: %s", portDescription(port).c_str());
     }
     if (channel.direction() == Direction::ToRam) {
         logger.logError("Unhandled DMA linked-list transfer to RAM");
@@ -139,7 +109,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                     default: {
-                        logger.logError(format("Unhandled DMA block transfer from RAM to source port: %s", portDescription(port).c_str()));
+                        logger.logError("Unhandled DMA block transfer from RAM to source port: %s", portDescription(port).c_str());
                         break;
                     }
                 }
@@ -166,7 +136,7 @@ void DMA::executeBlock(Port port, Channel& channel) {
                         break;
                     }
                     default: {
-                        logger.logError(format("Unhandled DMA block transfer to RAM from source port: %s", portDescription(port).c_str()));
+                        logger.logError("Unhandled DMA block transfer to RAM from source port: %s", portDescription(port).c_str());
                         break;
                     }
                 }
@@ -179,4 +149,32 @@ void DMA::executeBlock(Port port, Channel& channel) {
     }
     channel.done();
     return;
+}
+
+Port DMA::portWithIndex(uint32_t index) {
+    if (index > Port::OTC) {
+        logger.logError("Attempting to get port with out-of-bounds index: %d", index);
+    }
+    return Port(index);
+}
+
+string DMA::portDescription(Port port) {
+    switch (port) {
+        case MDECin:
+            return "MDECin";
+        case MDECout:
+            return "MDECout";
+        case GPUP:
+            return "GPU";
+        case CDROMP:
+            return "CDROM";
+        case SPU:
+            return "SPU";
+        case PIO:
+            return "PIO";
+        case OTC:
+            return "OTC";
+        case None:
+            return "None";
+    }
 }
