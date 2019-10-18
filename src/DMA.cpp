@@ -174,7 +174,7 @@ string DMA::portDescription(Port port) {
             return "PIO";
         case OTC:
             return "OTC";
-        case None:
+        default:
             return "None";
     }
 }

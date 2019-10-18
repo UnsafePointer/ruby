@@ -1044,4 +1044,5 @@ optional<string> BIOS::checkFunctions(uint32_t programCounter, uint32_t r9, arra
         return result;
     }
     logger.logMessage(functionCallLog.c_str());
+    return result;
 }
