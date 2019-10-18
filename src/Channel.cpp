@@ -13,10 +13,12 @@ Channel::~Channel() {
 }
 
 uint32_t Channel::controlRegister() const {
+    logger.logMessage("D%d_CHCR [R]: %#x", port, control.value);
     return control.value;
 }
 
 void Channel::setControlRegister(uint32_t value) {
+    logger.logMessage("D%d_CHCR [W]: %#x", port, value);
     value &= ~(1UL << 2);
     value &= ~(1UL << 3);
     value &= ~(1UL << 4);
@@ -38,10 +40,12 @@ void Channel::setControlRegister(uint32_t value) {
 }
 
 uint32_t Channel::baseAddressRegister() const {
+    logger.logMessage("D%d_MADR [R]: %#x", port, baseAddress.value);
     return baseAddress.value;
 }
 
 void Channel::setBaseAddressRegister(uint32_t value) {
+    logger.logMessage("D%d_MADR [W]: %#x", port, value);
     value &= ~(1UL << 24);
     value &= ~(1UL << 25);
     value &= ~(1UL << 26);
@@ -54,10 +58,12 @@ void Channel::setBaseAddressRegister(uint32_t value) {
 }
 
 uint32_t Channel::blockControlRegister() const {
+    logger.logMessage("D%d_BCR [R]: %#x", port, blockControl.value);
     return blockControl.value;
 }
 
 void Channel::setBlockControlRegister(uint32_t value) {
+    logger.logMessage("D%d_BCR [W]: %#x", port, value);
     blockControl.value = value;
 }
 
