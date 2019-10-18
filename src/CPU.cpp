@@ -951,7 +951,7 @@ void CPU::operationMoveFromCoprocessor0(Instruction instruction) {
     uint32_t cpuRegisterIndex = instruction.rt;
     uint32_t copRegisterIndex = instruction.rd;
 
-    uint32_t value;
+    uint32_t value = 0;
     switch (copRegisterIndex) {
         case 3: {
             value = cop0->breakPointOnExecute;

@@ -82,7 +82,7 @@ uint32_t GPU::statusRegister() const {
     value |= ((uint32_t)1) << 28; // Ready to receive DMA
     value |= ((uint32_t)dmaDirection) << 29;
     value |= ((uint32_t)0) << 31; // current drawn line?
-    uint32_t dmaRequest;
+    uint32_t dmaRequest = 0;
     switch (dmaDirection) {
         case GPUDMADirection::Off: {
             dmaRequest = 0;
