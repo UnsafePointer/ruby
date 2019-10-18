@@ -712,6 +712,8 @@ GP1(08h)      ;display mode 320x200 NTSC (0)
 GP0(E1h..E6h) ;rendering attributes (0)
 */
 void GPU::operationGp1Reset(uint32_t value) {
+    // TODO: unused
+    (void)value;
     interruptRequestEnable = false;
 
     texturePageBaseX = 0;
@@ -1659,6 +1661,8 @@ GP1(02h) - Acknowledge GPU Interrupt (IRQ1)
 0-23  Not used (zero)                                        ;GPUSTAT.24
 */
 void GPU::operationGp1AcknowledgeGPUInterrupt(uint32_t value) {
+    // TODO: unused
+    (void)value;
     interruptRequestEnable = false;
     return;
 }
@@ -1668,6 +1672,8 @@ GP1(01h) - Reset Command Buffer
 0-23  Not used (zero)
 */
 void GPU::operationGp1ResetCommandBuffer(uint32_t value) {
+    // TODO: unused
+    (void)value;
     gp0InstructionBuffer.clear();
     gp0WordsRemaining = 0;
     gp0Mode = GP0Mode::Command;
@@ -1767,6 +1773,9 @@ void GPU::operationGp0FillRectagleInVRAM() {
 }
 
 void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode) {
+    // TODO: unused
+    (void)opaque;
+    (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
     Point point1 = Point(gp0InstructionBuffer[1]);
     Point texturePoint1 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
@@ -1801,6 +1810,8 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
 }
 
 void GPU::quad(Dimensions dimensions, bool opaque) {
+    // TODO: unused
+    (void)opaque;
     Color color = Color(gp0InstructionBuffer[0]);
     Point point = Point(gp0InstructionBuffer[1]);
     Vertex topLeft = Vertex(point, color);
@@ -1822,6 +1833,8 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
 }
 
 void GPU::monochromePolygon(uint numberOfPoints, bool opaque) {
+    // TODO: unused
+    (void)opaque;
     Color color = Color(gp0InstructionBuffer[0]);
     vector<Vertex> vertices = vector<Vertex>();
     for (uint i = 1; i <= numberOfPoints; i++) {
@@ -1832,6 +1845,8 @@ void GPU::monochromePolygon(uint numberOfPoints, bool opaque) {
 }
 
 void GPU::shadedPolygon(uint numberOfPoints, bool opaque) {
+    // TODO: unused
+    (void)opaque;
     vector<Vertex> vertices = vector<Vertex>();
     for (uint i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
@@ -1842,6 +1857,9 @@ void GPU::shadedPolygon(uint numberOfPoints, bool opaque) {
 }
 
 void GPU::texturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
+    // TODO: unused
+    (void)opaque;
+    (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
     Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
     Point texturePage = Point::forTexturePage(gp0InstructionBuffer[4] >> 16);
@@ -1859,6 +1877,9 @@ void GPU::texturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode tex
 }
 
 void GPU::shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
+    // TODO: unused
+    (void)opaque;
+    (void)textureBlendMode;
     Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
     Point texturePage = Point::forTexturePage(gp0InstructionBuffer[5] >> 16);
     TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[5] >> 16) >> 7) & 0x3);
@@ -1875,6 +1896,8 @@ void GPU::shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMo
 }
 
 void GPU::monochromeLine(uint numberOfPoints, bool opaque) {
+    // TODO: unused
+    (void)opaque;
     Color color = Color(gp0InstructionBuffer[0]);
     vector<Vertex> vertices = vector<Vertex>();
     for (uint i = 1; i <= numberOfPoints; i++) {
@@ -1895,6 +1918,8 @@ void GPU::monochromeLine(uint numberOfPoints, bool opaque) {
 }
 
 void GPU::shadedLine(uint numberOfPoints, bool opaque) {
+    // TODO: unused
+    (void)opaque;
     vector<Vertex> vertices = vector<Vertex>();
     for (uint i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
