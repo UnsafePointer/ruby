@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include "Emulator.hpp"
+#include "Logger.hpp"
 
 // XXXX_NNN.NN (Boot-Executable) (filename specified in SYSTEM.CNF)
 // FILENAME.EXE (General-Purpose Executable)
@@ -33,6 +34,7 @@ const uint32_t TEST_HEADER_SIZE = 2048;
 class EmulatorRunner {
     static EmulatorRunner* instance;
 
+    Logger logger;
     Emulator *emulator;
     bool runTests;
     std::string exeFile;

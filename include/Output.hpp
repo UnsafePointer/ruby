@@ -1,7 +1,6 @@
 #pragma once
+#include <cstdarg>
 #include <string>
 
+std::string format(const char *fmt, va_list args);
 std::string format(const char *fmt, ...);
-void printMessage(const char *fmt, ...);
-void printWarning(const char *fmt, ...);
-void printError(const char *fmt, ...);

@@ -1,22 +1,28 @@
 #pragma once
 #include <sstream>
 #include <string>
+#include <limits>
+
+enum LogLevel : uint8_t {
+    NoLog = 0,
+    Warning = 1,
+    Message = 2,
+};
+
+LogLevel logLevelWithValue(std::string value);
 
 class Logger {
-    static Logger* instance;
-
+    LogLevel level;
+    std::string prefix;
     bool shouldTrace;
-    bool shouldLogVerbose;
-    std::stringstream stream;
-    uint16_t bufferSize;
-    void traceMessage(std::string message);
-    Logger();
+    void traceMessage(std::string message) const;
 public:
-    static Logger* getInstance();
-    void configure(bool enableTrace, bool enableVerbose);
-    void setupTraceFile();
-    void logMessage(std::string message);
-    void logWarning(std::string message);
-    void logError(std::string message);
-    void flush();
+    Logger(LogLevel level);
+    Logger(LogLevel level, std::string prefix);
+    Logger(LogLevel level, std::string prefix, bool shouldTrace);
+    void logDebug(const char *fmt, ...) const;
+    void logMessage(const char *fmt, ...) const;
+    void logWarning(const char *fmt, ...) const;
+    void logError(const char *fmt, ...) const;
+    void flush() const;
 };

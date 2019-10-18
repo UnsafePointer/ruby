@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "Logger.hpp"
 
 /*
 1F80104Ah JOY_CTRL (R/W) (usually 1003h,3003h,0000h)
@@ -140,7 +141,7 @@ union JoypadTxData {
 };
 
 class Controller {
-
+    Logger logger;
 public:
     Controller();
     ~Controller();

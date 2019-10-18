@@ -9,10 +9,12 @@
 #include "GPUImageBuffer.hpp"
 #include "Texture.hpp"
 #include "Window.hpp"
+#include "Logger.hpp"
 
 class GPU;
 
 class Renderer {
+    Logger logger;
     GLuint offsetUniform;
 
     std::unique_ptr<RendererProgram> program;

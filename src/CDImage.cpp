@@ -1,9 +1,8 @@
 #include "CDImage.hpp"
-#include "Output.hpp"
 
 using namespace std;
 
-CDImage::CDImage() : file() {
+CDImage::CDImage() : file(), logger(LogLevel::NoLog) {
 }
 
 CDImage::~CDImage() {
@@ -13,7 +12,7 @@ CDImage::~CDImage() {
 void CDImage::open(string filePath) {
     file.open(filePath, ios::binary);
     if (!file.is_open()) {
-        printError("Unable to load CD-ROM image file");
+        logger.logError("Unable to load CD-ROM image file");
     }
 }
 

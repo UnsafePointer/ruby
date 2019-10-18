@@ -41,7 +41,8 @@ GLuint RendererProgram::compileShader(string filePath, GLenum shaderType) const 
     GLint status = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
-        checkForOpenGLErrors();
+        RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+        rendererDebugger->checkForOpenGLErrors();
     }
     return shader;
 }
@@ -55,7 +56,8 @@ GLuint RendererProgram::linkProgram(vector<GLuint> shaders) const {
     GLint status = GL_FALSE;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
     if (status == GL_FALSE) {
-        checkForOpenGLErrors();
+        RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+        rendererDebugger->checkForOpenGLErrors();
     }
     return program;
 }
@@ -63,6 +65,7 @@ GLuint RendererProgram::linkProgram(vector<GLuint> shaders) const {
 GLuint RendererProgram::findProgramAttribute(string attribute) const {
     const GLchar *attrib = attribute.c_str();
     GLint index = glGetAttribLocation(program, attrib);
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
     return index;
 }

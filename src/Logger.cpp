@@ -1,68 +1,108 @@
 #include "Logger.hpp"
 #include <fstream>
 #include <iostream>
+#include "Output.hpp"
+#include "ConfigurationManager.hpp"
 
 using namespace std;
 
-Logger::Logger() : shouldTrace(false), stream(), bufferSize(0) {}
+const uint32_t BUFFER_SIZE_LIMIT = 8192;
 
-Logger* Logger::instance = nullptr;
+std::stringstream stream = std::stringstream();
+uint16_t bufferSize = 0;
 
-Logger* Logger::getInstance() {
-    if (instance == nullptr) {
-        instance = new Logger();
+LogLevel logLevelWithValue(std::string value) {
+    if (value.compare("WAR") == 0) {
+        return LogLevel::Warning;
+    } else if (value.compare("MSG") == 0) {
+        return LogLevel::Message;
+    } else if (value.compare("NOLOG") == 0) {
+        return LogLevel::NoLog;
     }
-    return instance;
+    return LogLevel::NoLog;
 }
 
-void Logger::configure(bool enableTrace, bool enableVerbose) {
-    shouldTrace = enableTrace;
-    shouldLogVerbose = enableVerbose;
+Logger::Logger(LogLevel level) : level(level), prefix("") {
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    shouldTrace = configurationManager->shouldTraceLogs();
 }
 
-void Logger::setupTraceFile() {
-    if (!shouldTrace) {
-        return;
-    }
-    remove("ruby.log");
+Logger::Logger(LogLevel level, string prefix) : level(level), prefix(prefix) {
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    shouldTrace = configurationManager->shouldTraceLogs();
 }
 
-void Logger::flush() {
+Logger::Logger(LogLevel level, string prefix, bool shouldTrace) : level(level), prefix(prefix), shouldTrace(shouldTrace) {}
+
+void Logger::flush() const {
     ofstream logfile = ofstream();
     logfile.open("ruby.log", ios::out | ios::app);
-    logfile << this->stream.str();
+    logfile << stream.str();
     logfile.close();
-    this->stream.str(string());
-    this->bufferSize = 0;
+    stream.str(string());
+    bufferSize = 0;
 }
 
-void Logger::traceMessage(std::string message) {
+void Logger::traceMessage(std::string message) const {
     if (!shouldTrace) {
         return;
     }
-    this->stream << message << endl;
-    this->bufferSize += message.length();
-    if (bufferSize < 8192) {
+    stream << message << endl;
+    bufferSize += message.length();
+    if (bufferSize < BUFFER_SIZE_LIMIT) {
         return;
     }
     flush();
 }
 
-void Logger::logMessage(std::string message) {
-    if (!shouldLogVerbose) {
+void Logger::logDebug(const char *fmt, ...) const {
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    formatted.insert(0, prefix);
+    cout << formatted << endl;
+    traceMessage(formatted);
+}
+
+void Logger::logMessage(const char *fmt, ...) const {
+    if (level < LogLevel::Message) {
         return;
     }
-    cout << message << endl;
-    traceMessage(message);
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    formatted.insert(0, prefix);
+    cout << formatted << endl;
+    traceMessage(formatted);
 }
 
-void Logger::logWarning(std::string message) {
-    cout << message << endl;
-    traceMessage(message);
+void Logger::logWarning(const char *fmt, ...) const {
+    if (level < LogLevel::Warning) {
+        return;
+    }
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    formatted.insert(0, prefix);
+    cout << formatted << endl;
+    traceMessage(formatted);
 }
 
-void Logger::logError(std::string message) {
-    cout << message << endl;
-    traceMessage(message);
+void Logger::logError(const char *fmt, ...) const {
+    va_list args;
+    va_start(args, fmt);
+    string formatted = format(fmt, args);
+    va_end(args);
+
+    formatted.insert(0, prefix);
+    cout << formatted << endl;
+    traceMessage(formatted);
     flush();
+    exit(1);
 }

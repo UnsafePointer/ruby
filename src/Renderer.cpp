@@ -4,14 +4,13 @@
 #include <streambuf>
 #include <vector>
 #include "RendererDebugger.hpp"
-#include "Output.hpp"
 #include "Framebuffer.hpp"
 #include "GPU.hpp"
 #include "ConfigurationManager.hpp"
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : mode(GL_TRIANGLES) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog), mode(GL_TRIANGLES) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -41,7 +40,8 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : mode(GL_TRIANGLES) {
 
     Dimensions screenDimensions = mainWindow->getDimensions();
     screenTexture = make_unique<Texture>(((GLsizei) screenDimensions.width), ((GLsizei) screenDimensions.height));
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 Renderer::~Renderer() {
@@ -65,7 +65,7 @@ void Renderer::checkForceDraw(uint verticesToRender, GLenum newMode) {
 void Renderer::pushLine(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 2) {
-        printError("Unhandled line with %d vertices", size);
+        logger.logError("Unhandled line with %d vertices", size);
         return;
     }
     checkForceDraw(size, GL_LINES);
@@ -77,7 +77,7 @@ void Renderer::pushLine(std::vector<Vertex> vertices) {
 void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     uint size = vertices.size();
     if (size < 3 || size > 4) {
-        printError("Unhandled polygon with %d vertices", size);
+        logger.logError("Unhandled polygon with %d vertices", size);
         return;
     }
     checkForceDraw(size, GL_TRIANGLES);
@@ -103,7 +103,8 @@ void Renderer::prepareFrame() {
 void Renderer::renderFrame() {
     Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->draw(mode);
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 void Renderer::finalizeFrame(GPU *gpu) {
@@ -129,7 +130,8 @@ void Renderer::finalizeFrame(GPU *gpu) {
     }
     screenBuffer->addData(pixels);
     screenBuffer->draw(GL_TRIANGLE_STRIP);
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
@@ -147,5 +149,6 @@ void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     textureBuffer->addData(data);
     Framebuffer framebuffer = Framebuffer(screenTexture);
     textureBuffer->draw(GL_TRIANGLE_STRIP);
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }

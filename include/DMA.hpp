@@ -6,6 +6,7 @@
 #include "GPU.hpp"
 #include <string>
 #include "CDROM.hpp"
+#include "Logger.hpp"
 
 enum Port {
     MDECin = 0,
@@ -17,9 +18,6 @@ enum Port {
     OTC = 6,
     None = 1337
 };
-
-Port portWithIndex(uint32_t index);
-std::string portDescription(Port port);
 
 // 1F8010F0h - DPCR - DMA Control Register (R/W)
 // 0-2   DMA0, MDECin  Priority      (0..7; 0=Highest, 7=Lowest)
@@ -133,6 +131,7 @@ union DMAInterrupt {
 // 1F8010F0h DPCR - DMA Control register
 // 1F8010F4h DICR - DMA Interrupt register
 class DMA {
+    Logger logger;
     std::unique_ptr<RAM> &ram;
     std::unique_ptr<GPU> &gpu;
     std::unique_ptr<CDROM> &cdrom;
@@ -153,6 +152,9 @@ class DMA {
     void execute(Port port);
     void executeBlock(Port port, Channel& channel);
     void executeLinkedList(Port port, Channel& channel);
+
+    Port portWithIndex(uint32_t index);
+    std::string portDescription(Port port);
 public:
     DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom);
     ~DMA();

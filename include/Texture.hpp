@@ -3,8 +3,10 @@
 #include <cstdint>
 #include <memory>
 #include "GPUImageBuffer.hpp"
+#include "Logger.hpp"
 
 class Texture {
+    Logger logger;
     GLuint object;
     GLsizei width;
     GLsizei height;

@@ -1,12 +1,11 @@
 #pragma once
 #include "DMA.hpp"
-#include "Output.hpp"
 
 template <typename T>
 inline T DMA::load(uint32_t offset) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (sizeof(T) != 4) {
-        printError("Unsupported DMA read with size: %d", sizeof(T));
+        logger.logError("Unsupported DMA read with size: %d", sizeof(T));
     }
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
@@ -31,7 +30,7 @@ inline T DMA::load(uint32_t offset) {
                     return channel.controlRegister();
                 }
                 default: {
-                    printError("Unhandled DMA read at offset: %#x", offset);
+                    logger.logError("Unhandled DMA read at offset: %#x", offset);
                     return 0;
                 }
             }
@@ -45,13 +44,13 @@ inline T DMA::load(uint32_t offset) {
                     return interruptRegister();
                 }
                 default: {
-                    printError("Unhandled DMA read at offset: %#x", offset);
+                    logger.logError("Unhandled DMA read at offset: %#x", offset);
                     return 0;
                 }
             }
         }
         default: {
-            printError("Unhandled DMA read at offset: %#x", offset);
+            logger.logError("Unhandled DMA read at offset: %#x", offset);
             return 0;
         }
     }
@@ -61,7 +60,7 @@ template <typename T>
 inline void DMA::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (sizeof(T) != 4) {
-        printError("Unsupported DMA write with size: %d", sizeof(T));
+        logger.logError("Unsupported DMA write with size: %d", sizeof(T));
     }
     uint32_t upper = (offset & 0x70) >> 4;
     uint32_t lower = (offset & 0xf);
@@ -90,7 +89,7 @@ inline void DMA::store(uint32_t offset, T value) {
                     break;
                 }
                 default: {
-                    printError("Unhandled DMA write at offset: %#x", offset);
+                    logger.logError("Unhandled DMA write at offset: %#x", offset);
                     return;
                 }
             }
@@ -110,14 +109,14 @@ inline void DMA::store(uint32_t offset, T value) {
                     break;
                 }
                 default: {
-                    printError("Unhandled DMA write at offset: %#x", offset);
+                    logger.logError("Unhandled DMA write at offset: %#x", offset);
                     return;
                 }
             }
             break;
         }
         default: {
-            printError("Unhandled DMA write at offset: %#x", offset);
+            logger.logError("Unhandled DMA write at offset: %#x", offset);
             return;
         }
     }

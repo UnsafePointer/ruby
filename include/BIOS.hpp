@@ -3,11 +3,13 @@
 #include <string>
 #include <optional>
 #include <array>
+#include "Logger.hpp"
 
 const uint32_t BIOS_SIZE = 512*1024;
 
 class BIOS {
     uint8_t data[BIOS_SIZE];
+    Logger logger;
 
     std::string formatBIOSFunction(std::string function, uint argc, std::array<uint32_t, 4> subroutineArguments);
 
@@ -15,7 +17,7 @@ class BIOS {
     std::optional<std::string> checkBFunctions(uint32_t r9, std::array<uint32_t, 4> subroutineArguments);
     std::optional<std::string> checkCFunctions(uint32_t r9, std::array<uint32_t, 4> subroutineArguments);
 public:
-    BIOS();
+    BIOS(LogLevel logLevel);
     ~BIOS();
 
     std::optional<std::string> checkFunctions(uint32_t programCounter, uint32_t r9, std::array<uint32_t, 4> subroutineArguments);

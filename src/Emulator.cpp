@@ -4,14 +4,13 @@
 #include "Constants.h"
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
-#include "Output.hpp"
 
 using namespace std;
 
 const uint32_t SCREEN_WIDTH = 1024;
 const uint32_t SCREEN_HEIGHT = 768;
 
-Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
+Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer(), biosFunctionsLog() {
     setupSDL();
     uint32_t screenHeight = SCREEN_HEIGHT;
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
@@ -22,7 +21,6 @@ Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
     if (showDebugInfoWindow) {
         debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT);
     }
-    logBiosFunctionCalls = configurationManager->shouldLogBiosFunctionCalls();
     mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
     mainWindow->makeCurrent();
     setupOpenGL();
@@ -30,20 +28,21 @@ Emulator::Emulator() : ttyBuffer(), biosFunctionsLog() {
         debugInfoRenderer = make_unique<DebugInfoRenderer>(debugWindow);
     }
     cop0 = make_unique<COP0>();
-    bios = make_unique<BIOS>();
+    bios = make_unique<BIOS>(configurationManager->biosLogLevel());
     ram = make_unique<RAM>();
-    gpu = make_unique<GPU>(mainWindow);
+    gpu = make_unique<GPU>(configurationManager->gpuLogLevel(), mainWindow);
     scratchpad = make_unique<Scratchpad>();
     interruptController = make_unique<InterruptController>(cop0);
-    cdrom = make_unique<CDROM>(interruptController, configurationManager->shouldLogCDROMActivity());
+    LogLevel cdromLogLevel = configurationManager->cdromLogLevel();
+    cdrom = make_unique<CDROM>(cdromLogLevel, interruptController);
     dma = make_unique<DMA>(ram, gpu, cdrom);
     expansion1 = make_unique<Expansion1>();
     timer0 = make_unique<Timer0>();
     timer1 = make_unique<Timer1>();
     timer2 = make_unique<Timer2>();
     controller = make_unique<Controller>();
-    interconnect = make_unique<Interconnect>(cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller);
-    cpu = make_unique<CPU>(interconnect, cop0, logBiosFunctionCalls);
+    interconnect = make_unique<Interconnect>(configurationManager->interconnectLogLevel(), cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller);
+    cpu = make_unique<CPU>(configurationManager->cpuLogLevel(), interconnect, cop0, logBiosFunctionCalls);
 }
 
 Emulator::~Emulator() {}
@@ -103,7 +102,7 @@ void Emulator::dumpRAM() {
 
 void Emulator::setupSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        printError("Error initializing SDL: %s", SDL_GetError());
+        logger.logError("Error initializing SDL: %s", SDL_GetError());
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
@@ -112,7 +111,7 @@ void Emulator::setupSDL() {
 
 void Emulator::setupOpenGL() {
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
-        printError("Failed to initialize the OpenGL context.");
+        logger.logError("Failed to initialize the OpenGL context.");
     }
 }
 
@@ -141,7 +140,7 @@ void Emulator::loadCDROMImageFile(string filePath) {
 
 void Emulator::checkTTY(char c) {
     if (c == '\n') {
-        printWarning("%s", ttyBuffer.c_str());
+        logger.logDebug("%s", ttyBuffer.c_str());
         ttyBuffer.clear();
         return;
     }
@@ -160,14 +159,6 @@ void Emulator::checkBIOSFunctions() {
     bool functionCallLogIsRFE = functionCallLog.find("ReturnFromException()") == 0;
     if (functionCallLog.find("std_out_putchar(char)") == 0) {
         checkTTY(registers[4]);
-    } else {
-        if (logBiosFunctionCalls) {
-            if (!functionCallLogIsRFE) {
-                printWarning("  BIOS: %s", functionCallLog.c_str());
-            }
-        }
     }
-    if (!functionCallLogIsRFE) {
-        biosFunctionsLog.push_back(functionCallLog);
-    }
+    biosFunctionsLog.push_back(functionCallLog);
 }

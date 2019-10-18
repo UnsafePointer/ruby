@@ -5,6 +5,7 @@
 #include "Instruction.hpp"
 #include "Debugger.hpp"
 #include "COP0.hpp"
+#include "Logger.hpp"
 
 struct LoadSlot {
     uint32_t registerIndex;
@@ -31,6 +32,7 @@ R31        ra       Return address (used so by JAL,BLTZAL,BGEZAL opcodes)
 -          hi,lo    Multiply/divide results, may be changed by subroutines
 */
 class CPU {
+    Logger logger;
     uint32_t programCounter;
     uint32_t jumpDestination;
     bool isBranching;
@@ -132,7 +134,7 @@ class CPU {
 
     void operationIllegal(Instruction instruction);
 public:
-    CPU(std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls);
+    CPU(LogLevel logLevel, std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls);
     ~CPU();
 
     std::unique_ptr<COP0>& cop0Ref();

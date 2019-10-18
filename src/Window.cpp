@@ -1,9 +1,9 @@
 #include "Window.hpp"
-#include "Logger.hpp"
+#include "ConfigurationManager.hpp"
 
 using namespace std;
 
-Window::Window(bool mainWindow, string title, uint32_t width, uint32_t height) : mainWindow(mainWindow), title(title), width(width), height(height), hidden(false) {
+Window::Window(bool mainWindow, string title, uint32_t width, uint32_t height) : logger(LogLevel::NoLog), mainWindow(mainWindow), title(title), width(width), height(height), hidden(false) {
     window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     windowID = SDL_GetWindowID(window);
     glContext = SDL_GL_CreateContext(window);
@@ -41,8 +41,7 @@ void Window::handleSDLEvent(SDL_Event event) {
                 SDL_HideWindow(window);
             }
             if (mainWindow) {
-                Logger *logger = Logger::getInstance();
-                logger->flush();
+                logger.flush();
             }
             break;
         }

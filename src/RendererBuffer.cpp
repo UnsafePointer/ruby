@@ -2,7 +2,6 @@
 #include <stddef.h>
 #include "Vertex.hpp"
 #include "RendererDebugger.hpp"
-#include "Output.hpp"
 
 using namespace std;
 
@@ -50,7 +49,8 @@ void RendererBuffer<T>::draw(GLenum mode) {
         }
     }
     clean();
-    checkForOpenGLErrors();
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
 }
 
 template <class T>

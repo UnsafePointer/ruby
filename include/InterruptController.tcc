@@ -1,5 +1,4 @@
 #include "InterruptController.hpp"
-#include "Output.hpp"
 
 template <typename T>
 inline T InterruptController::load(uint32_t offset) const {
@@ -12,7 +11,7 @@ inline T InterruptController::load(uint32_t offset) const {
             return mask.value;
         }
         default: {
-            printError("Unhandled Interrupt Request Control read at offset: %#x", offset);
+            logger.logError("Unhandled Interrupt Request Control read at offset: %#x", offset);
             return 0;
         }
     }
@@ -31,7 +30,7 @@ inline void InterruptController::store(uint32_t offset, T value) {
             return;
         }
         default: {
-            printError("Unhandled Interrupt Request Control write at offset: %#x", offset);
+            logger.logError("Unhandled Interrupt Request Control write at offset: %#x", offset);
             return;
         }
     }

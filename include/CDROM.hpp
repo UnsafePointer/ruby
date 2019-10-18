@@ -4,6 +4,7 @@
 #include <memory>
 #include "InterruptController.hpp"
 #include "CDImage.hpp"
+#include "Logger.hpp"
 
 /*
 INT0   No response received (no interrupt request)
@@ -214,9 +215,9 @@ union CDROMMode {
 };
 
 class CDROM {
+    Logger logger;
     std::unique_ptr<InterruptController> &interruptController;
     CDImage image;
-    bool logActivity;
 
     CDROMStatus status;
     CDROMInterrupt interrupt;
@@ -311,9 +312,8 @@ Command          Parameters      Response(s)
     void operationReadN();
     void operationPause();
     void operationInit();
-    void logMessage(std::string message) const;
 public:
-    CDROM(std::unique_ptr<InterruptController> &interruptController, bool logActivity);
+    CDROM(LogLevel logLevel, std::unique_ptr<InterruptController> &interruptController);
     ~CDROM();
 
     void step();

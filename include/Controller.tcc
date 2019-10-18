@@ -1,6 +1,5 @@
 #pragma once
 #include "Controller.hpp"
-#include "Output.hpp"
 
 template <typename T>
 inline T Controller::load(uint32_t offset) {
@@ -16,7 +15,7 @@ inline T Controller::load(uint32_t offset) {
             return getControlRegister();
         }
         default: {
-            printError("Unhandled Controller read at offset: %#x", offset);
+            logger.logError("Unhandled Controller read at offset: %#x", offset);
             break;
         }
     }
@@ -44,7 +43,7 @@ inline void Controller::store(uint32_t offset, T value) {
             break;
         }
         default: {
-            printError("Unhandled Controller write at offset: %#x", offset);
+            logger.logError("Unhandled Controller write at offset: %#x", offset);
             break;
         }
     }

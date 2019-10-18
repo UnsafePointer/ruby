@@ -1,6 +1,5 @@
 #pragma once
 #include "Interconnect.hpp"
-#include "Output.hpp"
 #include "RAM.tcc"
 #include "BIOS.tcc"
 #include "GPU.tcc"
@@ -56,7 +55,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        printMessage("Unhandled Sound Processing Unit read at offset: %#x", *offset);
+        logger.logMessage("Unhandled Sound Processing Unit read at offset: %#x", *offset);
         return 0;
     }
     offset = scratchpadRange.contains(absoluteAddress);
@@ -71,7 +70,7 @@ inline T Interconnect::load(uint32_t address) const {
     if (offset) {
         return controller->load<T>(*offset);
     }
-    printWarning("Unhandled read at: %#x", address);
+    logger.logWarning("Unhandled read at: %#x", address);
     Debugger *debugger = Debugger::getInstance();
     if (debugger->isAttached()) {
         return 0;
@@ -83,7 +82,7 @@ template <typename T>
 inline void Interconnect::store(uint32_t address, T value) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (address % sizeof(T) != 0) {
-        printError("Unaligned memory store");
+        logger.logError("Unaligned memory store");
         exit(1);
     }
     uint32_t absoluteAddress = maskRegion(address);
@@ -105,7 +104,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
                 break;
             }
             default: {
-                printWarning("Unhandled Memory Control write at offset: %#x", *offset);
+                logger.logWarning("Unhandled Memory Control write at offset: %#x", *offset);
                 break;
             }
         }
@@ -113,12 +112,12 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = ramSizeRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled RAM Control write at offset: %#x", *offset);
+        logger.logWarning("Unhandled RAM Control write at offset: %#x", *offset);
         return;
     }
     offset = cacheControlRange.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Cache Control write at offset: %#x", *offset);
+        logger.logWarning("Unhandled Cache Control write at offset: %#x", *offset);
         return;
     }
     offset = ramRange.contains(absoluteAddress);
@@ -161,12 +160,12 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        printMessage("Unhandled Sound Processing Unit write at offset: %#x", *offset);
+        logger.logMessage("Unhandled Sound Processing Unit write at offset: %#x", *offset);
         return;
     }
     offset = expansion2Range.contains(absoluteAddress);
     if (offset) {
-        printWarning("Unhandled Expansion 2 write at offset: %#x", *offset);
+        logger.logWarning("Unhandled Expansion 2 write at offset: %#x", *offset);
         return;
     }
     offset = scratchpadRange.contains(absoluteAddress);
@@ -184,5 +183,5 @@ inline void Interconnect::store(uint32_t address, T value) const {
         controller->store<T>(*offset, value);
         return;
     }
-    printError("Unhandled write at: %#x", address);
+    logger.logError("Unhandled write at: %#x", address);
 }
