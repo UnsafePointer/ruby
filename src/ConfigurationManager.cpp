@@ -10,7 +10,7 @@ using namespace std;
 
 const string configurationFile = "config.yaml";
 
-ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, "", false), filePath(), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), trace(false) {}
+ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, "", false), filePath(), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), opengl(NoLog), dma(NoLog), trace(false) {}
 
 ConfigurationManager* ConfigurationManager::instance = nullptr;
 
@@ -76,6 +76,7 @@ void ConfigurationManager::loadConfiguration() {
     cpu = logLevelWithValue(configuration["log"]["cpu"].As<string>());
     gpu = logLevelWithValue(configuration["log"]["gpu"].As<string>());
     opengl = logLevelWithValue(configuration["log"]["opengl"].As<string>());
+    dma = logLevelWithValue(configuration["log"]["dma"].As<string>());
     trace = configuration["log"]["trace"].As<bool>();
     if (trace) {
         remove("ruby.log");
@@ -112,6 +113,10 @@ LogLevel ConfigurationManager::gpuLogLevel() {
 
 LogLevel ConfigurationManager::openGLLogLevel() {
     return opengl;
+}
+
+LogLevel ConfigurationManager::dmaLogLevel() {
+    return dma;
 }
 
 bool ConfigurationManager::shouldTraceLogs() {

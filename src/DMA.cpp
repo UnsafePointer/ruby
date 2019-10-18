@@ -4,7 +4,7 @@
 
 using namespace std;
 
-DMA::DMA(unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : logger(LogLevel::NoLog), ram(ram), gpu(gpu), cdrom(cdrom) {
+DMA::DMA(LogLevel logLevel, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : logger(logLevel), ram(ram), gpu(gpu), cdrom(cdrom) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel();
     }
@@ -15,10 +15,12 @@ DMA::~DMA() {
 }
 
 uint32_t DMA::controlRegister() const {
+    logger.logMessage("DPCR [R]: %#x", control.value);
     return control.value;
 }
 
 void DMA::setControlRegister(uint32_t value) {
+    logger.logMessage("DPCR [W]: %#x", value);
     control.value = value;
 }
 
@@ -28,10 +30,12 @@ bool DMA::interruptRequestStatus() const {
 }
 
 uint32_t DMA::interruptRegister() const {
+    logger.logMessage("DICR [R]: %#x", interrupt.value);
     return interrupt.value;
 }
 
 void DMA::setInterruptRegister(uint32_t value) {
+    logger.logMessage("DICR [W]: %#x", value);
     value &= ~(1UL << 6);
     value &= ~(1UL << 7);
     value &= ~(1UL << 8);

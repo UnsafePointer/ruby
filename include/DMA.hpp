@@ -156,7 +156,7 @@ class DMA {
     Port portWithIndex(uint32_t index);
     std::string portDescription(Port port);
 public:
-    DMA(std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom);
+    DMA(LogLevel logLevel, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom);
     ~DMA();
 
     template <typename T>

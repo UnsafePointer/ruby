@@ -17,6 +17,7 @@ class ConfigurationManager {
     LogLevel cpu;
     LogLevel gpu;
     LogLevel opengl;
+    LogLevel dma;
     bool trace;
 
     ConfigurationManager();
@@ -35,5 +36,6 @@ public:
     LogLevel cpuLogLevel();
     LogLevel gpuLogLevel();
     LogLevel openGLLogLevel();
+    LogLevel dmaLogLevel();
     bool shouldTraceLogs();
 };
