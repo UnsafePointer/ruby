@@ -4,7 +4,7 @@
 
 using namespace std;
 
-DMA::DMA(LogLevel logLevel, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : logger(logLevel), ram(ram), gpu(gpu), cdrom(cdrom) {
+DMA::DMA(LogLevel logLevel, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : logger(logLevel, "  DMA: "), ram(ram), gpu(gpu), cdrom(cdrom) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel(logLevel, DMAPort(i));
     }
@@ -73,7 +73,7 @@ void DMA::executeLinkedList(DMAPort port, Channel& channel) {
     if (channel.direction() == Direction::ToRam) {
         logger.logError("Unhandled DMA linked-list transfer to RAM");
     }
-    logger.logWarning("LinkedList DMA for port: %s with base address: %#x", portDescription(port).c_str(), address);
+    logger.logWarning("LinkedList for port: %s with base address: %#x", portDescription(port).c_str(), address);
     while (true) {
         uint32_t header = ram->load<uint32_t>(address);
         uint32_t remainingTransferSize = header >> 24;
@@ -103,7 +103,7 @@ void DMA::executeBlock(DMAPort port, Channel& channel) {
         logger.logError("Unknown DMA transfer size");
     }
     uint32_t remainingTransferSize = *transferSize;
-    logger.logWarning("Block DMA for port: %s with base address: %#x and transfer size: %#x", portDescription(port).c_str(), address, transferSize);
+    logger.logWarning("Block for port: %s with base address: %#x and transfer size: %#x", portDescription(port).c_str(), address, transferSize);
     while (remainingTransferSize > 0) {
         uint32_t currentAddress = address & 0x1ffffc;
         switch (channel.direction()) {

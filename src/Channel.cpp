@@ -4,7 +4,7 @@ using namespace std;
 
 Channel::Channel() : logger(NoLog) {}
 
-Channel::Channel(LogLevel logLevel, DMAPort port) : control(), baseAddress(), blockControl(), logger(logLevel), port(port) {
+Channel::Channel(LogLevel logLevel, DMAPort port) : control(), baseAddress(), blockControl(), logger(logLevel, "  DMA: "), port(port) {
 
 }
 
