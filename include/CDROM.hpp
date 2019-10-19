@@ -320,6 +320,8 @@ Command          Parameters      Response(s)
     void operationPause();
     void operationInit();
     void operationDemute();
+
+    void handleUnsupportedOperation(uint8_t operation);
 public:
     CDROM(LogLevel logLevel, std::unique_ptr<InterruptController> &interruptController);
     ~CDROM();

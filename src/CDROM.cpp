@@ -141,7 +141,7 @@ void CDROM::execute(uint8_t value) {
             break;
         }
         default: {
-            logger.logError("Unhandled CDROM operation value: %#x", value);
+            handleUnsupportedOperation(value);
         }
     }
     clearParameters();
@@ -446,6 +446,13 @@ void CDROM::operationDemute() {
     interruptQueue.push(INT3);
 
     logger.logMessage("CMD Demute");
+}
+
+void CDROM::handleUnsupportedOperation(uint8_t operation) {
+    logger.logWarning("Unhandled CDROM operation value: %#x", operation);
+    interruptQueue.push(INT5);
+    pushResponse(0x11);
+    pushResponse(0x10);
 }
 
 void CDROM::loadCDROMImageFile(string filePath) {
