@@ -4,7 +4,7 @@
 
 using namespace std;
 
-DMA::DMA(LogLevel logLevel, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom) : logger(logLevel, "  DMA: "), ram(ram), gpu(gpu), cdrom(cdrom) {
+DMA::DMA(LogLevel logLevel, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  DMA: "), ram(ram), gpu(gpu), cdrom(cdrom), interruptController(interruptController) {
     for (int i = 0; i < 7; i++) {
         channels[i] = Channel(logLevel, DMAPort(i));
     }
@@ -24,14 +24,43 @@ void DMA::setControlRegister(uint32_t value) {
     control.value = value;
 }
 
-bool DMA::interruptRequestStatus() const {
-    uint8_t channelStatus = interrupt.IRQFlagsStatus().value & interrupt.IRQEnableStatus().value;
-    return interrupt.masterIRQFlag || (interrupt.IRQEnableStatus().value && channelStatus != 0);
+void DMA::triggerInterrupt(DMAPort port) {
+    if (!interrupt.IRQEnableStatus().isPortEnabled(port)) {
+        return;
+    }
+    IRQFlags flags = interrupt.IRQFlagsStatus();
+    flags.setFlag(port);
+    interrupt._IRQFlags = flags.value;
+    uint8_t interruptValue =  calculateInterruptRegister() >> 31 & 1;
+    if (interruptValue) {
+        shouldTriggerInterrupt = true;
+    }
+}
+
+void DMA::step() {
+    if (shouldTriggerInterrupt) {
+        shouldTriggerInterrupt = false;
+        interruptController->trigger(InterruptRequestNumber::DMAIRQ);
+    }
+}
+
+uint32_t DMA::calculateInterruptRegister() const {
+    /*
+    Bit31 is a simple readonly flag that follows the following rules:
+    IF b15=1 OR (b23=1 AND (b16-22 AND b24-30)>0) THEN b31=1 ELSE b31=0
+    */
+    uint32_t value = interrupt.value;
+    uint32_t interrupts = interrupt.IRQEnableStatus().value & interrupt.IRQFlagsStatus().value;
+    if (interrupt.forceIRQ || (interrupt.masterIRQEnable && interrupts > 0)) {
+        value |= (1UL << 31);
+    }
+    return value;
 }
 
 uint32_t DMA::interruptRegister() const {
     logger.logMessage("DICR [R]: %#x", interrupt.value);
-    return interrupt.value;
+    uint32_t value = calculateInterruptRegister();
+    return value;
 }
 
 void DMA::setInterruptRegister(uint32_t value) {
@@ -45,10 +74,13 @@ void DMA::setInterruptRegister(uint32_t value) {
     value &= ~(1UL << 12);
     value &= ~(1UL << 13);
     value &= ~(1UL << 14);
-    interrupt.value = value;
-    if (interrupt.forceIRQ) {
-        interrupt.masterIRQFlag = 1;
-    }
+    value &= ~(1UL << 31);
+    DMAInterrupt toWrite = DMAInterrupt();
+    toWrite.value = value;
+    IRQFlags flags = interrupt.IRQFlagsStatus();
+    flags.acknowledge(toWrite.IRQFlagsStatus());
+    toWrite._IRQFlags = flags.value;
+    interrupt.value = toWrite.value;
 }
 
 Channel& DMA::channelForPort(DMAPort port) {
@@ -62,6 +94,7 @@ void DMA::execute(DMAPort port) {
     } else {
         executeBlock(port, channel);
     }
+    triggerInterrupt(port);
     return;
 }
 
