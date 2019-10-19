@@ -108,6 +108,10 @@ void CDROM::execute(uint8_t value) {
             operationInit();
             break;
         }
+        case 0x0C: {
+            operationDemute();
+            break;
+        }
         case 0x0E: {
             operationSetmode();
             break;
@@ -418,6 +422,18 @@ void CDROM::operationInit() {
     interruptQueue.push(INT2);
 
     logger.logMessage("CMD Init");
+}
+
+/*
+Demute - Command 0Ch --> INT3(stat)
+*/
+void CDROM::operationDemute() {
+    // TODO: track mute state
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    logger.logMessage("CMD Demute");
 }
 
 void CDROM::loadCDROMImageFile(string filePath) {

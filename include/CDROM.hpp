@@ -312,6 +312,7 @@ Command          Parameters      Response(s)
     void operationReadN();
     void operationPause();
     void operationInit();
+    void operationDemute();
 public:
     CDROM(LogLevel logLevel, std::unique_ptr<InterruptController> &interruptController);
     ~CDROM();
