@@ -107,7 +107,7 @@ union DMAInterrupt {
     DMAInterrupt() : value(0) {}
 
     IRQEnable IRQEnableStatus() const { return IRQEnable(_IRQEnable); }
-    IRQFlags IRQFlagsStatus() const { return IRQFlags(_IRQEnable); }
+    IRQFlags IRQFlagsStatus() const { return IRQFlags(_IRQFlags); }
 };
 
 // DMA Register Summary
