@@ -1041,8 +1041,19 @@ optional<string> BIOS::checkFunctions(uint32_t programCounter, uint32_t r9, arra
     string functionCallLog = (*result);
     bool functionCallLogIsRFE = functionCallLog.find("ReturnFromException()") == 0;
     if (functionCallLogIsRFE) {
+        logger.logMessage(functionCallLog.c_str());
         return result;
     }
-    logger.logMessage(functionCallLog.c_str());
+    bool functionCallLogIsTestEvent = functionCallLog.find("TestEvent") == 0;
+    if (functionCallLogIsTestEvent) {
+        logger.logMessage(functionCallLog.c_str());
+        return result;
+    }
+    bool functionCallLogIsPutChat = functionCallLog.find("std_out_putchar") == 0;
+    if (functionCallLogIsPutChat) {
+        logger.logMessage(functionCallLog.c_str());
+        return result;
+    }
+    logger.logWarning(functionCallLog.c_str());
     return result;
 }
