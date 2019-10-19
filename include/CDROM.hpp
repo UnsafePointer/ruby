@@ -234,10 +234,13 @@ class CDROM {
     std::vector<uint32_t> readBuffer;
     uint32_t readBufferIndex;
 
+    uint8_t leftCDToLeftSPUVolume;
+
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
     void setInterruptFlagRegister(uint8_t value);
     void setRequestRegister(uint8_t value);
+    void setAudioVolumeLeftCDToLeftSPURegister(uint8_t value);
     void execute(uint8_t value);
 
     uint8_t getStatusRegister() const;
