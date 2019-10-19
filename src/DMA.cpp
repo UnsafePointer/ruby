@@ -136,7 +136,7 @@ void DMA::executeBlock(DMAPort port, Channel& channel) {
         logger.logError("Unknown DMA transfer size");
     }
     uint32_t remainingTransferSize = *transferSize;
-    logger.logWarning("Block for port: %s with base address: %#x and transfer size: %#x", portDescription(port).c_str(), address, transferSize);
+    logger.logWarning("Block for port: %s with base address: %#x and transfer size: %#x", portDescription(port).c_str(), address, remainingTransferSize);
     while (remainingTransferSize > 0) {
         uint32_t currentAddress = address & 0x1ffffc;
         switch (channel.direction()) {
