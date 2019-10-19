@@ -30,14 +30,16 @@ void CDROM::step() {
             interruptController->trigger(InterruptRequestNumber::CDROMIRQ);
         }
     }
-    counter++;
-    if ((statusCode.play || statusCode.read) && counter >= SystemClocksPerCDROMInt1DoubleSpeed) {
-        interruptQueue.push(INT1);
-        pushResponse(statusCode._value);
-        counter = 0;
+    if ((statusCode.play || statusCode.read)) {
+        counter++;
+        if (counter >= SystemClocksPerCDROMInt1DoubleSpeed) {
+            interruptQueue.push(INT1);
+            pushResponse(statusCode._value);
+            counter = 0;
 
-        currentSector = image.readSector(readSector);
-        readSector++;
+            currentSector = image.readSector(readSector);
+            readSector++;
+        }
     }
 }
 
