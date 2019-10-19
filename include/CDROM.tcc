@@ -82,6 +82,10 @@ inline void CDROM::store(uint32_t offset, T value) {
                     setAudioVolumeLeftCDToLeftSPURegister(value);
                     break;
                 }
+                case 3: {
+                    setAudioVolumeRightCDToLeftSPURegister(value);
+                    break;
+                }
                 default: {
                     logger.logError("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
                     break;

@@ -236,6 +236,7 @@ class CDROM {
 
     uint8_t leftCDToLeftSPUVolume;
     uint8_t leftCDToRightSPUVolume;
+    uint8_t rightCDToLeftSPUVolume;
 
     void setStatusRegister(uint8_t value);
     void setInterruptRegister(uint8_t value);
@@ -243,6 +244,7 @@ class CDROM {
     void setRequestRegister(uint8_t value);
     void setAudioVolumeLeftCDToLeftSPURegister(uint8_t value);
     void setAudioVolumeLeftCDToRightSPURegister(uint8_t value);
+    void setAudioVolumeRightCDToLeftSPURegister(uint8_t value);
     void execute(uint8_t value);
 
     uint8_t getStatusRegister() const;

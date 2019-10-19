@@ -16,7 +16,7 @@ should be: SystemClock*930h/4/44100Hz for Single Speed (and half as much for Dou
 const uint32_t SystemClocksPerCDROMInt1SingleSpeed=2352;
 const uint32_t SystemClocksPerCDROMInt1DoubleSpeed=2352/2;
 
-CDROM::CDROM(LogLevel logLevel, unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  CD-ROM: "), interruptController(interruptController), image(), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex(), leftCDToLeftSPUVolume(), leftCDToRightSPUVolume() {
+CDROM::CDROM(LogLevel logLevel, unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  CD-ROM: "), interruptController(interruptController), image(), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex(), leftCDToLeftSPUVolume(), leftCDToRightSPUVolume(), rightCDToLeftSPUVolume() {
 
 }
 
@@ -90,6 +90,10 @@ void CDROM::setAudioVolumeLeftCDToLeftSPURegister(uint8_t value) {
 
 void CDROM::setAudioVolumeLeftCDToRightSPURegister(uint8_t value) {
     leftCDToRightSPUVolume = value;
+}
+
+void CDROM::setAudioVolumeRightCDToLeftSPURegister(uint8_t value) {
+    rightCDToLeftSPUVolume = value;
 }
 
 void CDROM::execute(uint8_t value) {
