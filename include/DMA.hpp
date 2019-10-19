@@ -65,6 +65,26 @@ union IRQEnable {
     uint8_t value;
 
     IRQEnable(uint8_t value) : value(value) {}
+    bool isPortEnabled(DMAPort port) {
+        switch (port) {
+            case MDECin:
+                return MDECinIRQEnable > 0;
+            case MDECout:
+                return MDECoutIRQEnable > 0;
+            case GPUP:
+                return GPUIRQEnable > 0;
+            case CDROMP:
+                return CDROMIRQEnable > 0;
+            case SPU:
+                return SPUIRQEnable > 0;
+            case PIO:
+                return PIOIRQEnable > 0;
+            case OTC:
+                return OTCIRQEnable > 0;
+            default:
+                return false;
+        }
+    }
 };
 
 union IRQFlags {
@@ -81,6 +101,70 @@ union IRQFlags {
     uint8_t value;
 
     IRQFlags(uint8_t value) : value(value) {}
+    void setFlag(DMAPort port) {
+        switch (port) {
+            case MDECin:
+                MDECinIRQFlags = 1;
+                break;
+            case MDECout:
+                MDECoutIRQFlags = 1;
+                break;
+            case GPUP:
+                GPUIRQFlags = 1;
+                break;
+            case CDROMP:
+                CDROMIRQFlags = 1;
+                break;
+            case SPU:
+                SPUIRQFlags = 1;
+                break;
+            case PIO:
+                PIOIRQFlags = 1;
+                break;
+            case OTC:
+                OTCIRQFlags = 1;
+                break;
+            default:
+                break;
+        }
+    }
+    void acknowledge(IRQFlags flags) {
+        if (flags.MDECinIRQFlags && MDECinIRQFlags) {
+            MDECinIRQFlags = 0;
+        } else {
+            MDECinIRQFlags = flags.MDECinIRQFlags;
+        }
+        if (flags.MDECoutIRQFlags && MDECoutIRQFlags) {
+            MDECoutIRQFlags = 0;
+        } else {
+            MDECoutIRQFlags = flags.MDECoutIRQFlags;
+        }
+        if (flags.GPUIRQFlags && GPUIRQFlags) {
+            GPUIRQFlags = 0;
+        } else {
+            GPUIRQFlags = flags.GPUIRQFlags;
+        }
+        if (flags.CDROMIRQFlags && CDROMIRQFlags) {
+            CDROMIRQFlags = 0;
+        } else {
+            CDROMIRQFlags = flags.CDROMIRQFlags;
+        }
+        if (flags.SPUIRQFlags && SPUIRQFlags) {
+            SPUIRQFlags = 0;
+        } else {
+            SPUIRQFlags = flags.SPUIRQFlags;
+        }
+        if (flags.PIOIRQFlags && PIOIRQFlags) {
+            PIOIRQFlags = 0;
+        } else {
+            PIOIRQFlags = flags.PIOIRQFlags;
+        }
+        if (flags.OTCIRQFlags && OTCIRQFlags) {
+            OTCIRQFlags = 0;
+        } else {
+            OTCIRQFlags = flags.OTCIRQFlags;
+        }
+    }
 };
 
 // 1F8010F4h - DICR - DMA Interrupt Register (R/W)
@@ -125,9 +209,11 @@ class DMA {
     std::unique_ptr<RAM> &ram;
     std::unique_ptr<GPU> &gpu;
     std::unique_ptr<CDROM> &cdrom;
+    std::unique_ptr<InterruptController> &interruptController;
 
     DMAControl control;
     DMAInterrupt interrupt;
+    bool shouldTriggerInterrupt;
 
     Channel channels[7];
     Channel& channelForPort(DMAPort port);
@@ -137,7 +223,8 @@ class DMA {
     uint32_t interruptRegister() const;
     void setInterruptRegister(uint32_t value);
 
-    bool interruptRequestStatus() const;
+    uint32_t calculateInterruptRegister() const;
+    void triggerInterrupt(DMAPort port);
 
     void execute(DMAPort port);
     void executeBlock(DMAPort port, Channel& channel);
@@ -146,8 +233,10 @@ class DMA {
     DMAPort portWithIndex(uint32_t index);
     std::string portDescription(DMAPort port);
 public:
-    DMA(LogLevel logLevel, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom);
+    DMA(LogLevel logLevel, std::unique_ptr<RAM> &ram, std::unique_ptr<GPU> &gpu, std::unique_ptr<CDROM> &cdrom, std::unique_ptr<InterruptController> &interruptController);
     ~DMA();
+
+    void step();
 
     template <typename T>
     inline T load(uint32_t offset);
