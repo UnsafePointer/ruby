@@ -1,6 +1,6 @@
 #include "SPU.hpp"
 
-SPU::SPU() {
+SPU::SPU(LogLevel logLevel) : logger(logLevel, "  SPU: ") {
 
 }
 

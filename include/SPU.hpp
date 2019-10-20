@@ -1,10 +1,11 @@
 #pragma once
 #include <cstdint>
+#include "Logger.hpp"
 
 class SPU {
-
+    Logger logger;
 public:
-    SPU();
+    SPU(LogLevel logLevel);
     ~SPU();
 
     template <typename T>
