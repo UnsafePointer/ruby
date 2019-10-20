@@ -55,6 +55,7 @@ void ConfigurationManager::setupConfigurationFile() {
     logConfigurationRef["cpu"] = "NOLOG";
     logConfigurationRef["gpu"] = "NOLOG";
     logConfigurationRef["opengl"] = "NOLOG";
+    logConfigurationRef["dma"] = "NOLOG";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
