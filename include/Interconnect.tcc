@@ -11,6 +11,7 @@
 #include "Expansion1.tcc"
 #include "Timer.tcc"
 #include "Controller.tcc"
+#include "SPU.tcc"
 
 template <typename T>
 inline T Interconnect::load(uint32_t address) const {
@@ -55,8 +56,7 @@ inline T Interconnect::load(uint32_t address) const {
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        logger.logMessage("Unhandled Sound Processing Unit read at offset: %#x", *offset);
-        return 0;
+        return spu->load<T>(*offset);
     }
     offset = scratchpadRange.contains(absoluteAddress);
     if (offset) {
@@ -160,7 +160,7 @@ inline void Interconnect::store(uint32_t address, T value) const {
     }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
-        logger.logMessage("Unhandled Sound Processing Unit write at offset: %#x", *offset);
+        spu->store<T>(*offset, value);
         return;
     }
     offset = expansion2Range.contains(absoluteAddress);

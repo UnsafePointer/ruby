@@ -42,7 +42,7 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer(), biosFunctionsLog() 
     timer2 = make_unique<Timer2>();
     controller = make_unique<Controller>();
     spu = make_unique<SPU>();
-    interconnect = make_unique<Interconnect>(configurationManager->interconnectLogLevel(), cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller);
+    interconnect = make_unique<Interconnect>(configurationManager->interconnectLogLevel(), cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller, spu);
     cpu = make_unique<CPU>(configurationManager->cpuLogLevel(), interconnect, cop0, logBiosFunctionCalls);
 }
 
