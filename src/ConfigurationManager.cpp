@@ -49,12 +49,12 @@ void ConfigurationManager::setupConfigurationFile() {
     }
     Yaml::Node logConfiguration = Yaml::Node();
     Yaml::Node &logConfigurationRef = logConfiguration;
-    logConfigurationRef["bios"] = "OFF";
-    logConfigurationRef["cdrom"] = "OFF";
-    logConfigurationRef["interconnect"] = "OFF";
-    logConfigurationRef["cpu"] = "OFF";
-    logConfigurationRef["gpu"] = "OFF";
-    logConfigurationRef["opengl"] = "OFF";
+    logConfigurationRef["bios"] = "NOLOG";
+    logConfigurationRef["cdrom"] = "NOLOG";
+    logConfigurationRef["interconnect"] = "NOLOG";
+    logConfigurationRef["cpu"] = "NOLOG";
+    logConfigurationRef["gpu"] = "NOLOG";
+    logConfigurationRef["opengl"] = "NOLOG";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
