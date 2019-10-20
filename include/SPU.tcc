@@ -4,6 +4,9 @@ template <typename T>
 inline T SPU::load(uint32_t offset) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     switch (offset) {
+        case 0x1ae: {
+            return statusRegister();
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit read at offset: %#x, of size: %d", offset, sizeof(T));
             return 0;

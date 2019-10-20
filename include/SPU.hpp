@@ -43,13 +43,48 @@ union SPUControl {
     SPUControlRAMTransferMode RAMTransferMode() { return SPUControlRAMTransferMode(_RAMTransferMode); }
 };
 
+enum SPUStatusCaptureBufferWrite {
+    FirstHalf = 0,
+    SecondHalf = 1,
+};
+
+// 1F801DAEh - SPU Status Register (SPUSTAT) (R)
+// 15-12 Unknown/Unused (seems to be usually zero)
+// 11    Writing to First/Second half of Capture Buffers (0=First, 1=Second)
+// 10    Data Transfer Busy Flag          (0=Ready, 1=Busy)
+// 9     Data Transfer DMA Read Request   (0=No, 1=Yes)
+// 8     Data Transfer DMA Write Request  (0=No, 1=Yes)
+// 7     Data Transfer DMA Read/Write Request ;seems to be same as SPUCNT.Bit5
+// 6     IRQ9 Flag                        (0=No, 1=Interrupt Request)
+// 5-0   Current SPU Mode   (same as SPUCNT.Bit5-0, but, applied a bit delayed)
+union SPUStatus {
+    struct {
+        uint16_t currentMode : 5;
+        uint16_t IRQFlag : 1;
+        uint16_t dataTransferDMAReadWriteRequest : 1;
+        uint16_t dataTransferDMAWWriteequest : 1;
+        uint16_t dataTransferDMAWReadequest : 1;
+        uint16_t dataTransferBusyFlag : 1;
+        uint16_t _captureBufferWrite : 1;
+        uint16_t unknown : 4;
+    };
+
+    uint16_t value;
+
+    SPUStatus() : value() {}
+
+    SPUStatusCaptureBufferWrite captureBufferWrite() { return SPUStatusCaptureBufferWrite(_captureBufferWrite); }
+};
+
 class SPU {
     Logger logger;
 
     SPUControl control;
+    SPUStatus status;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
+    uint16_t statusRegister() const;
 public:
     SPU(LogLevel logLevel);
     ~SPU();
