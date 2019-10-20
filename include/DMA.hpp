@@ -75,7 +75,7 @@ union IRQEnable {
                 return GPUIRQEnable > 0;
             case CDROMP:
                 return CDROMIRQEnable > 0;
-            case SPU:
+            case SPUP:
                 return SPUIRQEnable > 0;
             case PIO:
                 return PIOIRQEnable > 0;
@@ -115,7 +115,7 @@ union IRQFlags {
             case CDROMP:
                 CDROMIRQFlags = 1;
                 break;
-            case SPU:
+            case SPUP:
                 SPUIRQFlags = 1;
                 break;
             case PIO:

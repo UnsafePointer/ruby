@@ -207,7 +207,7 @@ string DMA::portDescription(DMAPort port) {
             return "GPU";
         case CDROMP:
             return "CDROM";
-        case SPU:
+        case SPUP:
             return "SPU";
         case PIO:
             return "PIO";
