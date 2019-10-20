@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
+#include <iostream>
 #include "Logger.hpp"
+#include "Output.hpp"
 
 enum SPUControlRAMTransferMode {
     Stop = 0,
@@ -76,15 +78,39 @@ union SPUStatus {
     SPUStatusCaptureBufferWrite captureBufferWrite() { return SPUStatusCaptureBufferWrite(_captureBufferWrite); }
 };
 
+enum SPUVoiceKeyOffValue {
+    NoChange = 0,
+    StartRelease = 1,
+};
+
+// 1F801D8Ch - Voice 0..23 Key OFF (Start Release) (KOFF) (W)
+// 0-23  Voice 0..23 Off (0=No change, 1=Start Release)
+// 24-31 Not used
+struct SPUVoiceKeyOff {
+    uint32_t value;
+
+    SPUVoiceKeyOff() : value() {}
+
+    SPUVoiceKeyOffValue voiceKeyOffValueAtIndex(uint8_t voiceIndex) {
+        if (voiceIndex >= 24) {
+            std::cout << format("Unsupported index %d for KOFF SPU register", voiceIndex) << std::endl;
+            exit(1);
+        }
+        return SPUVoiceKeyOffValue((value >> voiceIndex) & 0x1);
+    }
+};
+
 class SPU {
     Logger logger;
 
     SPUControl control;
     SPUStatus status;
+    SPUVoiceKeyOff voiceKeyOff;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
     uint16_t statusRegister() const;
+    void setVoiceKeyOffRegister(uint32_t value);
 public:
     SPU(LogLevel logLevel);
     ~SPU();

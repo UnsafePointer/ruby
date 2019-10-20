@@ -41,6 +41,24 @@ inline void SPU::store(uint32_t offset, T value) {
             setControlRegister(value);
             break;
         }
+        case 0x18c: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KOFF write with size: %d", sizeof(T));
+            }
+            uint32_t upper = (voiceKeyOff.value >> 16) << 16;
+            uint32_t toWrite = upper | value;
+            setVoiceKeyOffRegister(toWrite);
+            break;
+        }
+        case 0x18e: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KOFF write with size: %d", sizeof(T));
+            }
+            uint32_t lower = voiceKeyOff.value & 0xFFFF;
+            uint32_t toWrite = (value << 16) | lower;
+            setVoiceKeyOffRegister(toWrite);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;

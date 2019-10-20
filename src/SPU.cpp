@@ -1,6 +1,6 @@
 #include "SPU.hpp"
 
-SPU::SPU(LogLevel logLevel) : logger(logLevel, "  SPU: "), control(), status() {
+SPU::SPU(LogLevel logLevel) : logger(logLevel, "  SPU: "), control(), status(), voiceKeyOff() {
 
 }
 
@@ -20,4 +20,8 @@ void SPU::setControlRegister(uint16_t value) {
 
 uint16_t SPU::statusRegister() const {
     return status.value;
+}
+
+void SPU::setVoiceKeyOffRegister(uint32_t value) {
+    voiceKeyOff.value = value;
 }
