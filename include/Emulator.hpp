@@ -19,6 +19,7 @@
 #include "Controller.hpp"
 #include <string>
 #include "Logger.hpp"
+#include "SPU.hpp"
 
 class Emulator {
     Logger logger;
@@ -42,6 +43,7 @@ class Emulator {
     std::unique_ptr<Timer1> timer1;
     std::unique_ptr<Timer2> timer2;
     std::unique_ptr<Controller> controller;
+    std::unique_ptr<SPU> spu;
 
     std::string ttyBuffer;
     std::vector<std::string> biosFunctionsLog;
