@@ -14,7 +14,6 @@ inline T SPU::load(uint32_t offset) const {
 template <typename T>
 inline void SPU::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
-    (void)value;
     switch (offset) {
         case 0x180: {
             logger.logMessage("Unhandled Sound Processing Unit main volume left write");
@@ -30,6 +29,13 @@ inline void SPU::store(uint32_t offset, T value) {
         }
         case 0x186: {
             logger.logMessage("Unhandled Sound Processing Unit reverb volume output right write");
+            break;
+        }
+        case 0x1aa: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported SPUCNT write with size: %d", sizeof(T));
+            }
+            setControlRegister(value);
             break;
         }
         default: {
