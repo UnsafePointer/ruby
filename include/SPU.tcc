@@ -77,6 +77,24 @@ inline void SPU::store(uint32_t offset, T value) {
             setPitchModulationEnableFlagsRegister(toWrite);
             break;
         }
+        case 0x194: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported NON write with size: %d", sizeof(T));
+            }
+            uint32_t upper = (noiseModeEnable.value >> 16) << 16;
+            uint32_t toWrite = upper | value;
+            setNoiseModeEnableRegister(toWrite);
+            break;
+        }
+        case 0x196: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported NON write with size: %d", sizeof(T));
+            }
+            uint32_t lower = noiseModeEnable.value & 0xFFFF;
+            uint32_t toWrite = (value << 16) | lower;
+            setNoiseModeEnableRegister(toWrite);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;

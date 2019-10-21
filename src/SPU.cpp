@@ -33,3 +33,11 @@ void SPU::setPitchModulationEnableFlagsRegister(uint32_t value) {
 uint32_t SPU::pitchModulationEnableFlagsRegister() const {
     return pitchModulationEnableFlags.value;
 }
+
+void SPU::setNoiseModeEnableRegister(uint32_t value) {
+    noiseModeEnable.value = value;
+}
+
+uint32_t SPU::noiseModeEnableRegister() const {
+    return noiseModeEnable.value;
+}

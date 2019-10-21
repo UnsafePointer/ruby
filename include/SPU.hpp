@@ -124,6 +124,28 @@ struct SPUPitchModulationEnableFlags {
     }
 };
 
+enum SPUNoiseModeEnableValue {
+    ADPCM = 0,
+    Noise = 1,
+};
+
+// 1F801D94h - Voice 0..23 Noise mode enable (NON)
+// 0-23  Voice 0..23 Noise (0=ADPCM, 1=Noise)
+// 24-31 Not used
+struct SPUNoiseModeEnable {
+    uint32_t value;
+
+    SPUNoiseModeEnable() : value() {}
+
+    SPUNoiseModeEnableValue noiseModeEnableValueAtIndex(uint8_t voiceIndex) {
+        if (voiceIndex >= 24) {
+            std::cout << format("Unsupported index %d for KOFF SPU register", voiceIndex) << std::endl;
+            exit(1);
+        }
+        return SPUNoiseModeEnableValue((value >> voiceIndex) & 0x1);
+    }
+};
+
 class SPU {
     Logger logger;
 
@@ -131,6 +153,7 @@ class SPU {
     SPUStatus status;
     SPUVoiceKeyOff voiceKeyOff;
     SPUPitchModulationEnableFlags pitchModulationEnableFlags;
+    SPUNoiseModeEnable noiseModeEnable;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -138,6 +161,8 @@ class SPU {
     void setVoiceKeyOffRegister(uint32_t value);
     void setPitchModulationEnableFlagsRegister(uint32_t value);
     uint32_t pitchModulationEnableFlagsRegister() const;
+    void setNoiseModeEnableRegister(uint32_t value);
+    uint32_t noiseModeEnableRegister() const;
 public:
     SPU(LogLevel logLevel);
     ~SPU();
