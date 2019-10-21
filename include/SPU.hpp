@@ -100,17 +100,44 @@ struct SPUVoiceKeyOff {
     }
 };
 
+enum SPUPitchModulationEnableFlagValue {
+    NormalFrequency = 0,
+    ModulateByPreviousVoice = 1,
+};
+
+// 1F801D90h - Voice 0..23 Pitch Modulation Enable Flags (PMON)
+// Pitch modulation allows to generate "Frequency Sweep" effects by mis-using the amplitude from channel (x-1) as pitch factor for channel (x).
+// 0     Unknown... Unused?
+// 1-23  Flags for Voice 1..23 (0=Normal, 1=Modulate by Voice 0..22)
+// 24-31 Not used
+struct SPUPitchModulationEnableFlags {
+    uint32_t value;
+
+    SPUPitchModulationEnableFlags() : value() {}
+
+    SPUPitchModulationEnableFlagValue pitchModulationEnableFlagValueAtIndex(uint8_t voiceIndex) {
+        if (voiceIndex >= 24 || voiceIndex < 1) {
+            std::cout << format("Unsupported index %d for KOFF SPU register", voiceIndex) << std::endl;
+            exit(1);
+        }
+        return SPUPitchModulationEnableFlagValue((value >> voiceIndex) & 0x1);
+    }
+};
+
 class SPU {
     Logger logger;
 
     SPUControl control;
     SPUStatus status;
     SPUVoiceKeyOff voiceKeyOff;
+    SPUPitchModulationEnableFlags pitchModulationEnableFlags;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
     uint16_t statusRegister() const;
     void setVoiceKeyOffRegister(uint32_t value);
+    void setPitchModulationEnableFlagsRegister(uint32_t value);
+    uint32_t pitchModulationEnableFlagsRegister() const;
 public:
     SPU(LogLevel logLevel);
     ~SPU();

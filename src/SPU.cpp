@@ -25,3 +25,11 @@ uint16_t SPU::statusRegister() const {
 void SPU::setVoiceKeyOffRegister(uint32_t value) {
     voiceKeyOff.value = value;
 }
+
+void SPU::setPitchModulationEnableFlagsRegister(uint32_t value) {
+    pitchModulationEnableFlags.value = value;
+}
+
+uint32_t SPU::pitchModulationEnableFlagsRegister() const {
+    return pitchModulationEnableFlags.value;
+}

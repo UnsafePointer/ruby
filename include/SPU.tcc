@@ -59,6 +59,24 @@ inline void SPU::store(uint32_t offset, T value) {
             setVoiceKeyOffRegister(toWrite);
             break;
         }
+        case 0x190: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported PMON write with size: %d", sizeof(T));
+            }
+            uint32_t upper = (pitchModulationEnableFlags.value >> 16) << 16;
+            uint32_t toWrite = upper | value;
+            setPitchModulationEnableFlagsRegister(toWrite);
+            break;
+        }
+        case 0x192: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported PMON write with size: %d", sizeof(T));
+            }
+            uint32_t lower = pitchModulationEnableFlags.value & 0xFFFF;
+            uint32_t toWrite = (value << 16) | lower;
+            setPitchModulationEnableFlagsRegister(toWrite);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;
