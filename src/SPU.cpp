@@ -49,3 +49,19 @@ void SPU::setReverbModeRegister(uint32_t value) {
 uint32_t SPU::reverbModeRegister() const {
     return reverbMode.value;
 }
+
+void SPU::setCDAudioInputVolumeLeft(uint16_t value) {
+    CDAudioInputVolume.left = value;
+}
+
+uint16_t SPU::CDAudioInputVolumeLeft() const {
+    return CDAudioInputVolume.left;
+}
+
+void SPU::setCDAudioInputVolumeRight(uint16_t value) {
+    CDAudioInputVolume.right = value;
+}
+
+uint16_t SPU::CDAudioInputVolumeRight() const {
+    return CDAudioInputVolume.right;
+}

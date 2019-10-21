@@ -168,6 +168,20 @@ struct SPUReverbMode {
     }
 };
 
+// 1F801DB0h - CD Audio Input Volume (for normal CD-DA, and compressed XA-ADPCM)
+// 0-15  Volume Left   (-8000h..+7FFFh)
+// 16-31 Volume Right  (-8000h..+7FFFh)
+union SPUCDAudioInputVolume {
+    struct {
+        uint32_t left : 16;
+        uint32_t right : 16;
+    };
+
+    uint32_t value;
+
+    SPUCDAudioInputVolume() : value() {}
+};
+
 class SPU {
     Logger logger;
 
@@ -177,6 +191,7 @@ class SPU {
     SPUPitchModulationEnableFlags pitchModulationEnableFlags;
     SPUNoiseModeEnable noiseModeEnable;
     SPUReverbMode reverbMode;
+    SPUCDAudioInputVolume CDAudioInputVolume;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -188,6 +203,10 @@ class SPU {
     uint32_t noiseModeEnableRegister() const;
     void setReverbModeRegister(uint32_t value);
     uint32_t reverbModeRegister() const;
+    void setCDAudioInputVolumeLeft(uint16_t value);
+    uint16_t CDAudioInputVolumeLeft() const;
+    void setCDAudioInputVolumeRight(uint16_t value);
+    uint16_t CDAudioInputVolumeRight() const;
 public:
     SPU(LogLevel logLevel);
     ~SPU();

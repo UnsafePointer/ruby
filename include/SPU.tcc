@@ -113,6 +113,20 @@ inline void SPU::store(uint32_t offset, T value) {
             setReverbModeRegister(toWrite);
             break;
         }
+        case 0x1b0: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported CD Audio Input Volume write with size: %d", sizeof(T));
+            }
+            setCDAudioInputVolumeLeft(value);
+            break;
+        }
+        case 0x1b2: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported CD Audio Input Volume write with size: %d", sizeof(T));
+            }
+            setCDAudioInputVolumeRight(value);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;
