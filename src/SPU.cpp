@@ -41,3 +41,11 @@ void SPU::setNoiseModeEnableRegister(uint32_t value) {
 uint32_t SPU::noiseModeEnableRegister() const {
     return noiseModeEnable.value;
 }
+
+void SPU::setReverbModeRegister(uint32_t value) {
+    reverbMode.value = value;
+}
+
+uint32_t SPU::reverbModeRegister() const {
+    return reverbMode.value;
+}

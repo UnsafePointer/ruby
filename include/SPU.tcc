@@ -95,6 +95,24 @@ inline void SPU::store(uint32_t offset, T value) {
             setNoiseModeEnableRegister(toWrite);
             break;
         }
+        case 0x198: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported EON write with size: %d", sizeof(T));
+            }
+            uint32_t upper = (reverbMode.value >> 16) << 16;
+            uint32_t toWrite = upper | value;
+            setReverbModeRegister(toWrite);
+            break;
+        }
+        case 0x19a: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported EON write with size: %d", sizeof(T));
+            }
+            uint32_t lower = reverbMode.value & 0xFFFF;
+            uint32_t toWrite = (value << 16) | lower;
+            setReverbModeRegister(toWrite);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;

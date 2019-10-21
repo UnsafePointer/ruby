@@ -146,6 +146,28 @@ struct SPUNoiseModeEnable {
     }
 };
 
+enum SPUReverbModeValue {
+    ToMixer = 0,
+    ToMixerAndToReverb = 1,
+};
+
+// 1F801D98h - Voice 0..23 Reverb mode aka Echo On (EON) (R/W)
+// 0-23  Voice 0..23 Destination (0=To Mixer, 1=To Mixer and to Reverb)
+// 24-31 Not used
+struct SPUReverbMode {
+    uint32_t value;
+
+    SPUReverbMode() : value() {}
+
+    SPUReverbModeValue reverbModeValueAtIndex(uint8_t voiceIndex) {
+        if (voiceIndex >= 24) {
+            std::cout << format("Unsupported index %d for KOFF SPU register", voiceIndex) << std::endl;
+            exit(1);
+        }
+        return SPUReverbModeValue((value >> voiceIndex) & 0x1);
+    }
+};
+
 class SPU {
     Logger logger;
 
@@ -154,6 +176,7 @@ class SPU {
     SPUVoiceKeyOff voiceKeyOff;
     SPUPitchModulationEnableFlags pitchModulationEnableFlags;
     SPUNoiseModeEnable noiseModeEnable;
+    SPUReverbMode reverbMode;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -163,6 +186,8 @@ class SPU {
     uint32_t pitchModulationEnableFlagsRegister() const;
     void setNoiseModeEnableRegister(uint32_t value);
     uint32_t noiseModeEnableRegister() const;
+    void setReverbModeRegister(uint32_t value);
+    uint32_t reverbModeRegister() const;
 public:
     SPU(LogLevel logLevel);
     ~SPU();
