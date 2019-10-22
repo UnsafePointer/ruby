@@ -3,6 +3,10 @@
 template <typename T>
 inline T SPU::load(uint32_t offset) const {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
+    if (offset >= 0 && offset <= 0x17f) {
+        logger.logMessage("Unhandled Sound Processing Unit voice register read");
+        return 0;
+    }
     switch (offset) {
         case 0x1ae: {
             return statusRegister();
@@ -20,6 +24,10 @@ inline T SPU::load(uint32_t offset) const {
 template <typename T>
 inline void SPU::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
+    if (offset >= 0 && offset <= 0x17f) {
+        logger.logMessage("Unhandled Sound Processing Unit voice register write");
+        return;
+    }
     switch (offset) {
         case 0x180: {
             logger.logMessage("Unhandled Sound Processing Unit main volume left write");
