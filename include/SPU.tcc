@@ -141,6 +141,13 @@ inline void SPU::store(uint32_t offset, T value) {
             setExternalAudioInputVolumeRight(value);
             break;
         }
+        case 0x1ac: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported Sound RAM Data Transfer Control write with size: %d", sizeof(T));
+            }
+            setRAMDataTransferControlRegister(value);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;

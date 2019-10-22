@@ -81,3 +81,7 @@ void SPU::setExternalAudioInputVolumeRight(uint16_t value) {
 uint16_t SPU::externalAudioInputVolumeRight() const {
     return externalAudioInputVolume.right;
 }
+
+void SPU::setRAMDataTransferControlRegister(uint16_t value) {
+    RAMDataTransferControl.value = value;
+}

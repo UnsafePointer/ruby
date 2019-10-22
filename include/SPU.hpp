@@ -196,6 +196,54 @@ union SPUExternalAudoInputVolume {
     SPUExternalAudoInputVolume() : value() {}
 };
 
+enum SPURAMDataTransferControlType {
+    Fill,
+    NormalTransfer,
+    Rep2,
+    Rep4,
+    Rep8,
+};
+
+// 1F801DACh - Sound RAM Data Transfer Control (should be 0004h)
+// 15-4   Unknown/no effect?                       (should be zero)
+// 3-1    Sound RAM Data Transfer Type (see below) (should be 2)
+// 0      Unknown/no effect?                       (should be zero)
+// The Transfer Type selects how data is forwarded from Fifo to SPU RAM:
+// __Transfer Type___Halfwords in Fifo________Halfwords written to SPU RAM__
+// 0,1,6,7  Fill     A,B,C,D,E,F,G,H,...,X    X,X,X,X,X,X,X,X,...
+// 2        Normal   A,B,C,D,E,F,G,H,...,X    A,B,C,D,E,F,G,H,...
+// 3        Rep2     A,B,C,D,E,F,G,H,...,X    A,A,C,C,E,E,G,G,...
+// 4        Rep4     A,B,C,D,E,F,G,H,...,X    A,A,A,A,E,E,E,E,...
+// 5        Rep8     A,B,C,D,E,F,G,H,...,X    H,H,H,H,H,H,H,H,...
+union SPURAMDataTransferControl {
+    struct {
+        uint16_t unknown1 : 1;
+        uint16_t _type : 3;
+        uint16_t unknown2 : 12;
+    };
+    uint16_t value;
+
+    SPURAMDataTransferControl() : value() {}
+
+    SPURAMDataTransferControlType type() {
+        switch (_type) {
+            case 0:
+            case 1:
+            case 6:
+            case 7:
+                return SPURAMDataTransferControlType::Fill;
+            case 3:
+                return SPURAMDataTransferControlType::Rep2;
+            case 4:
+                return SPURAMDataTransferControlType::Rep4;
+            case 5:
+                return SPURAMDataTransferControlType::Rep8;
+            case 2:
+                return SPURAMDataTransferControlType::NormalTransfer;
+        }
+    }
+};
+
 class SPU {
     Logger logger;
 
@@ -207,6 +255,7 @@ class SPU {
     SPUReverbMode reverbMode;
     SPUCDAudioInputVolume CDAudioInputVolume;
     SPUExternalAudoInputVolume externalAudioInputVolume;
+    SPURAMDataTransferControl RAMDataTransferControl;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -226,6 +275,7 @@ class SPU {
     uint16_t externalAudioInputVolumeLeft() const;
     void setExternalAudioInputVolumeRight(uint16_t value);
     uint16_t externalAudioInputVolumeRight() const;
+    void setRAMDataTransferControlRegister(uint16_t value);
 public:
     SPU(LogLevel logLevel);
     ~SPU();
