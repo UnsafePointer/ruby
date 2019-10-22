@@ -65,3 +65,19 @@ void SPU::setCDAudioInputVolumeRight(uint16_t value) {
 uint16_t SPU::CDAudioInputVolumeRight() const {
     return CDAudioInputVolume.right;
 }
+
+void SPU::setExternalAudioInputVolumeLeft(uint16_t value) {
+    externalAudioInputVolume.left = value;
+}
+
+uint16_t SPU::externalAudioInputVolumeLeft() const {
+    return externalAudioInputVolume.left;
+}
+
+void SPU::setExternalAudioInputVolumeRight(uint16_t value) {
+    externalAudioInputVolume.right = value;
+}
+
+uint16_t SPU::externalAudioInputVolumeRight() const {
+    return externalAudioInputVolume.right;
+}

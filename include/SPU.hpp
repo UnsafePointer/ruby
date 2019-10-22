@@ -182,6 +182,20 @@ union SPUCDAudioInputVolume {
     SPUCDAudioInputVolume() : value() {}
 };
 
+// 1F801DB4h - External Audio Input Volume
+// 0-15  Volume Left   (-8000h..+7FFFh)
+// 16-31 Volume Right  (-8000h..+7FFFh)
+union SPUExternalAudoInputVolume {
+    struct {
+        uint32_t left : 16;
+        uint32_t right : 16;
+    };
+
+    uint32_t value;
+
+    SPUExternalAudoInputVolume() : value() {}
+};
+
 class SPU {
     Logger logger;
 
@@ -192,6 +206,7 @@ class SPU {
     SPUNoiseModeEnable noiseModeEnable;
     SPUReverbMode reverbMode;
     SPUCDAudioInputVolume CDAudioInputVolume;
+    SPUExternalAudoInputVolume externalAudioInputVolume;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -207,6 +222,10 @@ class SPU {
     uint16_t CDAudioInputVolumeLeft() const;
     void setCDAudioInputVolumeRight(uint16_t value);
     uint16_t CDAudioInputVolumeRight() const;
+    void setExternalAudioInputVolumeLeft(uint16_t value);
+    uint16_t externalAudioInputVolumeLeft() const;
+    void setExternalAudioInputVolumeRight(uint16_t value);
+    uint16_t externalAudioInputVolumeRight() const;
 public:
     SPU(LogLevel logLevel);
     ~SPU();

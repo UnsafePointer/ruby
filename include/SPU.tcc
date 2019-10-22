@@ -127,6 +127,20 @@ inline void SPU::store(uint32_t offset, T value) {
             setCDAudioInputVolumeRight(value);
             break;
         }
+        case 0x1b4: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported External Audio Input Volume write with size: %d", sizeof(T));
+            }
+            setExternalAudioInputVolumeLeft(value);
+            break;
+        }
+        case 0x1b6: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported External Audio Input Volume write with size: %d", sizeof(T));
+            }
+            setExternalAudioInputVolumeRight(value);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;
