@@ -89,3 +89,11 @@ void SPU::setRAMDataTransferControlRegister(uint16_t value) {
 void SPU::setRAMDataTransferAddressRegister(uint16_t value) {
     RAMDataTransferControl.value = value;
 }
+
+uint32_t SPU::voiceKeyOnRegister() const {
+    return voiceKeyOn.value;
+}
+
+void SPU::setVoiceKeyOnRegister(uint32_t value) {
+    voiceKeyOn.value = value;
+}

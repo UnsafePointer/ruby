@@ -79,7 +79,7 @@ union SPUStatus {
 };
 
 enum SPUVoiceKeyOffValue {
-    NoChange = 0,
+    NoChangeKeyOff = 0,
     StartRelease = 1,
 };
 
@@ -97,6 +97,28 @@ struct SPUVoiceKeyOff {
             exit(1);
         }
         return SPUVoiceKeyOffValue((value >> voiceIndex) & 0x1);
+    }
+};
+
+enum SPUVoiceKeyOnValue {
+    NoChangeKeyOn = 0,
+    StartAttackDecaySustain = 1,
+};
+
+// 1F801D88h - Voice 0..23 Key ON (Start Attack/Decay/Sustain) (KON) (W)
+// 0-23  Voice 0..23 On  (0=No change, 1=Start Attack/Decay/Sustain)
+// 24-31 Not used
+struct SPUVoiceKeyOn {
+    uint32_t value;
+
+    SPUVoiceKeyOn() : value() {}
+
+    SPUVoiceKeyOnValue voiceKeyOffValueAtIndex(uint8_t voiceIndex) {
+        if (voiceIndex >= 24) {
+            std::cout << format("Unsupported index %d for KON SPU register", voiceIndex) << std::endl;
+            exit(1);
+        }
+        return SPUVoiceKeyOnValue((value >> voiceIndex) & 0x1);
     }
 };
 
@@ -270,6 +292,7 @@ class SPU {
     SPUExternalAudoInputVolume externalAudioInputVolume;
     SPURAMDataTransferControl RAMDataTransferControl;
     SPURAMDataTransferAddress RAMDataTransferAddress;
+    SPUVoiceKeyOn voiceKeyOn;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -291,6 +314,8 @@ class SPU {
     uint16_t externalAudioInputVolumeRight() const;
     void setRAMDataTransferControlRegister(uint16_t value);
     void setRAMDataTransferAddressRegister(uint16_t value);
+    uint32_t voiceKeyOnRegister() const;
+    void setVoiceKeyOnRegister(uint32_t value);
 public:
     SPU(LogLevel logLevel);
     ~SPU();

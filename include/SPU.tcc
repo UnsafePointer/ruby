@@ -14,6 +14,34 @@ inline T SPU::load(uint32_t offset) const {
         case 0x1aa: {
             return controlRegister();
         }
+        case 0x188: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KON read with size: %d", sizeof(T));
+            }
+            uint16_t lower = voiceKeyOn.value & 0xFFFF;
+            return lower;
+        }
+        case 0x18a: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KON read with size: %d", sizeof(T));
+            }
+            uint16_t upper = voiceKeyOn.value >> 16;
+            return upper;
+        }
+        case 0x18c: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KOFF read with size: %d", sizeof(T));
+            }
+            uint16_t lower = voiceKeyOff.value & 0xFFFF;
+            return lower;
+        }
+        case 0x18e: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KOFF read with size: %d", sizeof(T));
+            }
+            uint16_t upper = voiceKeyOff.value >> 16;
+            return upper;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit read at offset: %#x, of size: %d", offset, sizeof(T));
             return 0;
@@ -168,6 +196,24 @@ inline void SPU::store(uint32_t offset, T value) {
         }
         case 0x1a8: {
             logger.logWarning("Unhandled Sound RAM Data Transfer FIFO write");
+            break;
+        }
+        case 0x188: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KON write with size: %d", sizeof(T));
+            }
+            uint32_t upper = (voiceKeyOn.value >> 16) << 16;
+            uint32_t toWrite = upper | value;
+            setVoiceKeyOnRegister(toWrite);
+            break;
+        }
+        case 0x18A: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported KON write with size: %d", sizeof(T));
+            }
+            uint32_t lower = voiceKeyOn.value & 0xFFFF;
+            uint32_t toWrite = (value << 16) | lower;
+            setVoiceKeyOnRegister(toWrite);
             break;
         }
         default: {
