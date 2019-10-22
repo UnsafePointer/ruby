@@ -155,6 +155,10 @@ inline void SPU::store(uint32_t offset, T value) {
             setRAMDataTransferAddressRegister(value);
             break;
         }
+        case 0x1a8: {
+            logger.logWarning("Unhandled Sound RAM Data Transfer FIFO write");
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;
