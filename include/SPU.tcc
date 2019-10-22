@@ -7,6 +7,9 @@ inline T SPU::load(uint32_t offset) const {
         case 0x1ae: {
             return statusRegister();
         }
+        case 0x1aa: {
+            return controlRegister();
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit read at offset: %#x, of size: %d", offset, sizeof(T));
             return 0;
