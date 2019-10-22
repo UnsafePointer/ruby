@@ -244,6 +244,19 @@ union SPURAMDataTransferControl {
     }
 };
 
+
+// 1F801DA6h - Sound RAM Data Transfer Address
+// 15-0  Address in sound buffer divided by eight
+union SPURAMDataTransferAddress {
+    struct {
+        uint16_t address : 16;
+    };
+
+    uint16_t value;
+
+    SPURAMDataTransferAddress() : value() {}
+};
+
 class SPU {
     Logger logger;
 
@@ -256,6 +269,7 @@ class SPU {
     SPUCDAudioInputVolume CDAudioInputVolume;
     SPUExternalAudoInputVolume externalAudioInputVolume;
     SPURAMDataTransferControl RAMDataTransferControl;
+    SPURAMDataTransferAddress RAMDataTransferAddress;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -276,6 +290,7 @@ class SPU {
     void setExternalAudioInputVolumeRight(uint16_t value);
     uint16_t externalAudioInputVolumeRight() const;
     void setRAMDataTransferControlRegister(uint16_t value);
+    void setRAMDataTransferAddressRegister(uint16_t value);
 public:
     SPU(LogLevel logLevel);
     ~SPU();

@@ -148,6 +148,13 @@ inline void SPU::store(uint32_t offset, T value) {
             setRAMDataTransferControlRegister(value);
             break;
         }
+        case 0x1a6: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported Sound RAM Data Transfer Address write with size: %d", sizeof(T));
+            }
+            setRAMDataTransferAddressRegister(value);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;

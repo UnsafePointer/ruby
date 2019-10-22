@@ -85,3 +85,7 @@ uint16_t SPU::externalAudioInputVolumeRight() const {
 void SPU::setRAMDataTransferControlRegister(uint16_t value) {
     RAMDataTransferControl.value = value;
 }
+
+void SPU::setRAMDataTransferAddressRegister(uint16_t value) {
+    RAMDataTransferControl.value = value;
+}
