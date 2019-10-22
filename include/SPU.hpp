@@ -313,6 +313,7 @@ class SPU {
     void setExternalAudioInputVolumeRight(uint16_t value);
     uint16_t externalAudioInputVolumeRight() const;
     void setRAMDataTransferControlRegister(uint16_t value);
+    uint16_t RAMDataTransferControlRegister() const;
     void setRAMDataTransferAddressRegister(uint16_t value);
     uint32_t voiceKeyOnRegister() const;
     void setVoiceKeyOnRegister(uint32_t value);

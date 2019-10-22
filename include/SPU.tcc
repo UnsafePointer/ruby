@@ -42,6 +42,12 @@ inline T SPU::load(uint32_t offset) const {
             uint16_t upper = voiceKeyOff.value >> 16;
             return upper;
         }
+        case 0x1ac: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported RAM Data Transfer Control read with size: %d", sizeof(T));
+            }
+            return RAMDataTransferControlRegister();
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit read at offset: %#x, of size: %d", offset, sizeof(T));
             return 0;

@@ -86,6 +86,10 @@ void SPU::setRAMDataTransferControlRegister(uint16_t value) {
     RAMDataTransferControl.value = value;
 }
 
+uint16_t SPU::RAMDataTransferControlRegister() const {
+    return RAMDataTransferControl.value;
+}
+
 void SPU::setRAMDataTransferAddressRegister(uint16_t value) {
     RAMDataTransferControl.value = value;
 }
