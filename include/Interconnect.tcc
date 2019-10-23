@@ -70,12 +70,12 @@ inline T Interconnect::load(uint32_t address) const {
     if (offset) {
         return controller->load<T>(*offset);
     }
-    logger.logWarning("Unhandled read at: %#x", address);
     Debugger *debugger = Debugger::getInstance();
     if (debugger->isAttached()) {
         return 0;
     }
-    exit(1);
+    logger.logError("Unhandled read at: %#x", address);
+    return 0;
 }
 
 template <typename T>
