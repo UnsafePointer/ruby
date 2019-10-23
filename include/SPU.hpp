@@ -168,6 +168,29 @@ struct SPUNoiseModeEnable {
     }
 };
 
+enum SPUVoiceStatusValue {
+    NewlyKeyedOn = 0,
+    ReachedLoopEnd = 1,
+};
+
+// 1F801D9Ch - Voice 0..23 ON/OFF (status) (ENDX) (R)
+// 0-23  Voice 0..23 Status (0=Newly Keyed On, 1=Reached LOOP-END)
+// 24-31 Not used
+struct SPUVoiceStatus {
+    uint32_t value;
+
+    SPUVoiceStatus() : value() {}
+
+    SPUVoiceStatusValue noiseModeEnableValueAtIndex(uint8_t voiceIndex) {
+        if (voiceIndex >= 24) {
+            std::cout << format("Unsupported index %d for ENDX SPU register", voiceIndex) << std::endl;
+            exit(1);
+        }
+        return SPUVoiceStatusValue((value >> voiceIndex) & 0x1);
+    }
+};
+
+
 enum SPUReverbModeValue {
     ToMixer = 0,
     ToMixerAndToReverb = 1,
@@ -308,6 +331,7 @@ class SPU {
     SPURAMDataTransferAddress RAMDataTransferAddress;
     SPUVoiceKeyOn voiceKeyOn;
     SPUCurrentMainVolume currentMainVolume;
+    SPUVoiceStatus voiceStatus;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -336,6 +360,8 @@ class SPU {
     uint16_t currentMainVolumeLeft() const;
     void setCurrentMainVolumeRight(uint16_t value);
     uint16_t currentMainVolumeRight() const;
+    uint32_t voiceStatusRegister() const;
+    void setVoiceStatusRegister(uint32_t value);
 public:
     SPU(LogLevel logLevel);
     ~SPU();

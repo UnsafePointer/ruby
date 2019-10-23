@@ -117,3 +117,11 @@ void SPU::setCurrentMainVolumeRight(uint16_t value) {
 uint16_t SPU::currentMainVolumeRight() const {
     return currentMainVolume.right;
 }
+
+uint32_t SPU::voiceStatusRegister() const {
+    return voiceStatus.value;
+}
+
+void SPU::setVoiceStatusRegister(uint32_t value) {
+    voiceStatus.value = value;
+}

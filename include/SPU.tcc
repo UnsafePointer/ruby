@@ -249,6 +249,24 @@ inline void SPU::store(uint32_t offset, T value) {
             logger.logWarning("Unhandled Sound RAM Reverb Work Area Start Address");
             break;
         }
+        case 0x19c: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported voice status write with size: %d", sizeof(T));
+            }
+            uint32_t upper = (voiceStatus.value >> 16) << 16;
+            uint32_t toWrite = upper | value;
+            setVoiceStatusRegister(toWrite);
+            break;
+        }
+        case 0x19e: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported voice status write with size: %d", sizeof(T));
+            }
+            uint32_t lower = voiceKeyOn.value & 0xFFFF;
+            uint32_t toWrite = (value << 16) | lower;
+            setVoiceStatusRegister(toWrite);
+            break;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit write at offset: %#x, of size: %d", offset, sizeof(T));
             return;
