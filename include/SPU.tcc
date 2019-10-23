@@ -52,6 +52,18 @@ inline T SPU::load(uint32_t offset) const {
             }
             return RAMDataTransferControlRegister();
         }
+        case 0x1b8: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported Current Main Volume read with size: %d", sizeof(T));
+            }
+            return currentMainVolumeLeft();
+        }
+        case 0x1ba: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported Current Main Volume read with size: %d", sizeof(T));
+            }
+            return currentMainVolumeRight();
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit read at offset: %#x, of size: %d", offset, sizeof(T));
             return 0;

@@ -218,6 +218,20 @@ union SPUExternalAudoInputVolume {
     SPUExternalAudoInputVolume() : value() {}
 };
 
+// 1F801DB8h - Current Main Volume Left/Right
+// 0-15  Current Volume Left  (-8000h..+7FFFh)
+// 16-31 Current Volume Right (-8000h..+7FFFh)
+union SPUCurrentMainVolume {
+    struct {
+        uint32_t left : 16;
+        uint32_t right : 16;
+    };
+
+    uint32_t value;
+
+    SPUCurrentMainVolume() : value() {}
+};
+
 enum SPURAMDataTransferControlType {
     Fill,
     NormalTransfer,
@@ -293,6 +307,7 @@ class SPU {
     SPURAMDataTransferControl RAMDataTransferControl;
     SPURAMDataTransferAddress RAMDataTransferAddress;
     SPUVoiceKeyOn voiceKeyOn;
+    SPUCurrentMainVolume currentMainVolume;
 
     uint16_t controlRegister() const;
     void setControlRegister(uint16_t value);
@@ -317,6 +332,10 @@ class SPU {
     void setRAMDataTransferAddressRegister(uint16_t value);
     uint32_t voiceKeyOnRegister() const;
     void setVoiceKeyOnRegister(uint32_t value);
+    void setCurrentMainVolumeLeft(uint16_t value);
+    uint16_t currentMainVolumeLeft() const;
+    void setCurrentMainVolumeRight(uint16_t value);
+    uint16_t currentMainVolumeRight() const;
 public:
     SPU(LogLevel logLevel);
     ~SPU();

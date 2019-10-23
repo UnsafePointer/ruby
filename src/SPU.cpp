@@ -101,3 +101,19 @@ uint32_t SPU::voiceKeyOnRegister() const {
 void SPU::setVoiceKeyOnRegister(uint32_t value) {
     voiceKeyOn.value = value;
 }
+
+void SPU::setCurrentMainVolumeLeft(uint16_t value) {
+    currentMainVolume.left = value;
+}
+
+uint16_t SPU::currentMainVolumeLeft() const {
+    return currentMainVolume.left;
+}
+
+void SPU::setCurrentMainVolumeRight(uint16_t value) {
+    currentMainVolume.right = value;
+}
+
+uint16_t SPU::currentMainVolumeRight() const {
+    return currentMainVolume.right;
+}
