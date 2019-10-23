@@ -64,6 +64,12 @@ inline T SPU::load(uint32_t offset) const {
             }
             return currentMainVolumeRight();
         }
+        case 0x1a6: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported Sound RAM Data Transfer Address read with size: %d", sizeof(T));
+            }
+            return RAMDataTransferControlRegister();
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit read at offset: %#x, of size: %d", offset, sizeof(T));
             return 0;
