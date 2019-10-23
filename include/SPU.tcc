@@ -7,6 +7,10 @@ inline T SPU::load(uint32_t offset) const {
         logger.logMessage("Unhandled Sound Processing Unit voice register read");
         return 0;
     }
+    if (offset >= 0x1c0 && offset <= 0x1ff) {
+        logger.logMessage("Unhandled Sound Processing Unit reverb configuration area read");
+        return 0;
+    }
     switch (offset) {
         case 0x1ae: {
             return statusRegister();
@@ -60,6 +64,10 @@ inline void SPU::store(uint32_t offset, T value) {
     static_assert(std::is_same<T, uint8_t>() || std::is_same<T, uint16_t>() || std::is_same<T, uint32_t>(), "Invalid type");
     if (offset >= 0 && offset <= 0x17f) {
         logger.logMessage("Unhandled Sound Processing Unit voice register write");
+        return;
+    }
+    if (offset >= 0x1c0 && offset <= 0x1ff) {
+        logger.logMessage("Unhandled Sound Processing Unit reverb configuration area read");
         return;
     }
     switch (offset) {
