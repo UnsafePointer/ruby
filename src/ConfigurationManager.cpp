@@ -56,6 +56,7 @@ void ConfigurationManager::setupConfigurationFile() {
     logConfigurationRef["gpu"] = "NOLOG";
     logConfigurationRef["opengl"] = "NOLOG";
     logConfigurationRef["dma"] = "NOLOG";
+    logConfigurationRef["spu"] = "NOLOG";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
@@ -78,6 +79,7 @@ void ConfigurationManager::loadConfiguration() {
     gpu = logLevelWithValue(configuration["log"]["gpu"].As<string>());
     opengl = logLevelWithValue(configuration["log"]["opengl"].As<string>());
     dma = logLevelWithValue(configuration["log"]["dma"].As<string>());
+    spu = logLevelWithValue(configuration["log"]["spu"].As<string>());
     trace = configuration["log"]["trace"].As<bool>();
     if (trace) {
         remove("ruby.log");
@@ -118,6 +120,10 @@ LogLevel ConfigurationManager::openGLLogLevel() {
 
 LogLevel ConfigurationManager::dmaLogLevel() {
     return dma;
+}
+
+LogLevel ConfigurationManager::spuLogLevel() {
+    return spu;
 }
 
 bool ConfigurationManager::shouldTraceLogs() {

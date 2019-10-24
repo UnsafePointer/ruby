@@ -17,7 +17,7 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 - [x] Timers
 - [x] Controllers and Memory Cards
 - [ ] GTE
-- [ ] SPU
+- [x] SPU
 - [ ] SIO
 - [ ] PIO
 

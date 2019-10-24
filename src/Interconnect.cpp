@@ -15,7 +15,7 @@ const uint32_t regionMask[8] = {
     0xffffffff, 0xffffffff,
 };
 
-Interconnect::Interconnect(LogLevel logLevel, std::unique_ptr<COP0> &cop0, unique_ptr<BIOS> &bios, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<DMA> &dma, unique_ptr<Scratchpad> &scratchpad, unique_ptr<CDROM> &cdrom, unique_ptr<InterruptController> &interruptController, unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller) : logger(logLevel), cop0(cop0), bios(bios), ram(ram), gpu(gpu), dma(dma), scratchpad(scratchpad), cdrom(cdrom), interruptController(interruptController), expansion1(expansion1), timer0(timer0), timer1(timer1), timer2(timer2), controller(controller) {
+Interconnect::Interconnect(LogLevel logLevel, std::unique_ptr<COP0> &cop0, unique_ptr<BIOS> &bios, unique_ptr<RAM> &ram, unique_ptr<GPU> &gpu, unique_ptr<DMA> &dma, unique_ptr<Scratchpad> &scratchpad, unique_ptr<CDROM> &cdrom, unique_ptr<InterruptController> &interruptController, unique_ptr<Expansion1> &expansion1, std::unique_ptr<Timer0> &timer0, std::unique_ptr<Timer1> &timer1, std::unique_ptr<Timer2> &timer2, std::unique_ptr<Controller> &controller, std::unique_ptr<SPU> &spu) : logger(logLevel), cop0(cop0), bios(bios), ram(ram), gpu(gpu), dma(dma), scratchpad(scratchpad), cdrom(cdrom), interruptController(interruptController), expansion1(expansion1), timer0(timer0), timer1(timer1), timer2(timer2), controller(controller), spu(spu) {
     bios->loadBin("SCPH1001.BIN");
     EmulatorRunner *emulatorRunner = EmulatorRunner::getInstance();
     if (emulatorRunner->shouldRunTests()) {

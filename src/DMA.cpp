@@ -147,6 +147,11 @@ void DMA::executeBlock(DMAPort port, Channel& channel) {
                         gpu->executeGp0(source);
                         break;
                     }
+                    case DMAPort::SPUP: {
+                        logger.logWarning("Unhandled DMA block transfer from RAM to source port: %s", portDescription(port).c_str());
+                        goto unhandled;
+                        break;
+                    }
                     default: {
                         logger.logError("Unhandled DMA block transfer from RAM to source port: %s", portDescription(port).c_str());
                         break;
@@ -186,6 +191,7 @@ void DMA::executeBlock(DMAPort port, Channel& channel) {
         address += step;
         remainingTransferSize -= 1;
     }
+unhandled:
     channel.done();
     return;
 }
@@ -207,7 +213,7 @@ string DMA::portDescription(DMAPort port) {
             return "GPU";
         case CDROMP:
             return "CDROM";
-        case SPU:
+        case SPUP:
             return "SPU";
         case PIO:
             return "PIO";

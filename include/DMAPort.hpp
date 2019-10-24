@@ -6,7 +6,7 @@ enum DMAPort : uint8_t {
     MDECout = 1,
     GPUP = 2,
     CDROMP = 3,
-    SPU = 4,
+    SPUP = 4,
     PIO = 5,
     OTC = 6,
     None = 7
