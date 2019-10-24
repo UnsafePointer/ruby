@@ -70,6 +70,20 @@ inline T SPU::load(uint32_t offset) const {
             }
             return RAMDataTransferControlRegister();
         }
+        case 0x198: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported EON write with size: %d", sizeof(T));
+            }
+            uint16_t lower = reverbMode.value & 0xFFFF;
+            return lower;
+        }
+        case 0x19a: {
+            if (sizeof(T) != 2) {
+                logger.logError("Unsupported EON write with size: %d", sizeof(T));
+            }
+            uint16_t upper = (reverbMode.value >> 16) << 16;
+            return upper;
+        }
         default: {
             logger.logError("Unhandled Sound Processing Unit read at offset: %#x, of size: %d", offset, sizeof(T));
             return 0;
