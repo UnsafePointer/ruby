@@ -53,7 +53,11 @@ CPU* Emulator::getCPU() {
 }
 
 void Emulator::emulateFrame() {
-    uint32_t systemClockStep = 21;
+    // Emulate cpu for given time slice (21 * magicNumber cycles),
+    // then check what events occured during that time slice,
+    // finally simulate rest of hardware to accommodate for that
+    uint32_t emulationMagicNumber = 4;
+    uint32_t systemClockStep = 21 * emulationMagicNumber;
     uint32_t videoSystemClockStep = systemClockStep*11/7;
     uint32_t totalSystemClocksThisFrame = 0;
     uint32_t videoSystemClocksScanlineCounter = 0;
