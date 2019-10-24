@@ -9,20 +9,24 @@ SPU::~SPU() {
 }
 
 uint16_t SPU::controlRegister() const {
+    logger.logMessage("SPUCNT [R]: %#x", control.value);
     return control.value;
 }
 
 void SPU::setControlRegister(uint16_t value) {
+    logger.logMessage("SPUCNT [W]: %#x", value);
     // TODO: mirror Bit5-0 to SPUSTAT.Bit5-0
     // docs say it should be a delayed write
     control.value = value;
 }
 
 uint16_t SPU::statusRegister() const {
+    logger.logMessage("SPUSTAT [R]: %#x", control.value);
     return status.value;
 }
 
 void SPU::setVoiceKeyOffRegister(uint32_t value) {
+    logger.logMessage("SPUSTAT [W]: %#x", value);
     voiceKeyOff.value = value;
 }
 
