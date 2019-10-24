@@ -75,6 +75,11 @@ inline T Interconnect::load(uint32_t address) const {
         logger.logWarning("Unhandled Memory Control read at offset: %#x", *offset);
         return 0;
     }
+    offset = ramSizeRange.contains(absoluteAddress);
+    if (offset) {
+        logger.logWarning("Unhandled RAM Control read at offset: %#x", *offset);
+        return 0;
+    }
     Debugger *debugger = Debugger::getInstance();
     if (debugger->isAttached()) {
         return 0;
