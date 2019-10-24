@@ -70,6 +70,11 @@ inline T Interconnect::load(uint32_t address) const {
     if (offset) {
         return controller->load<T>(*offset);
     }
+    offset = memoryControlRange.contains(absoluteAddress);
+    if (offset) {
+        logger.logWarning("Unhandled Memory Control read at offset: %#x", *offset);
+        return 0;
+    }
     Debugger *debugger = Debugger::getInstance();
     if (debugger->isAttached()) {
         return 0;
