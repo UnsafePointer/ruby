@@ -44,8 +44,7 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
             logger.logError("The provided --exe filepath doesn't exist.");
         }
         argumentFound = true;
-    }
-    if (checkOption(argv, argv + argc, "--bin")) {
+    } else if (checkOption(argv, argv + argc, "--bin")) {
         char *path = getOptionValue(argv, argv + argc, "--bin");
         if (path == NULL) {
             logger.logError("Incorrect argument passed. See README.md for usage.");
