@@ -8,6 +8,7 @@ class ConfigurationManager {
     Logger logger;
     std::string filePath;
 
+    std::string ctrllerName;
     bool resizeWindowToFitFramefuffer;
     bool showDebugInfoWindow;
 
@@ -19,6 +20,7 @@ class ConfigurationManager {
     LogLevel opengl;
     LogLevel dma;
     LogLevel spu;
+    LogLevel controller;
     bool trace;
 
     ConfigurationManager();
@@ -28,6 +30,7 @@ public:
     void setupConfigurationFile();
     void loadConfiguration();
 
+    std::string controllerName();
     bool shouldResizeWindowToFitFramebuffer();
     bool shouldShowDebugInfoWindow();
 
@@ -39,5 +42,6 @@ public:
     LogLevel openGLLogLevel();
     LogLevel dmaLogLevel();
     LogLevel spuLogLevel();
+    LogLevel controllerLogLevel();
     bool shouldTraceLogs();
 };

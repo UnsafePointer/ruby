@@ -143,7 +143,7 @@ union JoypadTxData {
 class Controller {
     Logger logger;
 public:
-    Controller();
+    Controller(LogLevel logLevel);
     ~Controller();
 
     JoypadControl control;

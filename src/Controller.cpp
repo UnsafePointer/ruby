@@ -1,6 +1,6 @@
 #include "Controller.hpp"
 
-Controller::Controller() : logger(LogLevel::NoLog), control(), joypadBaud(), mode(), rxData(), status(), txData() {
+Controller::Controller(LogLevel logLevel) : logger(logLevel), control(), joypadBaud(), mode(), rxData(), status(), txData() {
 
 }
 
