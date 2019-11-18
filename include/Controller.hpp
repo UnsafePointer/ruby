@@ -3,6 +3,7 @@
 #include <memory>
 #include "Logger.hpp"
 #include "DigitalController.hpp"
+#include "InterruptController.hpp"
 
 enum Device : uint8_t {
     NoDevice = 0x0,
@@ -151,6 +152,10 @@ union JoypadTxData {
 class Controller {
     Logger logger;
 
+    std::unique_ptr<InterruptController> &interruptController;
+    bool shouldCount;
+    uint32_t counter;
+
     std::unique_ptr<DigitalController> digitalController;
     Device currentDevice;
 
@@ -170,8 +175,10 @@ class Controller {
     uint32_t getStatusRegister();
     uint16_t getControlRegister();
 public:
-    Controller(LogLevel logLevel);
+    Controller(LogLevel logLevel, std::unique_ptr<InterruptController> &interruptController);
     ~Controller();
+
+    void step(uint32_t steps);
 
     template <typename T>
     inline T load(uint32_t offset);

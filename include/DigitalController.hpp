@@ -32,4 +32,5 @@ public:
 
     uint8_t getResponse(uint8_t value);
     CommunicationSequenceStage getCurrentStage();
+    bool getAcknowledge();
 };

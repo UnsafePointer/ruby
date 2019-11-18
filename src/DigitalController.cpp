@@ -80,3 +80,7 @@ uint8_t DigitalController::getResponse(uint8_t value) {
 CommunicationSequenceStage DigitalController::getCurrentStage() {
     return currentStage;
 }
+
+bool DigitalController::getAcknowledge() {
+    return currentStage != ControllerAccess;
+}
