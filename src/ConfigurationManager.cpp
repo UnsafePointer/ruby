@@ -10,7 +10,7 @@ using namespace std;
 
 const string configurationFile = "config.yaml";
 
-ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, "", false), filePath(), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), opengl(NoLog), dma(NoLog), trace(false) {}
+ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, "", false), filePath(), ctrllerName(""), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), opengl(NoLog), dma(NoLog), controller(NoLog), trace(false) {}
 
 ConfigurationManager* ConfigurationManager::instance = nullptr;
 
@@ -57,10 +57,12 @@ void ConfigurationManager::setupConfigurationFile() {
     logConfigurationRef["opengl"] = "NOLOG";
     logConfigurationRef["dma"] = "NOLOG";
     logConfigurationRef["spu"] = "NOLOG";
+    logConfiguration["controller"] = "NOLOG";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
     configurationRef["log"] = logConfiguration;
+    configurationRef["controllerName"] = "Sony Interactive Entertainment Controller";
     configurationRef["debugInfoWindow"] = "false";
     configurationRef["showFramebuffer"] = "false";
     Yaml::Serialize(configuration, globalConfigurationPath.c_str());
@@ -70,6 +72,7 @@ void ConfigurationManager::setupConfigurationFile() {
 void ConfigurationManager::loadConfiguration() {
     Yaml::Node configuration = Yaml::Node();
     Yaml::Parse(configuration, filePath.c_str());
+    ctrllerName = configuration["controllerName"].As<string>();
     resizeWindowToFitFramefuffer = configuration["showFramebuffer"].As<bool>();
     showDebugInfoWindow = configuration["debugInfoWindow"].As<bool>();
     bios = logLevelWithValue(configuration["log"]["bios"].As<string>());
@@ -80,10 +83,15 @@ void ConfigurationManager::loadConfiguration() {
     opengl = logLevelWithValue(configuration["log"]["opengl"].As<string>());
     dma = logLevelWithValue(configuration["log"]["dma"].As<string>());
     spu = logLevelWithValue(configuration["log"]["spu"].As<string>());
+    controller = logLevelWithValue(configuration["log"]["controller"].As<string>());
     trace = configuration["log"]["trace"].As<bool>();
     if (trace) {
         remove("ruby.log");
     }
+}
+
+std::string ConfigurationManager::controllerName() {
+    return ctrllerName;
 }
 
 bool ConfigurationManager::shouldResizeWindowToFitFramebuffer() {
@@ -124,6 +132,10 @@ LogLevel ConfigurationManager::dmaLogLevel() {
 
 LogLevel ConfigurationManager::spuLogLevel() {
     return spu;
+}
+
+LogLevel ConfigurationManager::controllerLogLevel() {
+    return controller;
 }
 
 bool ConfigurationManager::shouldTraceLogs() {

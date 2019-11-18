@@ -40,7 +40,7 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer(), biosFunctionsLog() 
     timer0 = make_unique<Timer0>();
     timer1 = make_unique<Timer1>();
     timer2 = make_unique<Timer2>();
-    controller = make_unique<Controller>();
+    controller = make_unique<Controller>(configurationManager->controllerLogLevel(), interruptController);
     spu = make_unique<SPU>(configurationManager->spuLogLevel());
     interconnect = make_unique<Interconnect>(configurationManager->interconnectLogLevel(), cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller, spu);
     cpu = make_unique<CPU>(configurationManager->cpuLogLevel(), interconnect, cop0, logBiosFunctionCalls);
@@ -53,6 +53,7 @@ CPU* Emulator::getCPU() {
 }
 
 void Emulator::emulateFrame() {
+    controller->updateInput();
     // Emulate cpu for given time slice (21 * magicNumber cycles),
     // then check what events occured during that time slice,
     // finally simulate rest of hardware to accommodate for that
@@ -73,6 +74,7 @@ void Emulator::emulateFrame() {
         }
         dma->step();
         cdrom->step();
+        controller->step(systemClockStep);
         timer0->step(systemClockStep);
         timer1->step(systemClockStep);
         timer2->step(systemClockStep);
@@ -107,7 +109,7 @@ void Emulator::dumpRAM() {
 }
 
 void Emulator::setupSDL() {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {
         logger.logError("Error initializing SDL: %s", SDL_GetError());
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
