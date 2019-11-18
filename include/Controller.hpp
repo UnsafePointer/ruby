@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
+#include <memory>
 #include "Logger.hpp"
+#include "DigitalController.hpp"
 
 /*
 1F80104Ah JOY_CTRL (R/W) (usually 1003h,3003h,0000h)
@@ -145,6 +147,8 @@ class Controller {
 public:
     Controller(LogLevel logLevel);
     ~Controller();
+
+    std::unique_ptr<DigitalController> digitalController;
 
     JoypadControl control;
     uint16_t joypadBaud;

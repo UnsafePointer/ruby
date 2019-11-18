@@ -107,7 +107,7 @@ void Emulator::dumpRAM() {
 }
 
 void Emulator::setupSDL() {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {
         logger.logError("Error initializing SDL: %s", SDL_GetError());
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);

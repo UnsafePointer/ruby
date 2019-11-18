@@ -1,6 +1,8 @@
 #include "Controller.hpp"
 
-Controller::Controller(LogLevel logLevel) : logger(logLevel), control(), joypadBaud(), mode(), rxData(), status(), txData() {
+using namespace std;
+
+Controller::Controller(LogLevel logLevel) : logger(logLevel), digitalController(make_unique<DigitalController>(logLevel)), control(), joypadBaud(), mode(), rxData(), status(), txData() {
 
 }
 
