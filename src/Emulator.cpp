@@ -53,6 +53,7 @@ CPU* Emulator::getCPU() {
 }
 
 void Emulator::emulateFrame() {
+    controller->updateInput();
     // Emulate cpu for given time slice (21 * magicNumber cycles),
     // then check what events occured during that time slice,
     // finally simulate rest of hardware to accommodate for that

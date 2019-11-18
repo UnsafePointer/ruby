@@ -1,10 +1,11 @@
 #include "DigitalController.hpp"
 #include "ConfigurationManager.hpp"
 #include <string>
+#include <limits>
 
 using namespace std;
 
-DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel), currentStage(CommunicationSequenceStage::ControllerAccess), identifier(0x5A41) {
+DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel), currentStage(CommunicationSequenceStage::ControllerAccess), identifier(0x5A41), switches() {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     string controllerName = configurationManager->controllerName();
     int numberOfJoysticks = SDL_NumJoysticks();
@@ -64,14 +65,12 @@ uint8_t DigitalController::getResponse(uint8_t value) {
         case ReceiveDigitalSwitchesLow: {
             // TODO: Handle MOT validation?
             currentStage = ReceiveDigitalSwitchesHigh;
-            // TODO: Read values from SDL_Joystick
-            return 0xF;
+            return switches._value & 0xFF;
         }
         case ReceiveDigitalSwitchesHigh: {
             // TODO: Handle MOT validation?
             currentStage = ControllerAccess;
-            // TODO: Read values from SDL_Joystick
-            return 0xF;
+            return switches._value >> 8;
         }
     }
     return 0x0;
@@ -83,4 +82,54 @@ CommunicationSequenceStage DigitalController::getCurrentStage() {
 
 bool DigitalController::getAcknowledge() {
     return currentStage != ControllerAccess;
+}
+
+void DigitalController::updateInput() {
+    switches.reset();
+    if (SDL_JoystickGetButton(joystick, 0) != 0) { // TRIANGLE
+        switches.triangle = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 1) != 0) { // CIRCLE
+        switches.circle = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 2) != 0) { // X
+        switches.x = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 3) != 0) { // SQUARE
+        switches.square = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 4) != 0) { // L2
+        switches.L2 = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 5) != 0) { // R2
+        switches.R2 = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 6) != 0) { // L1
+        switches.L1 = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 7) != 0) { // R1
+        switches.R1 = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 8) != 0) { // SELECT
+        switches.select = false;
+    }
+    if (SDL_JoystickGetButton(joystick, 9) != 0) { // START
+        switches.start = false;
+    }
+    Sint16 X = SDL_JoystickGetAxis(joystick, 0); // LEFT OR RIGHT
+    if (X != 0) {
+        if (X == std::numeric_limits<int16_t>::max()) {
+            switches.right = false;
+        } else {
+            switches.left = false;
+        }
+    }
+    Sint16 Y = SDL_JoystickGetAxis(joystick, 1); // UP OR DOWN
+    if (Y != 0) {
+        if (Y == std::numeric_limits<int16_t>::max()) {
+            switches.down = false;
+        } else {
+            switches.up = false;
+        }
+    }
 }

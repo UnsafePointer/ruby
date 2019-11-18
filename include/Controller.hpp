@@ -179,6 +179,7 @@ public:
     ~Controller();
 
     void step(uint32_t steps);
+    void updateInput();
 
     template <typename T>
     inline T load(uint32_t offset);

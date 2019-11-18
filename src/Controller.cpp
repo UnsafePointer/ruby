@@ -100,3 +100,7 @@ void Controller::step(uint32_t steps) {
         interruptController->trigger(InterruptRequestNumber::CONTROLLER);
     }
 }
+
+void Controller::updateInput() {
+    digitalController->updateInput();
+}
