@@ -4,6 +4,12 @@
 #include "Logger.hpp"
 #include "DigitalController.hpp"
 
+enum Device : uint8_t {
+    NoDevice = 0x0,
+    ControllerDevice = 0x01,
+    MemoryCardDevice = 0x81
+};
+
 /*
 1F80104Ah JOY_CTRL (R/W) (usually 1003h,3003h,0000h)
 0     TX Enable (TXEN)  (0=Disable, 1=Enable)
@@ -149,6 +155,7 @@ public:
     ~Controller();
 
     std::unique_ptr<DigitalController> digitalController;
+    Device currentDevice;
 
     JoypadControl control;
     uint16_t joypadBaud;

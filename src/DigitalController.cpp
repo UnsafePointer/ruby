@@ -4,7 +4,7 @@
 
 using namespace std;
 
-DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel) {
+DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel), currentStage(CommunicationSequenceStage::ControllerAccess), identifier(0x5A41) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     string controllerName = configurationManager->controllerName();
     int numberOfJoysticks = SDL_NumJoysticks();
@@ -36,4 +36,47 @@ DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel) {
 
 DigitalController::~DigitalController() {
 
+}
+
+uint8_t DigitalController::getResponse(uint8_t value) {
+    switch (currentStage) {
+        case ControllerAccess: {
+            if (value == 0x1) {
+                currentStage = ReceiveIDLow;
+            }
+            return 0xff; // Hi-Z
+        }
+        case ReceiveIDLow: {
+            if (value == 0x42) {
+                currentStage = ReceiveIDHigh;
+                uint8_t response = identifier & 0xFF;
+                return response;
+            }
+            currentStage = ControllerAccess;
+            return 0xff;
+        }
+        case ReceiveIDHigh: {
+            // TODO: Handle TAP validation?
+            currentStage = ReceiveDigitalSwitchesLow;
+            uint8_t response = (identifier & 0xFF00) >> 8;
+            return response;
+        }
+        case ReceiveDigitalSwitchesLow: {
+            // TODO: Handle MOT validation?
+            currentStage = ReceiveDigitalSwitchesHigh;
+            // TODO: Read values from SDL_Joystick
+            return 0xF;
+        }
+        case ReceiveDigitalSwitchesHigh: {
+            // TODO: Handle MOT validation?
+            currentStage = ControllerAccess;
+            // TODO: Read values from SDL_Joystick
+            return 0xF;
+        }
+    }
+    return 0x0;
+}
+
+CommunicationSequenceStage DigitalController::getCurrentStage() {
+    return currentStage;
 }

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Controller::Controller(LogLevel logLevel) : logger(logLevel), digitalController(make_unique<DigitalController>(logLevel)), control(), joypadBaud(), mode(), rxData(), status(), txData() {
+Controller::Controller(LogLevel logLevel) : logger(logLevel), digitalController(make_unique<DigitalController>(logLevel)), currentDevice(NoDevice), control(), joypadBaud(), mode(), rxData(), status(), txData() {
 
 }
 
@@ -23,11 +23,33 @@ void Controller::setModeRegister(uint16_t value) {
 }
 
 void Controller::setTxDataRegister(uint8_t value) {
-    status.rxFifoNotEmpty = true;
     txData._value = value;
-    // TODO: send data to device
-    rxData.receivedData = 0xff;
-    status.ackInputLevel = true;
+    status.rxFifoNotEmpty = true;
+
+    if (currentDevice == NoDevice) {
+        if (value == Device::ControllerDevice) {
+            currentDevice = Device::ControllerDevice;
+        } else if (value == Device::MemoryCardDevice) {
+            currentDevice = Device::MemoryCardDevice;
+        }
+    }
+
+    if (currentDevice == Device::MemoryCardDevice) {
+        // TODO: Implement memory card
+        rxData.receivedData = 0xff;
+        return;
+    } else if (currentDevice == Device::ControllerDevice) {
+        if (control.desiredSlotNumber == 1) {
+            // TODO: Implement controller 2
+            rxData.receivedData = 0xff;
+            return;
+        } else {
+            rxData.receivedData = digitalController->getResponse(value);
+            if (digitalController->getCurrentStage() == CommunicationSequenceStage::ControllerAccess) {
+                currentDevice = NoDevice;
+            }
+        }
+    }
 }
 
 uint8_t Controller::getRxDataRegister() {
