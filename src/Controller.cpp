@@ -11,7 +11,7 @@ manufacturers).
 */
 const uint32_t SystemClocksPerControllerInt7 = 1500;
 
-Controller::Controller(LogLevel logLevel, std::unique_ptr<InterruptController> &interruptController) : logger(logLevel), interruptController(interruptController), digitalController(make_unique<DigitalController>(logLevel)), currentDevice(NoDevice), control(), joypadBaud(), mode(), rxData(), status(), txData() {
+Controller::Controller(LogLevel logLevel, std::unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  CONTROLLER: "), interruptController(interruptController), digitalController(make_unique<DigitalController>(logLevel)), currentDevice(NoDevice), control(), joypadBaud(), mode(), rxData(), status(), txData() {
 
 }
 
@@ -20,6 +20,7 @@ Controller::~Controller() {
 }
 
 void Controller::setControlRegister(uint16_t value) {
+    logger.logMessage("JOY_CTRL [W]: %#x", value);
     control._value = value;
     if (control.acknowledge) {
         status.interruptRequest = false;
@@ -27,14 +28,17 @@ void Controller::setControlRegister(uint16_t value) {
 }
 
 void Controller::setJoypadBaudRegister(uint16_t value) {
+    logger.logMessage("JOY_BAUD [W]: %#x", value);
     joypadBaud = value;
 }
 
 void Controller::setModeRegister(uint16_t value) {
+    logger.logMessage("JOY_MODE [W]: %#x", value);
     mode._value = value;
 }
 
 void Controller::setTxDataRegister(uint8_t value) {
+    logger.logMessage("JOY_TX_DATA [W]: %#x", value);
     txData._value = value;
     status.rxFifoNotEmpty = true;
 
@@ -70,11 +74,13 @@ void Controller::setTxDataRegister(uint8_t value) {
 }
 
 uint8_t Controller::getRxDataRegister() {
+    logger.logMessage("JOY_RX_DATA [R]: %#x", rxData._value);
     status.rxFifoNotEmpty = false;
     return rxData.receivedData;
 }
 
 uint32_t Controller::getStatusRegister() {
+    logger.logMessage("JOY_STAT [R]: %#x", status._value);
     status.txReadyFlag1 = true;
     status.txReadyFlag1 = true;
     uint32_t value = status._value;
@@ -83,6 +89,7 @@ uint32_t Controller::getStatusRegister() {
 }
 
 uint16_t Controller::getControlRegister() {
+    logger.logMessage("JOY_CTRL [R]: %#x", control._value);
     return control._value;
 }
 
