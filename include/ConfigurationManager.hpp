@@ -21,6 +21,7 @@ class ConfigurationManager {
     LogLevel dma;
     LogLevel spu;
     LogLevel controller;
+    LogLevel interrupt;
     bool trace;
 
     ConfigurationManager();
@@ -43,5 +44,6 @@ public:
     LogLevel dmaLogLevel();
     LogLevel spuLogLevel();
     LogLevel controllerLogLevel();
+    LogLevel interruptLogLevel();
     bool shouldTraceLogs();
 };

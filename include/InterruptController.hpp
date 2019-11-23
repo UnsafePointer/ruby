@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <string>
 #include "COP0.hpp"
 #include "Logger.hpp"
 
@@ -68,8 +69,10 @@ class InterruptController {
     void setMask(uint16_t mask);
     bool isActive();
     void update();
+
+    std::string requestNumberDescription(InterruptRequestNumber requestNumber) const;
 public:
-    InterruptController(std::unique_ptr<COP0> &cop0);
+    InterruptController(LogLevel logLevel, std::unique_ptr<COP0> &cop0);
     ~InterruptController();
 
     void trigger(InterruptRequestNumber irq);

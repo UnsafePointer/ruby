@@ -32,7 +32,7 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer(), biosFunctionsLog() 
     ram = make_unique<RAM>();
     gpu = make_unique<GPU>(configurationManager->gpuLogLevel(), mainWindow);
     scratchpad = make_unique<Scratchpad>();
-    interruptController = make_unique<InterruptController>(cop0);
+    interruptController = make_unique<InterruptController>(configurationManager->interruptLogLevel(), cop0);
     LogLevel cdromLogLevel = configurationManager->cdromLogLevel();
     cdrom = make_unique<CDROM>(cdromLogLevel, interruptController);
     dma = make_unique<DMA>(configurationManager->dmaLogLevel(), ram, gpu, cdrom, interruptController);

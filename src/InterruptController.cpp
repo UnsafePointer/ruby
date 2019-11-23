@@ -2,7 +2,7 @@
 
 using namespace std;
 
-InterruptController::InterruptController(unique_ptr<COP0> &cop0) : logger(LogLevel::NoLog), cop0(cop0), status(), mask() {
+InterruptController::InterruptController(LogLevel logLevel, unique_ptr<COP0> &cop0) : logger(logLevel, "  IRQ: "), cop0(cop0), status(), mask() {
 
 }
 
@@ -10,7 +10,37 @@ InterruptController::~InterruptController() {
 
 }
 
+string InterruptController::requestNumberDescription(InterruptRequestNumber requestNumber) const {
+    switch (requestNumber) {
+        case VBLANK:
+            return "VBLANK";
+        case GPUIRQ:
+            return "GPU";
+        case CDROMIRQ:
+            return "CDROM";
+        case DMAIRQ:
+            return "DMA";
+        case TIMER0:
+            return "TIMER0";
+        case TIMER1:
+            return "TIMER1";
+        case TIMER2:
+            return "TIMER2";
+        case CONTROLLER:
+            return "CONTROLLER";
+        case SIO:
+            return "SIO";
+        case SPUIRQ:
+            return "SPU";
+        case LIGHTPEN:
+            return "LIGHTPEN";
+        default:
+            return "none";
+    }
+}
+
 void InterruptController::trigger(InterruptRequestNumber irq) {
+    logger.logMessage("%s interrupt request enabled", requestNumberDescription(irq).c_str());
     status.value |= (1 << irq);
     update();
 }

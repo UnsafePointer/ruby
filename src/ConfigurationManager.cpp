@@ -10,7 +10,7 @@ using namespace std;
 
 const string configurationFile = "config.yaml";
 
-ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, "", false), filePath(), ctrllerName(""), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), opengl(NoLog), dma(NoLog), controller(NoLog), trace(false) {}
+ConfigurationManager::ConfigurationManager() : logger(LogLevel::Warning, "", false), filePath(), ctrllerName(""), resizeWindowToFitFramefuffer(false), showDebugInfoWindow(false),  bios(NoLog), cdrom(NoLog), interconnect(NoLog), cpu(NoLog), gpu(NoLog), opengl(NoLog), dma(NoLog), controller(NoLog), interrupt(NoLog), trace(false) {}
 
 ConfigurationManager* ConfigurationManager::instance = nullptr;
 
@@ -58,6 +58,7 @@ void ConfigurationManager::setupConfigurationFile() {
     logConfigurationRef["dma"] = "NOLOG";
     logConfigurationRef["spu"] = "NOLOG";
     logConfiguration["controller"] = "NOLOG";
+    logConfiguration["interrupt"] = "NOLOG";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
@@ -84,6 +85,7 @@ void ConfigurationManager::loadConfiguration() {
     dma = logLevelWithValue(configuration["log"]["dma"].As<string>());
     spu = logLevelWithValue(configuration["log"]["spu"].As<string>());
     controller = logLevelWithValue(configuration["log"]["controller"].As<string>());
+    interrupt = logLevelWithValue(configuration["log"]["interrupt"].As<string>());
     trace = configuration["log"]["trace"].As<bool>();
     if (trace) {
         remove("ruby.log");
@@ -136,6 +138,10 @@ LogLevel ConfigurationManager::spuLogLevel() {
 
 LogLevel ConfigurationManager::controllerLogLevel() {
     return controller;
+}
+
+LogLevel ConfigurationManager::interruptLogLevel() {
+    return interrupt;
 }
 
 bool ConfigurationManager::shouldTraceLogs() {
