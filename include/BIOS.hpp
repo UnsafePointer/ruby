@@ -11,7 +11,7 @@ class BIOS {
     uint8_t data[BIOS_SIZE];
     Logger logger;
 
-    std::string formatBIOSFunction(std::string function, uint argc, std::array<uint32_t, 4> subroutineArguments);
+    std::string formatBIOSFunction(std::string function, unsigned int argc, std::array<uint32_t, 4> subroutineArguments);
 
     std::optional<std::string> checkAFunctions(uint32_t r9, std::array<uint32_t, 4> subroutineArguments);
     std::optional<std::string> checkBFunctions(uint32_t r9, std::array<uint32_t, 4> subroutineArguments);

@@ -31,7 +31,7 @@ class Renderer {
     GLenum mode;
     bool resizeToFitFramebuffer;
 
-    void checkForceDraw(uint verticesToRender, GLenum newMode);
+    void checkForceDraw(unsigned int verticesToRender, GLenum newMode);
 public:
     Renderer(std::unique_ptr<Window> &mainWindow);
     ~Renderer();

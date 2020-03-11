@@ -35,7 +35,7 @@ void DebugInfoRenderer::update(vector<string> biosFunctionsLog) {
         {
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
             ImGui::BeginChild("Child1", ImVec2(ImGui::GetWindowContentRegionWidth(), static_cast<float>(windowDimensions.height - 60)), false, window_flags);
-            for (uint i = 0; i < biosFunctionsLog.size(); i++) {
+            for (unsigned int i = 0; i < biosFunctionsLog.size(); i++) {
                 ImGui::Text("%s", biosFunctionsLog[i].c_str());
             }
             ImGui::SetScrollHereY();

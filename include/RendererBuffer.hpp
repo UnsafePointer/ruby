@@ -12,18 +12,18 @@ class RendererBuffer {
     std::unique_ptr<VertexArrayObject> vao;
     GLuint vbo;
     std::unique_ptr<RendererProgram> &program;
-    uint capacity;
-    uint size;
+    unsigned int capacity;
+    unsigned int size;
 
     void enableAttributes() const;
 public:
-    RendererBuffer(std::unique_ptr<RendererProgram> &program, uint capacity);
+    RendererBuffer(std::unique_ptr<RendererProgram> &program, unsigned int capacity);
     ~RendererBuffer();
 
     void bind() const;
     void clean();
     void draw(GLenum mode);
     void addData(std::vector<T> data);
-    uint remainingCapacity();
+    unsigned int remainingCapacity();
 };
 

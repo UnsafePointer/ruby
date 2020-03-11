@@ -6,7 +6,7 @@
 using namespace std;
 
 template <class T>
-RendererBuffer<T>::RendererBuffer(unique_ptr<RendererProgram> &program, uint capacity) : vao(make_unique<VertexArrayObject>()), program(program), capacity(capacity), size(0) {
+RendererBuffer<T>::RendererBuffer(unique_ptr<RendererProgram> &program, unsigned int capacity) : vao(make_unique<VertexArrayObject>()), program(program), capacity(capacity), size(0) {
     glGenBuffers(1, &vbo);
 
     vao->bind();
@@ -57,15 +57,15 @@ template <class T>
 void RendererBuffer<T>::addData(vector<T> data) {
     bind();
 
-    uint offset = size * sizeof(T);
-    uint dataSize = data.size() * sizeof(T);
+    unsigned int offset = size * sizeof(T);
+    unsigned int dataSize = data.size() * sizeof(T);
     glBufferSubData(GL_ARRAY_BUFFER, offset, dataSize, data.data());
 
     size += data.size();
 }
 
 template <class T>
-uint RendererBuffer<T>::remainingCapacity() {
+unsigned int RendererBuffer<T>::remainingCapacity() {
     int remainingCapacity = capacity - size;
     return remainingCapacity;
 }
