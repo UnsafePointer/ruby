@@ -12,11 +12,12 @@ RAM::~RAM() {
 
 }
 
-void RAM::receiveTransfer(std::string path, uint32_t origin, uint32_t size, uint32_t destination) {
+void RAM::receiveTransfer(filesystem::path filePath, uint32_t origin, uint32_t size, uint32_t destination) {
     uint8_t *dataDestination = &data[destination];
-    readBinary(path, dataDestination, origin, size);
+    readBinary(filePath, dataDestination, origin, size);
 }
 
 void RAM::dump() {
-    std::ofstream("ram.bin", std::ios::binary).write(reinterpret_cast<char *>(data), RAM_SIZE);
+    filesystem::path ramBinFilePath = filesystem::current_path() / "ram.bin";
+    std::ofstream(ramBinFilePath, std::ios::binary).write(reinterpret_cast<char *>(data), RAM_SIZE);
 }

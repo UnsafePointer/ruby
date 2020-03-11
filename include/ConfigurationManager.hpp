@@ -1,12 +1,13 @@
 #pragma once
 #include <string>
 #include <yaml/Yaml.hpp>
+#include <filesystem>
 #include "Logger.hpp"
 
 class ConfigurationManager {
     static ConfigurationManager *instance;
     Logger logger;
-    std::string filePath;
+    std::filesystem::path filePath;
 
     std::string ctrllerName;
     bool resizeWindowToFitFramefuffer;

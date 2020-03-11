@@ -39,7 +39,10 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
             logger.logError("Incorrect argument passed. See README.md for usage.");
         }
         runTests = true;
-        exeFile = string(path);
+        exeFile = filesystem::current_path() / string(path);
+        if (!filesystem::exists(exeFile)) {
+            logger.logError("The provided --exe filepath doesn't exist.");
+        }
         argumentFound = true;
     }
     if (checkOption(argv, argv + argc, "--bin")) {
@@ -47,7 +50,10 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
         if (path == NULL) {
             logger.logError("Incorrect argument passed. See README.md for usage.");
         }
-        binFile = string(path);
+        binFile = filesystem::current_path() / string(path);
+        if (!filesystem::exists(binFile)) {
+            logger.logError("The provided --bin filepath doesn't exist.");
+        }
         argumentFound = true;
     }
     if (!argumentFound) {

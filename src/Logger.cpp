@@ -1,6 +1,7 @@
 #include "Logger.hpp"
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 #include "Output.hpp"
 #include "ConfigurationManager.hpp"
 
@@ -36,7 +37,8 @@ Logger::Logger(LogLevel level, string prefix, bool shouldTrace) : level(level), 
 
 void Logger::flush() const {
     ofstream logfile = ofstream();
-    logfile.open("ruby.log", ios::out | ios::app);
+    filesystem::path logFilePath = filesystem::current_path() / "ruby.log";
+    logfile.open(logFilePath, ios::out | ios::app);
     logfile << stream.str();
     logfile.close();
     stream.str(string());

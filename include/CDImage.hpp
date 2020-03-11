@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <cstdint>
+#include <filesystem>
 #include "Logger.hpp"
 
 const uint32_t SecondsPerMinute = 60;
@@ -34,6 +35,6 @@ public:
     CDImage();
     ~CDImage();
 
-    void open(std::string filePath);
+    void open(std::filesystem::path filePath);
     CDSector readSector(uint32_t location);
 };

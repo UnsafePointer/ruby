@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <filesystem>
 #include "Emulator.hpp"
 #include "Logger.hpp"
 
@@ -37,8 +38,8 @@ class EmulatorRunner {
     Logger logger;
     Emulator *emulator;
     bool runTests;
-    std::string exeFile;
-    std::string binFile;
+    std::filesystem::path exeFile;
+    std::filesystem::path binFile;
     uint8_t header[TEST_HEADER_SIZE];
 
     void readHeader();

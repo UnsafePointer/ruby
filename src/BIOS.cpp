@@ -16,8 +16,8 @@ BIOS::~BIOS() {
 
 }
 
-void BIOS::loadBin(const string& path) {
-    readBinary(path, data);
+void BIOS::loadBin(const std::filesystem::path& filePath) {
+    readBinary(filePath, data);
 }
 
 std::string BIOS::formatBIOSFunction(std::string function, unsigned int argc, std::array<uint32_t, 4> subroutineArguments) {

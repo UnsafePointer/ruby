@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <filesystem>
 
 const uint32_t EXPANSION1_SIZE = 512*1024;
 
@@ -9,7 +9,7 @@ public:
     Expansion1();
     ~Expansion1();
 
-    void loadBin(const std::string& path);
+    void loadBin(const std::filesystem::path& filePath);
     template <typename T>
     inline T load(uint32_t offset) const;
 };

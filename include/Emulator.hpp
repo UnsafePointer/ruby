@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <filesystem>
 #include "CPU.hpp"
 #include "COP0.hpp"
 #include "Interconnect.hpp"
@@ -61,10 +62,10 @@ public:
 
     CPU* getCPU();
     void emulateFrame();
-    void transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
+    void transferToRAM(std::filesystem::path filePath, uint32_t origin, uint32_t size, uint32_t destination);
     void dumpRAM();
     void handleSDLEvent(SDL_Event event);
     bool shouldTerminate();
     void toggleDebugInfoWindow();
-    void loadCDROMImageFile(std::string filePath);
+    void loadCDROMImageFile(std::filesystem::path filePath);
 };
