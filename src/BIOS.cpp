@@ -16,11 +16,11 @@ BIOS::~BIOS() {
 
 }
 
-void BIOS::loadBin(const string& path) {
-    readBinary(path, data);
+void BIOS::loadBin(const std::filesystem::path& filePath) {
+    readBinary(filePath, data);
 }
 
-std::string BIOS::formatBIOSFunction(std::string function, uint argc, std::array<uint32_t, 4> subroutineArguments) {
+std::string BIOS::formatBIOSFunction(std::string function, unsigned int argc, std::array<uint32_t, 4> subroutineArguments) {
     if (argc > 4) {
         logger.logError("BIOS formatting incorrect function with argc: %d", argc);
     }
@@ -31,7 +31,7 @@ std::string BIOS::formatBIOSFunction(std::string function, uint argc, std::array
         return ss.str();
     }
     ss << " args: ";
-    for (uint i = 0; i < argc; i++) {
+    for (unsigned int i = 0; i < argc; i++) {
         ss << hex << subroutineArguments[i];
         if (i != (argc - 1)) {
             ss << ", ";

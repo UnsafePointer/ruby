@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <filesystem>
 
 const uint32_t RAM_SIZE = 2*1024*1024;
 
@@ -15,6 +16,6 @@ public:
     template <typename T>
     inline void store(uint32_t offset, T value);
 
-    void receiveTransfer(std::string path, uint32_t origin, uint32_t size, uint32_t destination);
+    void receiveTransfer(std::filesystem::path filePath, uint32_t origin, uint32_t size, uint32_t destination);
     void dump();
 };

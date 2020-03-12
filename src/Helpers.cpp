@@ -5,10 +5,10 @@
 
 using namespace std;
 
-void readBinary(const std::string& path, uint8_t *data, uint32_t atOrigin, int64_t size) {
-    ifstream file = ifstream(path, ios::in | ios::binary | ios::ate);
+void readBinary(const filesystem::path& filePath, uint8_t *data, uint32_t atOrigin, int64_t size) {
+    ifstream file = ifstream(filePath, ios::in | ios::binary | ios::ate);
     if (!file.is_open()) {
-        cout << format("Unable to load binary at path %s", path.c_str()) << endl;
+        cout << format("Unable to load binary at path %s", filePath.string().c_str()) << endl;
         exit(1);
     }
     unsigned long long sizeToRead;
@@ -22,8 +22,8 @@ void readBinary(const std::string& path, uint8_t *data, uint32_t atOrigin, int64
     file.close();
 }
 
-void readBinary(const string& path, uint8_t *data) {
-    readBinary(path, data, 0, -1);
+void readBinary(const filesystem::path& filePath, uint8_t *data) {
+    readBinary(filePath, data, 0, -1);
 }
 
 uint8_t decimalFromBCDEncodedInt(uint8_t bcdEncoded) {

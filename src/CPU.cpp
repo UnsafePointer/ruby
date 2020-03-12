@@ -85,7 +85,7 @@ array<uint32_t, 4> CPU::getSubroutineArguments() {
 
 void CPU::printAllRegisters() {
     logger.logDebug("CPU Registers: ");
-    for (uint i = 0; i < 32; i++) {
+    for (unsigned int i = 0; i < 32; i++) {
         logger.logDebug("r%02d: %#x", i, registers[i]);
     }
     logger.logDebug("status: %#x", getStatusRegister());

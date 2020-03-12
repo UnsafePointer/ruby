@@ -455,8 +455,8 @@ void CDROM::handleUnsupportedOperation(uint8_t operation) {
     pushResponse(0x10);
 }
 
-void CDROM::loadCDROMImageFile(string filePath) {
-    if (filePath.empty()) {
+void CDROM::loadCDROMImageFile(std::filesystem::path filePath) {
+    if (!std::filesystem::exists(filePath)) {
         return;
     }
     statusCode.setShellOpen(false);

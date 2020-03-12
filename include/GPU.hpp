@@ -243,12 +243,12 @@ GP1(07h) - Vertical Display range (on Screen)
 
     void texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode);
     void quad(Dimensions dimensions, bool opaque);
-    void monochromePolygon(uint numberOfPoints, bool opaque);
-    void shadedPolygon(uint numberOfPoints, bool opaque);
-    void texturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode);
-    void shadedTexturedPolygon(uint numberOfPoints, bool opaque, TextureBlendMode textureBlendMode);
-    void monochromeLine(uint numberOfPoints, bool opaque);
-    void shadedLine(uint numberOfPoints, bool opaque);
+    void monochromePolygon(unsigned int numberOfPoints, bool opaque);
+    void shadedPolygon(unsigned int numberOfPoints, bool opaque);
+    void texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode);
+    void shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode);
+    void monochromeLine(unsigned int numberOfPoints, bool opaque);
+    void shadedLine(unsigned int numberOfPoints, bool opaque);
 
     void executeGp1(uint32_t value);
     TexturePageColors texturePageColorsWithValue(uint32_t value) const;

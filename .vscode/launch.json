@@ -11,6 +11,9 @@
             "cwd": "${workspaceFolder}",
             "externalConsole": false,
             "MIMode": "gdb",
+            "windows": {
+                "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe"
+            },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

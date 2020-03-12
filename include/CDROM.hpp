@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <queue>
 #include <memory>
+#include <filesystem>
 #include "InterruptController.hpp"
 #include "CDImage.hpp"
 #include "Logger.hpp"
@@ -333,6 +334,6 @@ public:
     template <typename T>
     inline void store(uint32_t offset, T value);
 
-    void loadCDROMImageFile(std::string filePath);
+    void loadCDROMImageFile(std::filesystem::path filePath);
     uint32_t loadWordFromReadBuffer();
 };

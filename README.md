@@ -6,7 +6,7 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 
 ![current_progress.gif](/images/current_progress.gif)
 
-### Progress
+## Progress
 
 - [x] CPU
 - [x] RAM
@@ -21,16 +21,25 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 - [ ] SIO
 - [ ] PIO
 
-### Building
+## Building
 
-#### Prerequisites
+### Prerequisites
+
+#### Linux
 
 - PlayStation BIOS: SCPH1001 (SHA1: 10155d8d6e6e832d6ea66db9bc098321fb5e8ebf)
-- C++17
+- GCC 9.2.0 (C++17)
 - OpenGL 4.5
 - SDL2
 
-#### Compiling
+#### Windows
+
+- [MSYS2](https://www.msys2.org/)
+- [Linux prerequisites](#Linux)
+
+### Compiling
+
+#### Linux
 
 ```
 $ mkdir build
@@ -39,7 +48,18 @@ $ cmake ..
 $ make -j8
 ```
 
-#### Compiling with GDB support
+#### Windows
+
+```
+$ mkdir build
+$ cd build
+$ cmake -G 'MSYS Makefiles' ..
+$ make -j8
+```
+
+### Compiling with GDB support
+
+#### Linux
 
 ```
 $ mkdir build
@@ -48,7 +68,7 @@ $ cmake -DHANA=ON ..
 $ make -j8
 ```
 
-#### GDB support
+### GDB support
 
 If compiled with GDB support, pressing the backspace key at any time will stop the emulator until GDB is attached to `localhost:2109`. You will need a [GDB build with support for MIPS little endian](https://images.linux-mips.org/wiki/Toolchains#GDB).
 
@@ -72,7 +92,9 @@ $ (gdb) info registers
 
 For a comprehensive list of supported GDB features, see [libHana](https://github.com/Ruenzuo/libHana).
 
-#### Compiling release build
+### Compiling release build
+
+#### Linux
 
 ```
 $ mkdir build
@@ -81,27 +103,40 @@ $ cmake -DCMAKE_BUILD_TYPE=Release ..
 $ make -j8
 ```
 
+#### Windows
+
+```
+$ mkdir build
+$ cd build
+$ cmake -G 'MSYS Makefiles' -DCMAKE_BUILD_TYPE=Release ..
+$ make -j8
+```
+
 ### Running
+
+#### Linux and Windows
 
 ```
 $ ./build/ruby # with SCPH1001.BIN in $PWD
 ```
 
-### Tests
+## Tests
 
-#### Running
+### Running
+
+#### Linux and Windows
 
 ```
 $ ./build/ruby --exe TESTNAME.exe
 ```
 
-#### CPU Tests
+### CPU Tests
 
 [amidog CPU tests](https://psx.amidog.se/doku.php?id=psx:download:cpu#CPU_Test): psxtest_cpu.exe (SHA1: 023aec8c92aaaf4d3b07956e26dd6c77ff397456)
 
 ![cpu_tests.png](/images/cpu_tests.png)
 
-#### GPU Tests
+### GPU Tests
 
 [PeterLemon/PSX GPU tests](https://github.com/PeterLemon/PSX/tree/master/GPU):
 
@@ -109,6 +144,6 @@ $ ./build/ruby --exe TESTNAME.exe
 ![gpu_tests_polys](/images/gpu_tests_polys.png)  ![gpu_tests_textured_polys](/images/gpu_tests_textured_polys.png)
 ![gpu_tests_lines](/images/gpu_tests_lines.png)
 
-### Acknowledgments
+## Acknowledgments
 
 This emulator, like many others, is based on the [Nocash PSX Specifications](http://problemkaputt.de/psx-spx.htm). For ease of access and review purposes, relevant parts of the specification are pasted before the implementation.

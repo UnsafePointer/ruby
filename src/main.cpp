@@ -63,4 +63,5 @@ int main(int argc, char* argv[]) {
             initTicks = SDL_GetTicks();
         }
     }
+    return 0;
 }

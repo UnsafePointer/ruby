@@ -11,6 +11,6 @@ Expansion1::~Expansion1() {
 
 }
 
-void Expansion1::loadBin(const string& path) {
-    readBinary(path, data);
+void Expansion1::loadBin(const std::filesystem::path& filePath) {
+    readBinary(filePath, data);
 }

@@ -9,7 +9,7 @@ CDImage::~CDImage() {
     file.close();
 }
 
-void CDImage::open(string filePath) {
+void CDImage::open(std::filesystem::path filePath) {
     file.open(filePath, ios::binary);
     if (!file.is_open()) {
         logger.logError("Unable to load CD-ROM image file");

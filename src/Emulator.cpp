@@ -100,8 +100,8 @@ void Emulator::emulateFrame() {
     }
 }
 
-void Emulator::transferToRAM(std::string path, uint32_t origin, uint32_t size, uint32_t destination) {
-    interconnect->transferToRAM(path, origin, size, destination);
+void Emulator::transferToRAM(filesystem::path filePath, uint32_t origin, uint32_t size, uint32_t destination) {
+    interconnect->transferToRAM(filePath, origin, size, destination);
 }
 
 void Emulator::dumpRAM() {
@@ -142,7 +142,7 @@ void Emulator::toggleDebugInfoWindow() {
     debugWindow->toggleHidden();
 }
 
-void Emulator::loadCDROMImageFile(string filePath) {
+void Emulator::loadCDROMImageFile(std::filesystem::path filePath) {
     cdrom->loadCDROMImageFile(filePath);
 }
 
