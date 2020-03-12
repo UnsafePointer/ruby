@@ -78,6 +78,9 @@ class DigitalController {
     CommunicationSequenceStage currentStage;
     uint16_t identifier;
     DigitalControllerSwitches switches;
+
+    void updateWithJoystick();
+    void updateWithKeyboard();
 public:
     DigitalController(LogLevel logLevel);
     ~DigitalController();

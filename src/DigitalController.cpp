@@ -5,7 +5,7 @@
 
 using namespace std;
 
-DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel), currentStage(CommunicationSequenceStage::ControllerAccess), identifier(0x5A41), switches() {
+DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel), joystick(nullptr), currentStage(CommunicationSequenceStage::ControllerAccess), identifier(0x5A41), switches() {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     string controllerName = configurationManager->controllerName();
     int numberOfJoysticks = SDL_NumJoysticks();
@@ -21,7 +21,8 @@ DigitalController::DigitalController(LogLevel logLevel) : logger(logLevel), curr
         }
     }
     if (joystick == nullptr) {
-        logger.logError("Failed to find target controller.");
+        logger.logWarning("Failed to find target controller. Defaulting to keyboard bindings.");
+        return;
     }
     int numberOfButtons = SDL_JoystickNumButtons(joystick);
     logger.logMessage("Buttons in joystick: %d buttons", numberOfButtons);
@@ -84,8 +85,7 @@ bool DigitalController::getAcknowledge() {
     return currentStage != ControllerAccess;
 }
 
-void DigitalController::updateInput() {
-    switches.reset();
+void DigitalController::updateWithJoystick() {
     if (SDL_JoystickGetButton(joystick, 0) != 0) { // TRIANGLE
         switches.triangle = false;
     }
@@ -131,5 +131,61 @@ void DigitalController::updateInput() {
         } else {
             switches.up = false;
         }
+    }
+}
+
+void DigitalController::updateWithKeyboard() {
+    const Uint8 *state = SDL_GetKeyboardState(NULL);
+    if (state[SDL_SCANCODE_W]) { // TRIANGLE
+        switches.triangle = false;
+    }
+    if (state[SDL_SCANCODE_D]) { // CIRCLE
+        switches.circle = false;
+    }
+    if (state[SDL_SCANCODE_S]) { // X
+        switches.x = false;
+    }
+    if (state[SDL_SCANCODE_A]) { // SQUARE
+        switches.square = false;
+    }
+    if (state[SDL_SCANCODE_1]) { // L2
+        switches.L2 = false;
+    }
+    if (state[SDL_SCANCODE_3]) { // R2
+        switches.R2 = false;
+    }
+    if (state[SDL_SCANCODE_Q]) { // L1
+        switches.L1 = false;
+    }
+    if (state[SDL_SCANCODE_E]) { // R1
+        switches.R1 = false;
+    }
+    if (state[SDL_SCANCODE_SPACE]) { // SELECT
+        switches.select = false;
+    }
+    if (state[SDL_SCANCODE_KP_ENTER]) { // START
+        switches.start = false;
+    }
+    if (state[SDL_SCANCODE_LEFT]) { // LEFT
+        switches.left = false;
+    }
+    if (state[SDL_SCANCODE_RIGHT]) { // RIGHT
+        switches.right = false;
+    }
+    if (state[SDL_SCANCODE_UP]) { // UP
+        switches.up = false;
+    }
+    if (state[SDL_SCANCODE_DOWN]) { // DOWN
+        switches.down = false;
+    }
+}
+
+void DigitalController::updateInput() {
+    switches.reset();
+
+    if (joystick == nullptr) {
+        updateWithKeyboard();
+    } else {
+        updateWithJoystick();
     }
 }
