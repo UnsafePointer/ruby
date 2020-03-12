@@ -22,6 +22,8 @@ Interconnect::Interconnect(LogLevel logLevel, std::unique_ptr<COP0> &cop0, uniqu
     if (emulatorRunner->shouldRunTests()) {
         filesystem::path expansionFilePath = filesystem::current_path() / "expansion" / "EXPNSION.BIN";
         expansion1->loadBin(expansionFilePath);
+    } else if (emulatorRunner->shouldLoadExpansionROM()) {
+        expansion1->loadBin(emulatorRunner->romFilePath());
     }
 }
 
