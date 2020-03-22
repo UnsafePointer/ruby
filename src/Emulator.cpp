@@ -100,6 +100,16 @@ void Emulator::emulateFrame() {
     }
 }
 
+void Emulator::emulateStoppedFrame() {
+    if (!showDebugInfoWindow) {
+        return;
+    }
+    debugWindow->makeCurrent();
+    debugInfoRenderer->update(biosFunctionsLog);
+    SDL_GL_SwapWindow(debugWindow->getWindowRef());
+    mainWindow->makeCurrent();
+}
+
 void Emulator::transferToRAM(filesystem::path filePath, uint32_t origin, uint32_t size, uint32_t destination) {
     interconnect->transferToRAM(filePath, origin, size, destination);
 }

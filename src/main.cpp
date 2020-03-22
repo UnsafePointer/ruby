@@ -47,9 +47,6 @@ int main(int argc, char* argv[]) {
             debugger->doStep();
             continue;
         }
-        if (debugger->isAttached() && debugger->isStopped()) {
-            continue;
-        }
         if (quit) {
             continue;
         }
@@ -59,7 +56,11 @@ int main(int argc, char* argv[]) {
         }
         uint32_t currentTicks = SDL_GetTicks();
         if (initTicks + interval < currentTicks) {
-            emulator->emulateFrame();
+            if (debugger->isStopped()) {
+                emulator->emulateStoppedFrame();
+            } else {
+                emulator->emulateFrame();
+            }
             initTicks = SDL_GetTicks();
         }
     }

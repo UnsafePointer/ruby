@@ -188,6 +188,8 @@ void Debugger::debug() {
     SetRemoveLoadWatchpointCallback(&removeLoadWatchpointC);
     SetRemoveStoreWatchpointCallback(&removeStoreWatchpointC);
     StartDebugServer(2109);
+#else
+    stopped = !stopped;
 #endif
     return;
 }

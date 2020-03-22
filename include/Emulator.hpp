@@ -62,6 +62,7 @@ public:
 
     CPU* getCPU();
     void emulateFrame();
+    void emulateStoppedFrame();
     void transferToRAM(std::filesystem::path filePath, uint32_t origin, uint32_t size, uint32_t destination);
     void dumpRAM();
     void handleSDLEvent(SDL_Event event);
