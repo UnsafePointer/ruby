@@ -168,6 +168,11 @@ inline void Interconnect::store(uint32_t address, T value) const {
         timer2->store<T>(*offset, value);
         return;
     }
+    offset = expansion1Range.contains(absoluteAddress);
+    if (offset) {
+        expansion1->store<T>(*offset, value);
+        return;
+    }
     offset = soundProcessingUnitRange.contains(absoluteAddress);
     if (offset) {
         spu->store<T>(*offset, value);
