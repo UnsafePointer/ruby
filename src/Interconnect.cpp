@@ -1,6 +1,7 @@
 #include "Interconnect.hpp"
 #include "Range.hpp"
 #include "EmulatorRunner.hpp"
+#include "Interconnect.tcc"
 
 using namespace std;
 
@@ -22,6 +23,10 @@ Interconnect::Interconnect(LogLevel logLevel, std::unique_ptr<COP0> &cop0, uniqu
     if (emulatorRunner->shouldRunTests()) {
         filesystem::path expansionFilePath = filesystem::current_path() / "expansion" / "EXPNSION.BIN";
         expansion1->loadBin(expansionFilePath);
+    } else if (emulatorRunner->shouldLoadExpansionROM()) {
+        expansion1->loadBin(emulatorRunner->romFilePath());
+        uint32_t maskedAddress = maskRegion(0x1F020018);
+        store<uint32_t>(maskedAddress, 0x1);
     }
 }
 

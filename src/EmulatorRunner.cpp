@@ -5,7 +5,7 @@
 
 using namespace std;
 
-EmulatorRunner::EmulatorRunner() : logger(LogLevel::NoLog), emulator(nullptr), runTests(false), exeFile(), binFile(), header() {}
+EmulatorRunner::EmulatorRunner() : logger(LogLevel::NoLog), emulator(nullptr), runTests(false), loadExpansionROM(false), exeFile(), binFile(), romFile(), header() {}
 
 EmulatorRunner* EmulatorRunner::instance = nullptr;
 
@@ -44,8 +44,7 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
             logger.logError("The provided --exe filepath doesn't exist.");
         }
         argumentFound = true;
-    }
-    if (checkOption(argv, argv + argc, "--bin")) {
+    } else if (checkOption(argv, argv + argc, "--bin")) {
         char *path = getOptionValue(argv, argv + argc, "--bin");
         if (path == NULL) {
             logger.logError("Incorrect argument passed. See README.md for usage.");
@@ -53,6 +52,18 @@ void EmulatorRunner::configure(int argc, char* argv[]) {
         binFile = filesystem::current_path() / string(path);
         if (!filesystem::exists(binFile)) {
             logger.logError("The provided --bin filepath doesn't exist.");
+        }
+        argumentFound = true;
+    }
+    if (checkOption(argv, argv + argc, "--rom")) {
+        char *path = getOptionValue(argv, argv + argc, "--rom");
+        if (path == NULL) {
+            logger.logError("Incorrect argument passed. See README.md for usage.");
+        }
+        loadExpansionROM = true;
+        romFile = filesystem::current_path() / string(path);
+        if (!filesystem::exists(romFile)) {
+            logger.logError("The provided --rom filepath doesn't exist.");
         }
         argumentFound = true;
     }
@@ -90,6 +101,14 @@ uint32_t EmulatorRunner::loadWord(uint32_t offset) {
 
 bool EmulatorRunner::shouldRunTests() {
     return runTests;
+}
+
+bool EmulatorRunner::shouldLoadExpansionROM() {
+    return loadExpansionROM;
+}
+
+std::filesystem::path EmulatorRunner::romFilePath() {
+    return romFile;
 }
 
 uint32_t EmulatorRunner::programCounter() {
