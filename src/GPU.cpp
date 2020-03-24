@@ -299,6 +299,14 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
+            case 0x4c: {
+                // TODO: validate opcode with documentation
+                gp0WordsRemaining = -1;
+                gp0InstructionMethod = [&]() {
+                    this->operationGp0MonochromePolylineOpaque();
+                };
+                break;
+            }
             case 0x50: {
                 gp0WordsRemaining = 4;
                 gp0InstructionMethod = [&]() {
