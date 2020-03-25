@@ -7,7 +7,7 @@
 
 using namespace std;
 
-DebugInfoRenderer::DebugInfoRenderer(std::unique_ptr<Window> &debugWindow) : debugWindow(debugWindow), backgroundColor(ImVec4(255/255.0f, 182/255.0f, 193/255.0f, 1.00f)) {
+DebugInfoRenderer::DebugInfoRenderer(std::unique_ptr<Window> &debugWindow) : debugWindow(debugWindow), backgroundColor(ImVec4(255/255.0f, 182/255.0f, 193/255.0f, 1.00f)), biosFunctionsLog() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     io = &ImGui::GetIO(); (void)io;
@@ -22,7 +22,8 @@ DebugInfoRenderer::~DebugInfoRenderer() {
     ImGui::DestroyContext();
 }
 
-void DebugInfoRenderer::update(vector<string> biosFunctionsLog) {
+void DebugInfoRenderer::update() {
+    debugWindow->makeCurrent();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(debugWindow->getWindowRef());
     Dimensions windowDimensions = debugWindow->getDimensions();
@@ -48,8 +49,13 @@ void DebugInfoRenderer::update(vector<string> biosFunctionsLog) {
     glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(debugWindow->getWindowRef());
 }
 
 void DebugInfoRenderer::handleSDLEvent(SDL_Event event) {
     ImGui_ImplSDL2_ProcessEvent(&event);
+}
+
+void DebugInfoRenderer::pushLog(std::string log) {
+    biosFunctionsLog.push_back(log);
 }

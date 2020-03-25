@@ -16,7 +16,7 @@ class Window {
     uint32_t windowID;
     bool hidden;
 public:
-    Window(bool mainWindow, std::string title, uint32_t width, uint32_t height);
+    Window(bool mainWindow, std::string title, uint32_t width, uint32_t height, bool hidden);
     ~Window();
 
     SDL_Window* getWindowRef();

@@ -1,12 +1,14 @@
 #include "GPU.hpp"
 #include "Vertex.hpp"
+#include "Constants.h"
+#include "ConfigurationManager.hpp"
 #include <iostream>
 
 using namespace std;
 
 const uint32_t GP0_COMMAND_TERMINATION_CODE = 0x55555555;
 
-GPU::GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow) : logger(logLevel),
+GPU::GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<DebugInfoRenderer> &debugInfoRenderer) : logger(logLevel),
              texturePageBaseX(0),
              texturePageBaseY(0),
              semiTransparency(0),
@@ -48,9 +50,15 @@ GPU::GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow) : logger(logLev
              gp0WordsRead(0),
              gp0InstructionMethod(nullptr),
              gp0Mode(GP0Mode::Command),
-             imageBuffer(make_unique<GPUImageBuffer>())
+             imageBuffer(make_unique<GPUImageBuffer>()),
+             interruptController(interruptController),
+             videoSystemClocksScanlineCounter(0),
+             scanlineCounter(0),
+             debugInfoRenderer(debugInfoRenderer)
 {
     renderer = make_unique<Renderer>(mainWindow);
+    ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
+    showDebugInfoWindow = configurationManager->shouldShowDebugInfoWindow();
 }
 
 GPU::~GPU() {
@@ -586,10 +594,30 @@ void GPU::executeGp0(uint32_t value) {
     }
 }
 
+void GPU::step(uint32_t cycles) {
+    uint32_t videoSystemClockStep = cycles*11/7;
+    videoSystemClocksScanlineCounter += videoSystemClockStep;
+    if (videoSystemClocksScanlineCounter >= VideoSystemClocksPerScanline) {
+        scanlineCounter++;
+        videoSystemClocksScanlineCounter = 0;
+    }
+    if (scanlineCounter >= ScanlinesPerFrame) {
+        scanlineCounter = 0;
+        render();
+        interruptController->trigger(VBLANK);
+    }
+}
+
 void GPU::render() {
     renderer->prepareFrame();
     renderer->renderFrame();
     renderer->finalizeFrame(this);
+    if (showDebugInfoWindow) {
+        debugInfoRenderer->update();
+        // This application makes most of the OpenGL work on the main window, so after
+        // we are doine with the debug window we forget about it until the next time to update
+        renderer->resetMainWindow();
+    }
 }
 
 Dimensions GPU::getResolution() {

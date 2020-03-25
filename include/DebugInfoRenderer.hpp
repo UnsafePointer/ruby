@@ -10,10 +10,12 @@ class DebugInfoRenderer {
     std::unique_ptr<Window> &debugWindow;
     ImGuiIO *io;
     ImVec4 backgroundColor;
+    std::vector<std::string> biosFunctionsLog;
 public:
     DebugInfoRenderer(std::unique_ptr<Window> &debugWindow);
     ~DebugInfoRenderer();
 
-    void update(std::vector<std::string> biosFunctionsLog);
+    void update();
     void handleSDLEvent(SDL_Event event);
+    void pushLog(std::string log);
 };

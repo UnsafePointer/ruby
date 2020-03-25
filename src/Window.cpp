@@ -3,8 +3,12 @@
 
 using namespace std;
 
-Window::Window(bool mainWindow, string title, uint32_t width, uint32_t height) : logger(LogLevel::NoLog), mainWindow(mainWindow), title(title), width(width), height(height), hidden(false) {
-    window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+Window::Window(bool mainWindow, string title, uint32_t width, uint32_t height, bool hidden) : logger(LogLevel::NoLog), mainWindow(mainWindow), title(title), width(width), height(height), hidden(hidden) {
+    Uint32 flags = SDL_WINDOW_OPENGL;
+    if (hidden) {
+        flags |= SDL_WINDOW_HIDDEN;
+    }
+    window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
     windowID = SDL_GetWindowID(window);
     glContext = SDL_GL_CreateContext(window);
 }
