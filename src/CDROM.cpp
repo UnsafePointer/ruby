@@ -1,6 +1,7 @@
 #include "CDROM.hpp"
 #include "Helpers.hpp"
 #include "ConfigurationManager.hpp"
+#include "Constants.h"
 
 using namespace std;
 
@@ -13,8 +14,8 @@ The INT1 rate needs to be precise for CD-DA and CD-XA Audio streaming, exact clo
 should be: SystemClock*930h/4/44100Hz for Single Speed (and half as much for Double Speed)
 (the "Average" values are AVERAGE values, not exact values).
 */
-const uint32_t SystemClocksPerCDROMInt1SingleSpeed=2352;
-const uint32_t SystemClocksPerCDROMInt1DoubleSpeed=2352/2;
+const uint32_t SystemClocksPerCDROMInt1SingleSpeed = SystemClocksPerSecond / 75;
+const uint32_t SystemClocksPerCDROMInt1DoubleSpeed = SystemClocksPerSecond / 150;
 
 CDROM::CDROM(LogLevel logLevel, unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  CD-ROM: "), interruptController(interruptController), image(), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex(), leftCDToLeftSPUVolume(), leftCDToRightSPUVolume(), rightCDToLeftSPUVolume() {
 
@@ -24,14 +25,14 @@ CDROM::~CDROM() {
 
 }
 
-void CDROM::step() {
+void CDROM::step(uint32_t cycles) {
     if (!interruptQueue.empty()) {
         if ((interrupt.enable & 0x7) & (interruptQueue.front() & 0x7)) {
             interruptController->trigger(InterruptRequestNumber::CDROMIRQ);
         }
     }
     if ((statusCode.play || statusCode.read)) {
-        counter++;
+        counter += cycles;
         if (counter >= SystemClocksPerCDROMInt1DoubleSpeed) {
             interruptQueue.push(INT1);
             pushResponse(statusCode._value);
