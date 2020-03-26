@@ -323,6 +323,7 @@ Command          Parameters      Response(s)
     void operationDemute();
     void operationGetTN();
     void operationReadS();
+    void operationGetTD();
 
     void handleUnsupportedOperation(uint8_t operation);
 public:

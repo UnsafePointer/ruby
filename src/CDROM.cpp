@@ -132,6 +132,10 @@ void CDROM::execute(uint8_t value) {
             operationGetTN();
             break;
         }
+        case 0x14: {
+            operationGetTD();
+            break;
+        }
         case 0x15: {
             operationSeekL();
             break;
@@ -482,6 +486,35 @@ void CDROM::operationReadS() {
     interruptQueue.push(INT3);
 
     logger.logMessage("CMD ReadS");
+}
+
+/*
+GetTD - Command 14h,track --> INT3(stat,mm,ss) ;BCD
+*/
+void CDROM::operationGetTD() {
+    // TODO: CUE parser
+
+    uint8_t param = parameters.front();
+    parameters.pop();
+
+    uint8_t track = decimalFromBCDEncodedInt(param);
+    if (track == 0) {
+        uint8_t minutes;
+        uint8_t seconds;
+        uint8_t sectors;
+        tie(minutes, seconds, sectors) = minutesSecondsSectorsFromLogicalABlockddressing(image.getLBA());
+        pushResponse(statusCode._value);
+        pushResponse(BCDEncodedIntFromDecimal(minutes));
+        pushResponse(BCDEncodedIntFromDecimal(seconds));
+    } else {
+        pushResponse(statusCode._value);
+        pushResponse(0x0);
+        pushResponse(0x2);
+    }
+
+    interruptQueue.push(INT3);
+
+    logger.logMessage("CMD GetTD");
 }
 
 void CDROM::handleUnsupportedOperation(uint8_t operation) {

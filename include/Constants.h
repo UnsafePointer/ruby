@@ -10,3 +10,5 @@ const uint32_t VideoSystemClocksPerScanline = 3413;
 const uint32_t VideoSystemClocksPerDot = 6;
 const uint32_t ScanlinesPerFrame = 263;
 const std::string EmulatorName = "ルビィ";
+const uint32_t SecondsPerMinute = 60;
+const uint32_t SectorsPerSecond = 75;
