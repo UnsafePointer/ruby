@@ -65,7 +65,16 @@ inline void CDROM::store(uint32_t offset, T value) {
             break;
         }
         case 1: {
-            execute(value);
+            switch (status.index) {
+                case 0: {
+                    execute(value);
+                    break;
+                }
+                default: {
+                    logger.logWarning("Unhandled CDROM write at offset: %#x, with index: %d", offset, status.index);
+                    break;
+                }
+            }
             break;
         }
         case 2: {
