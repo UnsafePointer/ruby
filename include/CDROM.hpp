@@ -321,6 +321,7 @@ Command          Parameters      Response(s)
     void operationPause();
     void operationInit();
     void operationDemute();
+    void operationGetTN();
 
     void handleUnsupportedOperation(uint8_t operation);
 public:

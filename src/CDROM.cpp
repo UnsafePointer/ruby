@@ -128,6 +128,10 @@ void CDROM::execute(uint8_t value) {
             operationSetmode();
             break;
         }
+        case 0x13: {
+            operationGetTN();
+            break;
+        }
         case 0x15: {
             operationSeekL();
             break;
@@ -446,6 +450,20 @@ void CDROM::operationDemute() {
     interruptQueue.push(INT3);
 
     logger.logMessage("CMD Demute");
+}
+
+/*
+GetTN - Command 13h --> INT3(stat,first,last) ;BCD
+*/
+void CDROM::operationGetTN() {
+    // TODO: CUE parser
+
+    pushResponse(statusCode._value);
+    pushResponse(0x1);
+    pushResponse(0x1);
+    interruptQueue.push(INT3);
+
+    logger.logMessage("CMD GetTN");
 }
 
 void CDROM::handleUnsupportedOperation(uint8_t operation) {
