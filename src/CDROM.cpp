@@ -144,6 +144,10 @@ void CDROM::execute(uint8_t value) {
             operationGetID();
             break;
         }
+        case 0x1B: {
+            operationReadS();
+            break;
+        }
         default: {
             handleUnsupportedOperation(value);
         }
@@ -464,6 +468,20 @@ void CDROM::operationGetTN() {
     interruptQueue.push(INT3);
 
     logger.logMessage("CMD GetTN");
+}
+
+/*
+ReadS - Command 1Bh --> INT3(stat) --> INT1(stat) --> datablock
+*/
+void CDROM::operationReadS() {
+    readSector = seekSector;
+
+    statusCode.setState(CDROMState::Reading);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    logger.logMessage("CMD ReadS");
 }
 
 void CDROM::handleUnsupportedOperation(uint8_t operation) {
