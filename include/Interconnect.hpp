@@ -34,6 +34,7 @@ const Range dmaRegisterRange = Range(0x1f801080, 0x80);
 const Range gpuRegisterRange = Range(0x1f801810, 8);
 const Range cdromRegisterRange = Range(0x1f801800, 4);
 const Range controllerRegisterRange = Range(0x1f801040, 16);
+const Range mdecRegisterRange = Range(0x1F801820, 8);
 
 /*
 Memory Map

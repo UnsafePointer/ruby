@@ -84,6 +84,11 @@ inline T Interconnect::load(uint32_t address) const {
     if (debugger->isAttached()) {
         return 0;
     }
+    offset = mdecRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        logger.logWarning("Unhandled MDEC read at offset: %#x", *offset);
+        return 0;
+    }
     logger.logError("Unhandled read at: %#x", address);
     return 0;
 }
@@ -196,6 +201,11 @@ inline void Interconnect::store(uint32_t address, T value) const {
     offset = controllerRegisterRange.contains(absoluteAddress);
     if (offset) {
         controller->store<T>(*offset, value);
+        return;
+    }
+    offset = mdecRegisterRange.contains(absoluteAddress);
+    if (offset) {
+        logger.logWarning("Unhandled MDEC write at offset: %#x", *offset);
         return;
     }
     logger.logError("Unhandled write at: %#x", address);
