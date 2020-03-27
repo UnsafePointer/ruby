@@ -112,6 +112,10 @@ void CDROM::execute(uint8_t value) {
             operationReadN();
             break;
         }
+        case 0x08: {
+            operationStop();
+            break;
+        }
         case 0x09: {
             operationPause();
             break;
@@ -515,6 +519,21 @@ void CDROM::operationGetTD() {
     interruptQueue.push(INT3);
 
     logger.logMessage("CMD GetTD");
+}
+
+/*
+Stop - Command 08h --> INT3(stat) --> INT2(stat)
+*/
+void CDROM::operationStop() {
+    statusCode._value = 0;
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT2);
+
+    logger.logMessage("CMD Stop");
 }
 
 void CDROM::handleUnsupportedOperation(uint8_t operation) {
