@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "ConfigurationManager.hpp"
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -54,7 +55,8 @@ GPU::GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow, std::unique_ptr
              interruptController(interruptController),
              videoSystemClocksScanlineCounter(0),
              scanlineCounter(0),
-             debugInfoRenderer(debugInfoRenderer)
+             debugInfoRenderer(debugInfoRenderer),
+             frameCounter(0)
 {
     renderer = make_unique<Renderer>(mainWindow);
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
@@ -609,6 +611,7 @@ void GPU::step(uint32_t cycles) {
 }
 
 void GPU::render() {
+    frameCounter++;
     renderer->prepareFrame();
     renderer->renderFrame();
     renderer->finalizeFrame(this);
@@ -618,6 +621,10 @@ void GPU::render() {
         // we are doine with the debug window we forget about it until the next time to update
         renderer->resetMainWindow();
     }
+    stringstream title = stringstream();
+    title << EmulatorName;
+    title << " - " << dec << frameCounter << " frames";
+    renderer->updateWindowTitle(title.str());
 }
 
 Dimensions GPU::getResolution() {

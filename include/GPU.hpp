@@ -163,6 +163,8 @@ GP1(07h) - Vertical Display range (on Screen)
     bool showDebugInfoWindow;
     std::unique_ptr<DebugInfoRenderer> &debugInfoRenderer;
 
+    unsigned int frameCounter;
+
     void operationGp0Nop();
     void operationGp0DrawMode();
     void operationGp0SetDrawingAreaTopLeft();

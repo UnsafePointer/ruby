@@ -18,8 +18,8 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer() {
         screenHeight = 512;
     }
     showDebugInfoWindow = configurationManager->shouldShowDebugInfoWindow();
-    debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT, !showDebugInfoWindow);
-    mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight, false);
+    debugWindow = make_unique<Window>(false, EmulatorName + " - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT, !showDebugInfoWindow);
+    mainWindow = make_unique<Window>(true, EmulatorName, SCREEN_WIDTH, screenHeight, false);
     mainWindow->makeCurrent();
     setupOpenGL();
     debugInfoRenderer = make_unique<DebugInfoRenderer>(debugWindow);

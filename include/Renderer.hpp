@@ -44,6 +44,7 @@ public:
     void prepareFrame();
     void renderFrame();
     void finalizeFrame(GPU *gpu);
+    void updateWindowTitle(std::string title);
     void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);
     void resetMainWindow();
 };

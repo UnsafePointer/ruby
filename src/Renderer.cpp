@@ -140,6 +140,10 @@ void Renderer::finalizeFrame(GPU *gpu) {
     SDL_GL_SwapWindow(mainWindow->getWindowRef());
 }
 
+void Renderer::updateWindowTitle(string title) {
+    SDL_SetWindowTitle(mainWindow->getWindowRef(), title.c_str());
+}
+
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
     buffer->draw(mode);
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
