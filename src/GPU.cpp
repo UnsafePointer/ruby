@@ -1847,7 +1847,7 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
     texturePoint4.x += dimensions.width;
     texturePoint4.y += dimensions.height;
     uint16_t texturePageData = texturePageBaseY;
-    texturePageData <<= 2;
+    texturePageData <<= 4;
     texturePageData |= texturePageBaseX;
     Point texturePage = Point::forTexturePage(texturePageData);
     GLuint textureDepthShift = 2 - texturePageColors;
