@@ -112,6 +112,7 @@ uint32_t GPU::statusRegister() const {
         }
     }
     value |= (dmaRequest << 25);
+    logger.logMessage("GPUSTAT [R]: %#x", value);
     return value;
 }
 
@@ -119,6 +120,7 @@ void GPU::executeGp0(uint32_t value) {
     if (gp0WordsRemaining == 0) {
         gp0WordsRead = 0;
         uint32_t opCode = (value >> 24) & 0xff;
+        logger.logMessage("GP0 [W] with opcode: %#x (%#x)", opCode, value);
         switch (opCode) {
             case 0x00: {
                 gp0WordsRemaining = 1;
@@ -612,6 +614,7 @@ void GPU::step(uint32_t cycles) {
 
 void GPU::render() {
     frameCounter++;
+    logger.logMessage("Rendering frame: %ld", frameCounter);
     renderer->prepareFrame();
     renderer->renderFrame();
     renderer->finalizeFrame(this);
@@ -755,8 +758,8 @@ GP1(08h)      ;display mode 320x200 NTSC (0)
 GP0(E1h..E6h) ;rendering attributes (0)
 */
 void GPU::operationGp1Reset(uint32_t value) {
-    // TODO: unused
-    (void)value;
+    logger.logMessage("GP1(00h) - Reset GPU: %#x", value);
+
     interruptRequestEnable = false;
 
     texturePageBaseX = 0;
@@ -800,6 +803,7 @@ void GPU::operationGp1Reset(uint32_t value) {
 }
 
 uint32_t GPU::readRegister() const {
+    logger.logMessage("GPUREAD [R]: %#x", gpuRead);
     return gpuRead;
 }
 
@@ -815,6 +819,7 @@ GP1(08h) - Display mode
 8-23  Not used (zero)
 */
 void GPU::operationGp1DisplayMode(uint32_t value) {
+    logger.logMessage("GP1(08h) - Display mode: %#x", value);
     uint8_t horizontalResolutionValue1 = (value & 3);
     uint8_t horizontalResolutionValue2 = (value >> 6) & 1;
     horizontalResolution = horizontalResolutionFromValues(horizontalResolutionValue1, horizontalResolutionValue2);
@@ -834,6 +839,7 @@ GP1(04h) - DMA Direction / Data Request
 2-23 Not used (zero)
 */
 void GPU::operationGp1DMADirection(uint32_t value) {
+    logger.logMessage("GP1(04h) - DMA Direction / Data Request: %#x", value);
     dmaDirection = GPUDMADirection(value & 3);
 }
 
@@ -922,6 +928,7 @@ GP1(05h) - Start of Display area (in VRAM)
 19-23 Not used (zero)
 */
 void GPU::operationGp1StartOfDisplayArea(uint32_t value) {
+    logger.logMessage("GP1(05h) - Start of Display area (in VRAM): %#x", value);
     displayVRAMStartX = (value & 0x3fe);
     displayVRAMStartY = ((value >> 10) & 0x1ff);
 }
@@ -932,6 +939,7 @@ GP1(06h) - Horizontal Display range (on Screen)
 12-23  X2 (260h+320*8)   ;12bit       ;/relative to HSYNC
 */
 void GPU::operationGp1HorizontalDisplayRange(uint32_t value) {
+    logger.logMessage("GP1(06h) - Horizontal Display range (on Screen): %#x", value);
     displayHorizontalStart = (value & 0xfff);
     displayHorizontalEnd = ((value >> 12) & 0xfff);
 }
@@ -943,6 +951,7 @@ GP1(07h) - Vertical Display range (on Screen)
 20-23 Not used (zero)
 */
 void GPU::operationGp1VerticalDisplayRange(uint32_t value) {
+    logger.logMessage("GP1(07h) - Vertical Display range (on Screen): %#x", value);
     displayLineStart = (value & 0x3ff);
     displayLineEnd = ((value >> 10) & 0x3ff);
 }
@@ -980,6 +989,7 @@ GP1(03h) - Display Enable
 1-23  Not used (zero)
 */
 void GPU::operationGp1DisplayEnable(uint32_t value) {
+    logger.logMessage("GP1(03h) - Display Enable: %#x", value);
     displayDisable = (value & 1) != 0;
 }
 
@@ -1704,8 +1714,7 @@ GP1(02h) - Acknowledge GPU Interrupt (IRQ1)
 0-23  Not used (zero)                                        ;GPUSTAT.24
 */
 void GPU::operationGp1AcknowledgeGPUInterrupt(uint32_t value) {
-    // TODO: unused
-    (void)value;
+    logger.logMessage("GP1(02h) - Acknowledge GPU Interrupt (IRQ1): %#x", value);
     interruptRequestEnable = false;
     return;
 }
@@ -1715,8 +1724,8 @@ GP1(01h) - Reset Command Buffer
 0-23  Not used (zero)
 */
 void GPU::operationGp1ResetCommandBuffer(uint32_t value) {
-    // TODO: unused
-    (void)value;
+    logger.logMessage("GP1(01h) - Reset Command Buffer: %#x", value);
+
     gp0InstructionBuffer.clear();
     gp0WordsRemaining = 0;
     gp0Mode = GP0Mode::Command;
@@ -1739,6 +1748,7 @@ On New 208pin GPUs, following values can be selected:
 10h-FFFFFFh = Mirrors of 00h..0Fh
 */
 void GPU::operationGp1GetGPUInfo(uint32_t value) {
+    logger.logMessage("GP1(10h) - Get GPU Info: %#x", value);
     switch (value & 0xf) {
         case 0x0:
         case 0x1: {
@@ -1837,7 +1847,7 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
     texturePoint4.x += dimensions.width;
     texturePoint4.y += dimensions.height;
     uint16_t texturePageData = texturePageBaseY;
-    texturePageData <<= 2;
+    texturePageData <<= 4;
     texturePageData |= texturePageBaseX;
     Point texturePage = Point::forTexturePage(texturePageData);
     GLuint textureDepthShift = 2 - texturePageColors;
