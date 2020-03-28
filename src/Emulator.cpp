@@ -10,7 +10,7 @@ using namespace std;
 const uint32_t SCREEN_WIDTH = 1024;
 const uint32_t SCREEN_HEIGHT = 768;
 
-Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer(), biosFunctionsLog() {
+Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer() {
     setupSDL();
     uint32_t screenHeight = SCREEN_HEIGHT;
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
@@ -18,21 +18,17 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer(), biosFunctionsLog() 
         screenHeight = 512;
     }
     showDebugInfoWindow = configurationManager->shouldShowDebugInfoWindow();
-    if (showDebugInfoWindow) {
-        debugWindow = make_unique<Window>(false, "ルビィ - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT);
-    }
-    mainWindow = make_unique<Window>(true, "ルビィ", SCREEN_WIDTH, screenHeight);
+    debugWindow = make_unique<Window>(false, EmulatorName + " - dbginfo", SCREEN_WIDTH, SCREEN_HEIGHT, !showDebugInfoWindow);
+    mainWindow = make_unique<Window>(true, EmulatorName, SCREEN_WIDTH, screenHeight, false);
     mainWindow->makeCurrent();
     setupOpenGL();
-    if (showDebugInfoWindow) {
-        debugInfoRenderer = make_unique<DebugInfoRenderer>(debugWindow);
-    }
+    debugInfoRenderer = make_unique<DebugInfoRenderer>(debugWindow);
     cop0 = make_unique<COP0>();
     bios = make_unique<BIOS>(configurationManager->biosLogLevel());
     ram = make_unique<RAM>();
-    gpu = make_unique<GPU>(configurationManager->gpuLogLevel(), mainWindow);
     scratchpad = make_unique<Scratchpad>();
     interruptController = make_unique<InterruptController>(configurationManager->interruptLogLevel(), cop0);
+    gpu = make_unique<GPU>(configurationManager->gpuLogLevel(), mainWindow, interruptController, debugInfoRenderer);
     LogLevel cdromLogLevel = configurationManager->cdromLogLevel();
     cdrom = make_unique<CDROM>(cdromLogLevel, interruptController);
     dma = make_unique<DMA>(configurationManager->dmaLogLevel(), ram, gpu, cdrom, interruptController);
@@ -59,10 +55,7 @@ void Emulator::emulateFrame() {
     // finally simulate rest of hardware to accommodate for that
     uint32_t emulationMagicNumber = 4;
     uint32_t systemClockStep = 21 * emulationMagicNumber;
-    uint32_t videoSystemClockStep = systemClockStep*11/7;
     uint32_t totalSystemClocksThisFrame = 0;
-    uint32_t videoSystemClocksScanlineCounter = 0;
-    uint32_t totalScanlines = 0;
     while (totalSystemClocksThisFrame < SystemClocksPerFrame) {
         for (uint32_t i = 0; i < systemClockStep / 3; i++) {
             checkBIOSFunctions();
@@ -78,25 +71,7 @@ void Emulator::emulateFrame() {
         timer0->step(systemClockStep);
         timer1->step(systemClockStep);
         timer2->step(systemClockStep);
-        videoSystemClocksScanlineCounter += videoSystemClockStep;
-        if (videoSystemClocksScanlineCounter >= VideoSystemClocksPerScanline) {
-            totalScanlines++;
-            videoSystemClocksScanlineCounter = 0;
-        }
-        if (totalScanlines >= ScanlinesPerFrame) {
-            interruptController->trigger(VBLANK);
-            totalScanlines = 0;
-            gpu->render();
-            SDL_GL_SwapWindow(mainWindow->getWindowRef());
-            if (showDebugInfoWindow) {
-                debugWindow->makeCurrent();
-                debugInfoRenderer->update(biosFunctionsLog);
-                SDL_GL_SwapWindow(debugWindow->getWindowRef());
-                // This application makes most of the OpenGL work on the main window, so after
-                // we are doine with the debug window we forget about it until the next time to update
-                mainWindow->makeCurrent();
-            }
-        }
+        gpu->step(systemClockStep);
     }
 }
 
@@ -167,5 +142,7 @@ void Emulator::checkBIOSFunctions() {
     if (functionCallLog.find("std_out_putchar(char)") == 0) {
         checkTTY(registers[4]);
     }
-    biosFunctionsLog.push_back(functionCallLog);
+    if (showDebugInfoWindow) {
+        debugInfoRenderer->pushLog(functionCallLog);
+    }
 }

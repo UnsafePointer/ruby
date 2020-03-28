@@ -17,6 +17,8 @@ class Renderer {
     Logger logger;
     GLuint offsetUniform;
 
+    std::unique_ptr<Window> &mainWindow;
+
     std::unique_ptr<RendererProgram> program;
     std::unique_ptr<RendererBuffer<Vertex>> buffer;
 
@@ -42,5 +44,7 @@ public:
     void prepareFrame();
     void renderFrame();
     void finalizeFrame(GPU *gpu);
+    void updateWindowTitle(std::string title);
     void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);
+    void resetMainWindow();
 };

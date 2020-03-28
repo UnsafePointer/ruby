@@ -47,7 +47,6 @@ class Emulator {
     std::unique_ptr<SPU> spu;
 
     std::string ttyBuffer;
-    std::vector<std::string> biosFunctionsLog;
 
     bool showDebugInfoWindow;
     bool logBiosFunctionCalls;

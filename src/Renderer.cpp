@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog), mode(GL_TRIANGLES) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -96,7 +96,12 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     return;
 }
 
+void Renderer::resetMainWindow() {
+    mainWindow->makeCurrent();
+}
+
 void Renderer::prepareFrame() {
+    resetMainWindow();
     loadImageTexture->bind(GL_TEXTURE0);
 }
 
@@ -132,6 +137,11 @@ void Renderer::finalizeFrame(GPU *gpu) {
     screenBuffer->draw(GL_TRIANGLE_STRIP);
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
     rendererDebugger->checkForOpenGLErrors();
+    SDL_GL_SwapWindow(mainWindow->getWindowRef());
+}
+
+void Renderer::updateWindowTitle(string title) {
+    SDL_SetWindowTitle(mainWindow->getWindowRef(), title.c_str());
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {

@@ -7,6 +7,8 @@
 #include "GPUImageBuffer.hpp"
 #include "Window.hpp"
 #include "Logger.hpp"
+#include "InterruptController.hpp"
+#include "DebugInfoRenderer.hpp"
 
 enum TexturePageColors {
     T4Bit = 0,
@@ -154,6 +156,15 @@ GP1(07h) - Vertical Display range (on Screen)
 
     std::unique_ptr<GPUImageBuffer> imageBuffer;
 
+    std::unique_ptr<InterruptController> &interruptController;
+    uint32_t videoSystemClocksScanlineCounter;
+    uint32_t scanlineCounter;
+
+    bool showDebugInfoWindow;
+    std::unique_ptr<DebugInfoRenderer> &debugInfoRenderer;
+
+    unsigned int frameCounter;
+
     void operationGp0Nop();
     void operationGp0DrawMode();
     void operationGp0SetDrawingAreaTopLeft();
@@ -253,8 +264,10 @@ GP1(07h) - Vertical Display range (on Screen)
     void executeGp1(uint32_t value);
     TexturePageColors texturePageColorsWithValue(uint32_t value) const;
     uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) const;
+
+    void render();
 public:
-    GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow);
+    GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<DebugInfoRenderer> &debugInfoRenderer);
     ~GPU();
     template <typename T>
     inline T load(uint32_t offset) const;
@@ -263,7 +276,7 @@ public:
 
     // TODO: should be private
     void executeGp0(uint32_t value);
-    void render();
+    void step(uint32_t cycles);
     Dimensions getResolution();
     Point getDisplayAreaStart();
 };
