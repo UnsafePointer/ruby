@@ -325,6 +325,7 @@ Command          Parameters      Response(s)
     void operationReadS();
     void operationGetTD();
     void operationStop();
+    void operationSeekP();
 
     void handleUnsupportedOperation(uint8_t operation);
 public:

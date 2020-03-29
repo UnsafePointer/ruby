@@ -145,6 +145,10 @@ void CDROM::execute(uint8_t value) {
             operationSeekL();
             break;
         }
+        case 0x16: {
+            operationSeekP();
+            break;
+        }
         case 0x19: {
             operationTest();
             break;
@@ -392,6 +396,23 @@ void CDROM::operationSeekL() {
     interruptQueue.push(INT2);
 
     logger.logMessage("CMD SeekL");
+}
+
+/*
+SeekP - Command 16h --> INT3(stat) --> INT2(stat)
+*/
+void CDROM::operationSeekP() {
+    readSector = seekSector;
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    statusCode.setState(CDROMState::Seeking);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT2);
+
+    logger.logMessage("CMD SeekP");
 }
 
 /*
