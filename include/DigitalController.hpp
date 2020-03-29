@@ -70,6 +70,7 @@ enum CommunicationSequenceStage : uint8_t {
     ReceiveIDHigh = 2,
     ReceiveDigitalSwitchesLow = 3,
     ReceiveDigitalSwitchesHigh = 4,
+    TransferStopped = 5,
 };
 
 class DigitalController {
