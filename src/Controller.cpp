@@ -60,9 +60,10 @@ void Controller::setTxDataRegister(uint8_t value) {
             rxData.receivedData = 0xff;
             return;
         } else {
-            rxData.receivedData = digitalController->getResponse(value);
-            status.ackInputLevel = digitalController->getAcknowledge();
-            if (status.ackInputLevel) {
+            rxData.receivedData = digitalController->getResponse(value);;
+            control.acknowledge = digitalController->getAcknowledge();
+            status.ackInputLevel = true;
+            if (control.acknowledge) {
                 shouldCount = true;
                 counter = 0;
             }
