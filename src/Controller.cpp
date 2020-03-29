@@ -53,11 +53,13 @@ void Controller::setTxDataRegister(uint8_t value) {
     if (currentDevice == Device::MemoryCardDevice) {
         // TODO: Implement memory card
         rxData.receivedData = 0xff;
+        currentDevice = NoDevice;
         return;
     } else if (currentDevice == Device::ControllerDevice) {
         if (control.desiredSlotNumber == 1) {
             // TODO: Implement controller 2
             rxData.receivedData = 0xff;
+            currentDevice = NoDevice;
             return;
         } else {
             rxData.receivedData = digitalController->getResponse(value);;
