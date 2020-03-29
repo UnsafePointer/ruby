@@ -82,7 +82,7 @@ uint8_t Controller::getRxDataRegister() {
 uint32_t Controller::getStatusRegister() {
     logger.logMessage("JOY_STAT [R]: %#x", status._value);
     status.txReadyFlag1 = true;
-    status.txReadyFlag1 = true;
+    status.txReadyFlag2 = true;
     uint32_t value = status._value;
     status.ackInputLevel = false;
     return value;
