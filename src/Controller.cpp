@@ -53,16 +53,19 @@ void Controller::setTxDataRegister(uint8_t value) {
     if (currentDevice == Device::MemoryCardDevice) {
         // TODO: Implement memory card
         rxData.receivedData = 0xff;
+        currentDevice = NoDevice;
         return;
     } else if (currentDevice == Device::ControllerDevice) {
         if (control.desiredSlotNumber == 1) {
             // TODO: Implement controller 2
             rxData.receivedData = 0xff;
+            currentDevice = NoDevice;
             return;
         } else {
-            rxData.receivedData = digitalController->getResponse(value);
-            status.ackInputLevel = digitalController->getAcknowledge();
-            if (status.ackInputLevel) {
+            rxData.receivedData = digitalController->getResponse(value);;
+            control.acknowledge = digitalController->getAcknowledge();
+            status.ackInputLevel = true;
+            if (control.acknowledge) {
                 shouldCount = true;
                 counter = 0;
             }
@@ -82,7 +85,7 @@ uint8_t Controller::getRxDataRegister() {
 uint32_t Controller::getStatusRegister() {
     logger.logMessage("JOY_STAT [R]: %#x", status._value);
     status.txReadyFlag1 = true;
-    status.txReadyFlag1 = true;
+    status.txReadyFlag2 = true;
     uint32_t value = status._value;
     status.ackInputLevel = false;
     return value;

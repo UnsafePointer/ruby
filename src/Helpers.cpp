@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Output.hpp"
 #include <iostream>
+#include "Constants.h"
 
 using namespace std;
 
@@ -32,4 +33,22 @@ uint8_t decimalFromBCDEncodedInt(uint8_t bcdEncoded) {
 
     uint8_t value = high * 10 + low;
     return value;
+}
+
+tuple<uint8_t, uint8_t, uint8_t> minutesSecondsSectorsFromLogicalABlockddressing(unsigned int lba) {
+    uint8_t sectors = lba % SectorsPerSecond;
+    lba /= SectorsPerSecond;
+
+    uint8_t seconds = lba % SecondsPerMinute;
+    lba /= SecondsPerMinute;
+
+    uint8_t minutes = lba;
+
+    return { minutes, seconds, sectors };
+}
+
+uint8_t BCDEncodedIntFromDecimal(unsigned int decimal) {
+    uint8_t high = decimal / 10;
+    uint8_t low = decimal % 10;
+    return high | low;
 }

@@ -66,7 +66,7 @@ void Emulator::emulateFrame() {
             totalSystemClocksThisFrame++;
         }
         dma->step();
-        cdrom->step();
+        cdrom->step(systemClockStep);
         controller->step(systemClockStep);
         timer0->step(systemClockStep);
         timer1->step(systemClockStep);

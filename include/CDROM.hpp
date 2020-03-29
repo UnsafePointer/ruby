@@ -321,13 +321,18 @@ Command          Parameters      Response(s)
     void operationPause();
     void operationInit();
     void operationDemute();
+    void operationGetTN();
+    void operationReadS();
+    void operationGetTD();
+    void operationStop();
+    void operationSeekP();
 
     void handleUnsupportedOperation(uint8_t operation);
 public:
     CDROM(LogLevel logLevel, std::unique_ptr<InterruptController> &interruptController);
     ~CDROM();
 
-    void step();
+    void step(uint32_t cycles);
 
     template <typename T>
     inline T load(uint32_t offset);

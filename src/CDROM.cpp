@@ -1,6 +1,7 @@
 #include "CDROM.hpp"
 #include "Helpers.hpp"
 #include "ConfigurationManager.hpp"
+#include "Constants.h"
 
 using namespace std;
 
@@ -13,8 +14,8 @@ The INT1 rate needs to be precise for CD-DA and CD-XA Audio streaming, exact clo
 should be: SystemClock*930h/4/44100Hz for Single Speed (and half as much for Double Speed)
 (the "Average" values are AVERAGE values, not exact values).
 */
-const uint32_t SystemClocksPerCDROMInt1SingleSpeed=2352;
-const uint32_t SystemClocksPerCDROMInt1DoubleSpeed=2352/2;
+const uint32_t SystemClocksPerCDROMInt1SingleSpeed = SystemClocksPerSecond / 75;
+const uint32_t SystemClocksPerCDROMInt1DoubleSpeed = SystemClocksPerSecond / 150;
 
 CDROM::CDROM(LogLevel logLevel, unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  CD-ROM: "), interruptController(interruptController), image(), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex(), leftCDToLeftSPUVolume(), leftCDToRightSPUVolume(), rightCDToLeftSPUVolume() {
 
@@ -24,14 +25,14 @@ CDROM::~CDROM() {
 
 }
 
-void CDROM::step() {
+void CDROM::step(uint32_t cycles) {
     if (!interruptQueue.empty()) {
         if ((interrupt.enable & 0x7) & (interruptQueue.front() & 0x7)) {
             interruptController->trigger(InterruptRequestNumber::CDROMIRQ);
         }
     }
     if ((statusCode.play || statusCode.read)) {
-        counter++;
+        counter += cycles;
         if (counter >= SystemClocksPerCDROMInt1DoubleSpeed) {
             interruptQueue.push(INT1);
             pushResponse(statusCode._value);
@@ -112,6 +113,10 @@ void CDROM::execute(uint8_t value) {
             operationReadN();
             break;
         }
+        case 0x08: {
+            operationStop();
+            break;
+        }
         case 0x09: {
             operationPause();
             break;
@@ -128,8 +133,20 @@ void CDROM::execute(uint8_t value) {
             operationSetmode();
             break;
         }
+        case 0x13: {
+            operationGetTN();
+            break;
+        }
+        case 0x14: {
+            operationGetTD();
+            break;
+        }
         case 0x15: {
             operationSeekL();
+            break;
+        }
+        case 0x16: {
+            operationSeekP();
             break;
         }
         case 0x19: {
@@ -138,6 +155,10 @@ void CDROM::execute(uint8_t value) {
         }
         case 0x1A: {
             operationGetID();
+            break;
+        }
+        case 0x1B: {
+            operationReadS();
             break;
         }
         default: {
@@ -378,6 +399,23 @@ void CDROM::operationSeekL() {
 }
 
 /*
+SeekP - Command 16h --> INT3(stat) --> INT2(stat)
+*/
+void CDROM::operationSeekP() {
+    readSector = seekSector;
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    statusCode.setState(CDROMState::Seeking);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT2);
+
+    logger.logMessage("CMD SeekP");
+}
+
+/*
 Setmode - Command 0Eh,mode --> INT3(stat)
 */
 void CDROM::operationSetmode() {
@@ -446,6 +484,78 @@ void CDROM::operationDemute() {
     interruptQueue.push(INT3);
 
     logger.logMessage("CMD Demute");
+}
+
+/*
+GetTN - Command 13h --> INT3(stat,first,last) ;BCD
+*/
+void CDROM::operationGetTN() {
+    // TODO: CUE parser
+
+    pushResponse(statusCode._value);
+    pushResponse(0x1);
+    pushResponse(0x1);
+    interruptQueue.push(INT3);
+
+    logger.logMessage("CMD GetTN");
+}
+
+/*
+ReadS - Command 1Bh --> INT3(stat) --> INT1(stat) --> datablock
+*/
+void CDROM::operationReadS() {
+    readSector = seekSector;
+
+    statusCode.setState(CDROMState::Reading);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    logger.logMessage("CMD ReadS");
+}
+
+/*
+GetTD - Command 14h,track --> INT3(stat,mm,ss) ;BCD
+*/
+void CDROM::operationGetTD() {
+    // TODO: CUE parser
+
+    uint8_t param = parameters.front();
+    parameters.pop();
+
+    uint8_t track = decimalFromBCDEncodedInt(param);
+    if (track == 0) {
+        uint8_t minutes;
+        uint8_t seconds;
+        uint8_t sectors;
+        tie(minutes, seconds, sectors) = minutesSecondsSectorsFromLogicalABlockddressing(image.getLBA());
+        pushResponse(statusCode._value);
+        pushResponse(BCDEncodedIntFromDecimal(minutes));
+        pushResponse(BCDEncodedIntFromDecimal(seconds));
+    } else {
+        pushResponse(statusCode._value);
+        pushResponse(0x0);
+        pushResponse(0x2);
+    }
+
+    interruptQueue.push(INT3);
+
+    logger.logMessage("CMD GetTD");
+}
+
+/*
+Stop - Command 08h --> INT3(stat) --> INT2(stat)
+*/
+void CDROM::operationStop() {
+    statusCode._value = 0;
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT2);
+
+    logger.logMessage("CMD Stop");
 }
 
 void CDROM::handleUnsupportedOperation(uint8_t operation) {

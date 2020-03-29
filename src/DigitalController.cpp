@@ -70,8 +70,12 @@ uint8_t DigitalController::getResponse(uint8_t value) {
         }
         case ReceiveDigitalSwitchesHigh: {
             // TODO: Handle MOT validation?
-            currentStage = ControllerAccess;
+            currentStage = TransferStopped;
             return switches._value >> 8;
+        }
+        case TransferStopped: {
+            currentStage = ControllerAccess;
+            return 0xff;
         }
     }
     return 0x0;

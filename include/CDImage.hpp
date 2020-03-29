@@ -4,9 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include "Logger.hpp"
-
-const uint32_t SecondsPerMinute = 60;
-const uint32_t SectorsPerSecond = 75;
+#include "Constants.h"
 
 /*
 Mode2/Form1 (CD-XA)
@@ -31,10 +29,12 @@ struct CDSector {
 class CDImage {
     std::ifstream file;
     Logger logger;
+    unsigned int logicalBlockAddressing;
 public:
     CDImage();
     ~CDImage();
 
     void open(std::filesystem::path filePath);
     CDSector readSector(uint32_t location);
+    unsigned int getLBA();
 };

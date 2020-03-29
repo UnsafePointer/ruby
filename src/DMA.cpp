@@ -152,6 +152,11 @@ void DMA::executeBlock(DMAPort port, Channel& channel) {
                         goto unhandled;
                         break;
                     }
+                    case DMAPort::MDECin: {
+                        logger.logWarning("Unhandled DMA block transfer from RAM to source port: %s", portDescription(port).c_str());
+                        goto unhandled;
+                        break;
+                    }
                     default: {
                         logger.logError("Unhandled DMA block transfer from RAM to source port: %s", portDescription(port).c_str());
                         break;
