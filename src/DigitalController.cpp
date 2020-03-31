@@ -167,7 +167,7 @@ void DigitalController::updateWithKeyboard() {
     if (state[SDL_SCANCODE_SPACE]) { // SELECT
         switches.select = false;
     }
-    if (state[SDL_SCANCODE_KP_ENTER]) { // START
+    if (state[SDL_SCANCODE_RETURN]) { // START
         switches.start = false;
     }
     if (state[SDL_SCANCODE_LEFT]) { // LEFT
