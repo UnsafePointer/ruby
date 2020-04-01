@@ -21,6 +21,7 @@
 #include <string>
 #include "Logger.hpp"
 #include "SPU.hpp"
+#include "GTE.hpp"
 
 class Emulator {
     Logger logger;
@@ -45,6 +46,7 @@ class Emulator {
     std::unique_ptr<Timer2> timer2;
     std::unique_ptr<Controller> controller;
     std::unique_ptr<SPU> spu;
+    std::unique_ptr<GTE> gte;
 
     std::string ttyBuffer;
 

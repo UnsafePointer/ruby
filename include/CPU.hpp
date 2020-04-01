@@ -6,6 +6,7 @@
 #include "Debugger.hpp"
 #include "COP0.hpp"
 #include "Logger.hpp"
+#include "GTE.hpp"
 
 struct LoadSlot {
     uint32_t registerIndex;
@@ -45,6 +46,7 @@ class CPU {
     std::unique_ptr<COP0> &cop0;
     Instruction currentInstruction;
     bool logBiosFunctionCalls;
+    std::unique_ptr<GTE> &gte;
 
     void moveLoadDelaySlots();
     void loadDelaySlot(uint32_t registerIndex, uint32_t value);
@@ -134,7 +136,7 @@ class CPU {
 
     void operationIllegal(Instruction instruction);
 public:
-    CPU(LogLevel logLevel, std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls);
+    CPU(LogLevel logLevel, std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte);
     ~CPU();
 
     std::unique_ptr<COP0>& cop0Ref();

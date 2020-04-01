@@ -7,7 +7,7 @@
 
 using namespace std;
 
-CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls) : logger(logLevel),
+CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte) : logger(logLevel),
              programCounter(0xbfc00000),
              jumpDestination(0),
              isBranching(false),
@@ -18,7 +18,8 @@ CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<C
              interconnect(interconnect),
              cop0(cop0),
              currentInstruction(Instruction(0x0)),
-             logBiosFunctionCalls(logBiosFunctionCalls)
+             logBiosFunctionCalls(logBiosFunctionCalls),
+             gte(gte)
 {
     fill_n(registers, 32, 0);
 }
@@ -1071,9 +1072,23 @@ void CPU::operationCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationCoprocessor2(Instruction instruction) {
-    // TODO: unused
-    (void)instruction;
-    logger.logError("Unhandled Geometry Transformation Engine instruction: %#x", instruction.value);
+    switch (instruction.copcode() & 0x10) {
+        case 0x0: {
+            switch (instruction.copcode()) {
+                default: {
+                    logger.logError("Unhandled coprocessor2 instruction %#x", instruction.value);
+                }
+            }
+            break;
+        }
+        case 0x10: {
+            gte->execute(instruction.value);
+            break;
+        }
+        default: {
+            logger.logError("Unhandled coprocessor2 instruction %#x", instruction.value);
+        }
+    }
 }
 
 void CPU::operationCoprocessor3(Instruction instruction) {
