@@ -134,6 +134,11 @@ class CPU {
     void operationLoadByte(Instruction instruction);
     void operationLoadByteUnsigned(Instruction instruction);
 
+    void operationMoveFromCoprocessor2(Instruction instruction);
+    void operationCopyFromCoprocessor2(Instruction instruction);
+    void operationMoveToCoprocessor2(Instruction instruction);
+    void operationCopyToCoprocessor2(Instruction instruction);
+
     void operationIllegal(Instruction instruction);
 public:
     CPU(LogLevel logLevel, std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte);

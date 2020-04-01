@@ -1071,10 +1071,37 @@ void CPU::operationCoprocessor1(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
 }
 
+/*
+Coprocessor Opcode/Parameter Encoding
+31..26 |25..21|20..16|15..11|10..6 |  5..0  |
+ 6bit  | 5bit | 5bit | 5bit | 5bit |  6bit  |
+-------+------+------+------+------+--------+------------
+0100nn |0|0000| rt   | rd   | N/A  | 000000 | MFCn rt,rd_dat  ;rt = dat
+0100nn |0|0010| rt   | rd   | N/A  | 000000 | CFCn rt,rd_cnt  ;rt = cnt
+0100nn |0|0100| rt   | rd   | N/A  | 000000 | MTCn rt,rd_dat  ;dat = rt
+0100nn |0|0110| rt   | rd   | N/A  | 000000 | CTCn rt,rd_cnt  ;cnt = rt
+0100nn |1| <--------immediate25bit--------> | COPn imm25
+*/
 void CPU::operationCoprocessor2(Instruction instruction) {
     switch (instruction.copcode() & 0x10) {
         case 0x0: {
             switch (instruction.copcode()) {
+                case 0b00000: {
+                    operationMoveFromCoprocessor2(instruction);
+                    break;
+                }
+                case 0b00010: {
+                    operationCopyFromCoprocessor2(instruction);
+                    break;
+                }
+                case 0b00100: {
+                    operationMoveToCoprocessor2(instruction);
+                    break;
+                }
+                case 0b00110: {
+                    operationCopyToCoprocessor2(instruction);
+                    break;
+                }
                 default: {
                     logger.logError("Unhandled coprocessor2 instruction %#x", instruction.value);
                 }
@@ -1433,4 +1460,20 @@ void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
     // TODO: unused
     (void)instruction;
     triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationMoveFromCoprocessor2(Instruction instruction) {
+    logger.logError("Unhandled MFC2: %#x", instruction.value);
+}
+
+void CPU::operationCopyFromCoprocessor2(Instruction instruction) {
+    logger.logError("Unhandled CFC2: %#x", instruction.value);
+}
+
+void CPU::operationMoveToCoprocessor2(Instruction instruction) {
+    logger.logError("Unhandled MTC2: %#x", instruction.value);
+}
+
+void CPU::operationCopyToCoprocessor2(Instruction instruction) {
+    logger.logError("Unhandled CFC2: %#x", instruction.value);
 }
