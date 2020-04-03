@@ -1,5 +1,6 @@
 #include "GTE.hpp"
 #include "GTEInstruction.hpp"
+#include "Helpers.hpp"
 
 GTE::GTE(LogLevel logLevel) : logger(logLevel, "  GTE: "),
     v0({0, 0, 0}),
@@ -51,6 +52,145 @@ GTE::~GTE() {}
 void GTE::setData(uint32_t index, uint32_t value) {
     logger.logMessage("DATA [W] (IDX: %d): %#x", index, value);
     switch (index) {
+        case 0: {
+            v0.x = value & 0xFFFF;
+            v0.y = (value >> 16) & 0xFFFF;
+            break;
+        }
+        case 1: {
+            v0.z = value & 0xFFFF;
+            break;
+        }
+        case 2: {
+            v1.x = value & 0xFFFF;
+            v1.y = (value >> 16) & 0xFFFF;
+            break;
+        }
+        case 3: {
+            v1.z = value & 0xFFFF;
+            break;
+        }
+        case 4: {
+            v2.x = value & 0xFFFF;
+            v2.y = (value >> 16) & 0xFFFF;
+            break;
+        }
+        case 5: {
+            v2.z = value & 0xFFFF;
+            break;
+        }
+        case 6: {
+            rgbc._value = value;
+            break;
+        }
+        case 7: {
+            otz = value & 0xFFFF;
+            break;
+        }
+        case 8: {
+            ir0 = (value & 0xFFFF);
+            break;
+        }
+        case 9: {
+            ir1 = (value & 0xFFFF);
+            break;
+        }
+        case 10: {
+            ir2 = (value & 0xFFFF);
+            break;
+        }
+        case 11: {
+            ir3 = (value & 0xFFFF);
+            break;
+        }
+        case 12: {
+            sxy0.x = (value & 0xFFFF);
+            sxy0.y = (value >> 16) & 0xFFFF;
+            break;
+        }
+        case 13: {
+            sxy1.x = (value & 0xFFFF);
+            sxy1.y = (value >> 16) & 0xFFFF;
+            break;
+        }
+        case 14: {
+            sxy2.x = (value & 0xFFFF);
+            sxy2.y = (value >> 16) & 0xFFFF;
+            break;
+        }
+        case 15: {
+            sxy0 = sxy1;
+            sxy1 = sxy2;
+            sxy2.x = (value & 0xFFFF);
+            sxy2.y = (value >> 16) & 0xFFFF;
+            break;
+        }
+        case 16: {
+            sz0 = (value & 0xFFFF);
+            break;
+        }
+        case 17: {
+            sz1 = (value & 0xFFFF);
+            break;
+        }
+        case 18: {
+            sz2 = (value & 0xFFFF);
+            break;
+        }
+        case 19: {
+            sz3 = (value & 0xFFFF);
+            break;
+        }
+        case 20: {
+            rgb0._value = value;
+            break;
+        }
+        case 21: {
+            rgb1._value = value;
+            break;
+        }
+        case 22: {
+            rgb2._value = value;
+            break;
+        }
+        case 23: {
+            res1 = value;
+            break;
+        }
+        case 24: {
+            mac0 = value;
+            break;
+        }
+        case 25: {
+            mac1 = value;
+            break;
+        }
+        case 26: {
+            mac2 = value;
+            break;
+        }
+        case 27: {
+            mac3 = value;
+            break;
+        }
+        case 28: {
+            irgb = (value & 0x7FFF);
+            ir1 = (value & 0x1F) * 0x80;
+            ir2 = ((value >> 5) & 0x1F) * 0x80;
+            ir3 = ((value >> 10) & 0x1F) * 0x80;
+            break;
+        }
+        case 29: {
+            break;
+        }
+        case 30: {
+            lzcs = value;
+            lzcr = countLeadingZeroes(value);
+            break;
+        }
+        case 31: {
+            break;
+        }
         default: {
             logger.logError("Unhandled DATA write at index: %d with value: %#x", index, value);
             break;

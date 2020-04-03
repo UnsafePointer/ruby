@@ -52,3 +52,16 @@ uint8_t BCDEncodedIntFromDecimal(unsigned int decimal) {
     uint8_t low = decimal % 10;
     return high | low;
 }
+
+uint32_t countLeadingZeroes(uint32_t value) {
+    uint32_t sign = value >> 31;
+    uint32_t leadingZeroes = 0;
+    for (unsigned int i = 0; i < 32; i++) {
+        if ((value >> 31) != sign) {
+            break;
+        }
+        leadingZeroes++;
+        value <<= 1;
+    }
+    return leadingZeroes;
+}
