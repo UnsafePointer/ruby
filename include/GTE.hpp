@@ -182,5 +182,6 @@ public:
     GTE(LogLevel logLevel);
     ~GTE();
 
+    void setData(uint32_t index, uint32_t value);
     void execute(uint32_t value);
 };

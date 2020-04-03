@@ -1471,7 +1471,8 @@ void CPU::operationCopyFromCoprocessor2(Instruction instruction) {
 }
 
 void CPU::operationMoveToCoprocessor2(Instruction instruction) {
-    logger.logError("Unhandled MTC2: %#x", instruction.value);
+    uint32_t value = registerAtIndex(instruction.rt);
+    gte->setData(instruction.rd, value);
 }
 
 void CPU::operationCopyToCoprocessor2(Instruction instruction) {

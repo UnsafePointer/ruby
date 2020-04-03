@@ -48,6 +48,16 @@ GTE::GTE(LogLevel logLevel) : logger(logLevel, "  GTE: "),
 
 GTE::~GTE() {}
 
+void GTE::setData(uint32_t index, uint32_t value) {
+    logger.logMessage("DATA [W] (IDX: %d): %#x", index, value);
+    switch (index) {
+        default: {
+            logger.logError("Unhandled DATA write at index: %d with value: %#x", index, value);
+            break;
+        }
+    }
+}
+
 void GTE::execute(uint32_t value) {
     GTEInstruction instruction = GTEInstruction(value);
     logger.logError("Unhandled Geometry Transformation Engine command: %#x", instruction.command);
