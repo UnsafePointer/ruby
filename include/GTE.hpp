@@ -184,5 +184,6 @@ public:
 
     void setData(uint32_t index, uint32_t value);
     uint32_t getData(uint32_t index);
+    void setControl(uint32_t index, uint32_t value);
     void execute(uint32_t value);
 };

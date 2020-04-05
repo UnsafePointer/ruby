@@ -1477,5 +1477,6 @@ void CPU::operationMoveToCoprocessor2(Instruction instruction) {
 }
 
 void CPU::operationCopyToCoprocessor2(Instruction instruction) {
-    logger.logError("Unhandled CFC2: %#x", instruction.value);
+    uint32_t value = registerAtIndex(instruction.rt);
+    gte->setControl(instruction.rd, value);
 }
