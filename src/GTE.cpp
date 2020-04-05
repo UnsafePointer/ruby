@@ -198,6 +198,144 @@ void GTE::setData(uint32_t index, uint32_t value) {
     }
 }
 
+uint32_t GTE::getData(uint32_t index) {
+    uint32_t value = 0;
+    switch (index) {
+        case 0: {
+            value = ((uint16_t)v0.y << 16) | (uint16_t)v0.x;
+            break;
+        }
+        case 1: {
+            value = v0.z;
+            break;
+        }
+        case 2: {
+            value = ((uint16_t)v1.y << 16) | (uint16_t)v1.x;
+            break;
+        }
+        case 3: {
+            value = v1.z;
+            break;
+        }
+        case 4: {
+            value = ((uint16_t)v2.y << 16) | (uint16_t)v2.x;
+            break;
+        }
+        case 5: {
+            value = v2.z;
+            break;
+        }
+        case 6: {
+            value = rgbc._value;
+            break;
+        }
+        case 7: {
+            value = otz;
+            break;
+        }
+        case 8: {
+            value = ir0;
+            break;
+        }
+        case 9: {
+            value = ir1;
+            break;
+        }
+        case 10: {
+            value = ir2;
+            break;
+        }
+        case 11: {
+            value = ir3;
+            break;
+        }
+        case 12: {
+            value = ((uint16_t)sxy0.y << 16) | (uint16_t)sxy0.x;
+            break;
+        }
+        case 13: {
+            value = ((uint16_t)sxy1.y << 16) | (uint16_t)sxy1.x;
+            break;
+        }
+        case 14:
+        case 15: {
+            value = ((uint16_t)sxy2.y << 16) | (uint16_t)sxy2.x;
+            break;
+        }
+        case 16: {
+            value = sz0;
+            break;
+        }
+        case 17: {
+            value = sz1;
+            break;
+        }
+        case 18: {
+            value = sz2;
+            break;
+        }
+        case 19: {
+            value = sz3;
+            break;
+        }
+        case 20: {
+            value = rgb0._value;
+            break;
+        }
+        case 21: {
+            value = rgb1._value;
+            break;
+        }
+        case 22: {
+            value = rgb2._value;
+            break;
+        }
+        case 23: {
+            value = res1;
+            break;
+        }
+        case 24: {
+            value = mac0;
+            break;
+        }
+        case 25: {
+            value = mac1;
+            break;
+        }
+        case 26: {
+            value = mac2;
+            break;
+        }
+        case 27: {
+            value = mac3;
+            break;
+        }
+        case 28:
+        case 29: {
+            uint16_t ir1Saturated = saturate(ir1 / 0x80);
+            uint16_t ir2Saturated = saturate(ir2 / 0x80);
+            uint16_t ir3Saturated = saturate(ir3 / 0x80);
+            irgb = ir3Saturated << 10 | ir2Saturated << 5 | ir1Saturated;
+            value = irgb;
+            break;
+        }
+        case 30: {
+            value = lzcs;
+            break;
+        }
+        case 31: {
+            value = lzcr;
+            break;
+        }
+        default: {
+            logger.logError("Unhandled DATA read at index: %d", index);
+            break;
+        }
+    }
+    logger.logMessage("DATA [R] (IDX: %d): %#x", index, value);
+    return value;
+}
+
 void GTE::execute(uint32_t value) {
     GTEInstruction instruction = GTEInstruction(value);
     logger.logError("Unhandled Geometry Transformation Engine command: %#x", instruction.command);

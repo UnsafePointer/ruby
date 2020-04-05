@@ -183,5 +183,6 @@ public:
     ~GTE();
 
     void setData(uint32_t index, uint32_t value);
+    uint32_t getData(uint32_t index);
     void execute(uint32_t value);
 };

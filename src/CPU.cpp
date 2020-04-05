@@ -1463,7 +1463,8 @@ void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
 }
 
 void CPU::operationMoveFromCoprocessor2(Instruction instruction) {
-    logger.logError("Unhandled MFC2: %#x", instruction.value);
+    uint32_t value = gte->getData(instruction.rd);
+    loadDelaySlot(instruction.rt, value);
 }
 
 void CPU::operationCopyFromCoprocessor2(Instruction instruction) {

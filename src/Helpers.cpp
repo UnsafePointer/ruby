@@ -65,3 +65,14 @@ uint32_t countLeadingZeroes(uint32_t value) {
     }
     return leadingZeroes;
 }
+
+int16_t saturate(int32_t value) {
+    int16_t shouldSaturate = value;
+    if (shouldSaturate < 0x0) {
+        return 0x0;
+    } else if (shouldSaturate > 0x1F) {
+        return 0x1F;
+    } else {
+        return shouldSaturate;
+    }
+}
