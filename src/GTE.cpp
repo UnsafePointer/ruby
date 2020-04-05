@@ -489,6 +489,146 @@ void GTE::setControl(uint32_t index, uint32_t value) {
     }
 }
 
+uint32_t GTE::getControl(uint32_t index) {
+    uint32_t value = 0;
+    switch (index) {
+        case 0: {
+            value = ((uint16_t)rt.v0.y << 16) | (uint16_t)rt.v0.x;
+            break;
+        }
+        case 1: {
+            value = ((uint16_t)rt.v1.x << 16) | (uint16_t)rt.v0.z;
+            break;
+        }
+        case 2: {
+            value = ((uint16_t)rt.v1.z << 16) |(uint16_t) rt.v1.y;
+            break;
+        }
+        case 3: {
+            value = ((uint16_t)rt.v2.y << 16) | (uint16_t)rt.v2.x;
+            break;
+        }
+        case 4: {
+            value = rt.v2.z;
+            break;
+        }
+        case 5: {
+            value = tr.x;
+            break;
+        }
+        case 6: {
+            value = tr.y;
+            break;
+        }
+        case 7: {
+            value = tr.z;
+            break;
+        }
+        case 8: {
+            value = ((uint16_t)l.v0.y << 16) | (uint16_t)l.v0.x;
+            break;
+        }
+        case 9: {
+            value = ((uint16_t)l.v1.x << 16) | (uint16_t)l.v0.z;
+            break;
+        }
+        case 10: {
+            value = ((uint16_t)l.v1.z << 16) | (uint16_t)l.v1.y;
+            break;
+        }
+        case 11: {
+            value = ((uint16_t)l.v2.y << 16) | (uint16_t)l.v2.x;
+            break;
+        }
+        case 12: {
+            value = l.v2.z;
+            break;
+        }
+        case 13: {
+            value = bk.r;
+            break;
+        }
+        case 14: {
+            value = bk.g;
+            break;
+        }
+        case 15: {
+            value = bk.b;
+            break;
+        }
+        case 16: {
+            value = ((uint16_t)lr.v0.y << 16) | (uint16_t)lr.v0.x;
+            break;
+        }
+        case 17: {
+            value = ((uint16_t)lr.v1.x << 16) | (uint16_t)lr.v0.z;
+            break;
+        }
+        case 18: {
+            value = ((uint16_t)lr.v1.z << 16) | (uint16_t)lr.v1.y;
+            break;
+        }
+        case 19: {
+            value = ((uint16_t)lr.v2.y << 16) | (uint16_t)lr.v2.x;
+            break;
+        }
+        case 20: {
+            value = lr.v2.z;
+            break;
+        }
+        case 21: {
+            value = fc.r;
+            break;
+        }
+        case 22: {
+            value = fc.g;
+            break;
+        }
+        case 23: {
+            value = fc.b;
+            break;
+        }
+        case 24: {
+            value = of.x;
+            break;
+        }
+        case 25: {
+            value = of.y;
+            break;
+        }
+        case 26: {
+            value = (int16_t)hl;
+            break;
+        }
+        case 27: {
+            value = dqa;
+            break;
+        }
+        case 28: {
+            value = dqb;
+            break;
+        }
+        case 29: {
+            value = zsf3;
+            break;
+        }
+        case 30: {
+            value = zsf4;
+            break;
+        }
+        case 31: {
+            value = flag._value;
+            break;
+        }
+        default: {
+            logger.logError("Unhandled CONTROL read at index: %d", index);
+            break;
+        }
+    }
+    logger.logMessage("CONTROL [R] (IDX: %d): %#x", index, value);
+    return value;
+}
+
 void GTE::execute(uint32_t value) {
     GTEInstruction instruction = GTEInstruction(value);
     logger.logError("Unhandled Geometry Transformation Engine command: %#x", instruction.command);

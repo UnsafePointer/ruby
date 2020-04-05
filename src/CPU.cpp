@@ -1468,7 +1468,8 @@ void CPU::operationMoveFromCoprocessor2(Instruction instruction) {
 }
 
 void CPU::operationCopyFromCoprocessor2(Instruction instruction) {
-    logger.logError("Unhandled CFC2: %#x", instruction.value);
+    uint32_t value = gte->getControl(instruction.rd);
+    loadDelaySlot(instruction.rt, value);
 }
 
 void CPU::operationMoveToCoprocessor2(Instruction instruction) {
