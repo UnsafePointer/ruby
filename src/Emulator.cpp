@@ -39,7 +39,8 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer() {
     controller = make_unique<Controller>(configurationManager->controllerLogLevel(), interruptController);
     spu = make_unique<SPU>(configurationManager->spuLogLevel());
     interconnect = make_unique<Interconnect>(configurationManager->interconnectLogLevel(), cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller, spu);
-    cpu = make_unique<CPU>(configurationManager->cpuLogLevel(), interconnect, cop0, logBiosFunctionCalls);
+    gte = make_unique<GTE>(configurationManager->gteLogLevel());
+    cpu = make_unique<CPU>(configurationManager->cpuLogLevel(), interconnect, cop0, logBiosFunctionCalls, gte);
 }
 
 Emulator::~Emulator() {}

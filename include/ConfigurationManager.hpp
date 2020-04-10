@@ -23,6 +23,7 @@ class ConfigurationManager {
     LogLevel spu;
     LogLevel controller;
     LogLevel interrupt;
+    LogLevel gte;
     bool trace;
 
     ConfigurationManager();
@@ -46,5 +47,6 @@ public:
     LogLevel spuLogLevel();
     LogLevel controllerLogLevel();
     LogLevel interruptLogLevel();
+    LogLevel gteLogLevel();
     bool shouldTraceLogs();
 };

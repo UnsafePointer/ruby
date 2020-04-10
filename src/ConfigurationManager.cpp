@@ -34,6 +34,7 @@ void ConfigurationManager::setupConfigurationFile() {
     logConfigurationRef["spu"] = "NOLOG";
     logConfiguration["controller"] = "NOLOG";
     logConfiguration["interrupt"] = "NOLOG";
+    logConfiguration["gte"] = "NOLOG";
     logConfigurationRef["trace"] = "false";
     Yaml::Node configuration = Yaml::Node();
     Yaml::Node &configurationRef = configuration;
@@ -60,6 +61,7 @@ void ConfigurationManager::loadConfiguration() {
     spu = logLevelWithValue(configuration["log"]["spu"].As<string>());
     controller = logLevelWithValue(configuration["log"]["controller"].As<string>());
     interrupt = logLevelWithValue(configuration["log"]["interrupt"].As<string>());
+    gte = logLevelWithValue(configuration["log"]["gte"].As<string>());
     trace = configuration["log"]["trace"].As<bool>();
     if (trace) {
         remove("ruby.log");
@@ -116,6 +118,10 @@ LogLevel ConfigurationManager::controllerLogLevel() {
 
 LogLevel ConfigurationManager::interruptLogLevel() {
     return interrupt;
+}
+
+LogLevel ConfigurationManager::gteLogLevel() {
+    return gte;
 }
 
 bool ConfigurationManager::shouldTraceLogs() {

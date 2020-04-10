@@ -7,7 +7,7 @@
 
 using namespace std;
 
-CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls) : logger(logLevel),
+CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte) : logger(logLevel),
              programCounter(0xbfc00000),
              jumpDestination(0),
              isBranching(false),
@@ -18,7 +18,8 @@ CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<C
              interconnect(interconnect),
              cop0(cop0),
              currentInstruction(Instruction(0x0)),
-             logBiosFunctionCalls(logBiosFunctionCalls)
+             logBiosFunctionCalls(logBiosFunctionCalls),
+             gte(gte)
 {
     fill_n(registers, 32, 0);
 }
@@ -1070,10 +1071,51 @@ void CPU::operationCoprocessor1(Instruction instruction) {
     triggerException(ExceptionType::Coprocessor);
 }
 
+/*
+Coprocessor Opcode/Parameter Encoding
+31..26 |25..21|20..16|15..11|10..6 |  5..0  |
+ 6bit  | 5bit | 5bit | 5bit | 5bit |  6bit  |
+-------+------+------+------+------+--------+------------
+0100nn |0|0000| rt   | rd   | N/A  | 000000 | MFCn rt,rd_dat  ;rt = dat
+0100nn |0|0010| rt   | rd   | N/A  | 000000 | CFCn rt,rd_cnt  ;rt = cnt
+0100nn |0|0100| rt   | rd   | N/A  | 000000 | MTCn rt,rd_dat  ;dat = rt
+0100nn |0|0110| rt   | rd   | N/A  | 000000 | CTCn rt,rd_cnt  ;cnt = rt
+0100nn |1| <--------immediate25bit--------> | COPn imm25
+*/
 void CPU::operationCoprocessor2(Instruction instruction) {
-    // TODO: unused
-    (void)instruction;
-    logger.logWarning("Unhandled Geometry Transformation Engine instruction: %#x", instruction.value);
+    switch (instruction.copcode() & 0x10) {
+        case 0x0: {
+            switch (instruction.copcode()) {
+                case 0b00000: {
+                    operationMoveFromCoprocessor2(instruction);
+                    break;
+                }
+                case 0b00010: {
+                    operationCopyFromCoprocessor2(instruction);
+                    break;
+                }
+                case 0b00100: {
+                    operationMoveToCoprocessor2(instruction);
+                    break;
+                }
+                case 0b00110: {
+                    operationCopyToCoprocessor2(instruction);
+                    break;
+                }
+                default: {
+                    logger.logError("Unhandled coprocessor2 instruction %#x", instruction.value);
+                }
+            }
+            break;
+        }
+        case 0x10: {
+            gte->execute(instruction.value);
+            break;
+        }
+        default: {
+            logger.logError("Unhandled coprocessor2 instruction %#x", instruction.value);
+        }
+    }
 }
 
 void CPU::operationCoprocessor3(Instruction instruction) {
@@ -1387,7 +1429,7 @@ void CPU::operationLoadWordCoprocessor1(Instruction instruction) {
 void CPU::operationLoadWordCoprocessor2(Instruction instruction) {
     // TODO: unused
     (void)instruction;
-    logger.logWarning("Unhandled GTE LWC: %#x", instruction.value);
+    logger.logError("Unhandled GTE LWC: %#x", instruction.value);
 }
 
 void CPU::operationLoadWordCoprocessor3(Instruction instruction) {
@@ -1411,11 +1453,31 @@ void CPU::operationStoreWordCoprocessor1(Instruction instruction) {
 void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
     // TODO: unused
     (void)instruction;
-    logger.logWarning("Unhandled GTE SWC: %#x", instruction.value);
+    logger.logError("Unhandled GTE SWC: %#x", instruction.value);
 }
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {
     // TODO: unused
     (void)instruction;
     triggerException(ExceptionType::Coprocessor);
+}
+
+void CPU::operationMoveFromCoprocessor2(Instruction instruction) {
+    uint32_t value = gte->getData(instruction.rd);
+    loadDelaySlot(instruction.rt, value);
+}
+
+void CPU::operationCopyFromCoprocessor2(Instruction instruction) {
+    uint32_t value = gte->getControl(instruction.rd);
+    loadDelaySlot(instruction.rt, value);
+}
+
+void CPU::operationMoveToCoprocessor2(Instruction instruction) {
+    uint32_t value = registerAtIndex(instruction.rt);
+    gte->setData(instruction.rd, value);
+}
+
+void CPU::operationCopyToCoprocessor2(Instruction instruction) {
+    uint32_t value = registerAtIndex(instruction.rt);
+    gte->setControl(instruction.rd, value);
 }
