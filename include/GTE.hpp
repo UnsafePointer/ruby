@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "Logger.hpp"
+#include "GTEInstruction.hpp"
 
 struct GTEVector3_16_t {
     int16_t x;
@@ -187,4 +188,9 @@ public:
     void setControl(uint32_t index, uint32_t value);
     uint32_t getControl(uint32_t index);
     void execute(uint32_t value);
+
+    int64_t calculateMAC(unsigned int index, int64_t value);
+    int16_t calculateIR(unsigned int index, int64_t value, bool lm);
+
+    void squareVector(GTEInstruction instruction);
 };

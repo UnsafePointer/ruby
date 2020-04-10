@@ -1,5 +1,4 @@
 #include "GTE.hpp"
-#include "GTEInstruction.hpp"
 #include "Helpers.hpp"
 
 GTE::GTE(LogLevel logLevel) : logger(logLevel, "  GTE: "),
@@ -632,5 +631,73 @@ uint32_t GTE::getControl(uint32_t index) {
 
 void GTE::execute(uint32_t value) {
     GTEInstruction instruction = GTEInstruction(value);
-    logger.logError("Unhandled Geometry Transformation Engine command: %#x", instruction.command);
+    flag._value = 0;
+    switch (instruction.command) {
+        case 0x28: {
+            squareVector(instruction);
+            break;
+        }
+        default: {
+            logger.logMessage("Unhandled Geometry Transformation Engine command: %#x", instruction.command);
+            break;
+        }
+    }
+    if ((flag._value & 0x7F87E000) != 0) {
+        flag._value |= 0x80000000;
+    }
+}
+
+int64_t GTE::calculateMAC(unsigned int index, int64_t value) {
+    if (value < -0x80000000000) {
+        flag._value |= 0x8000000 >> (index - 1);
+    }
+    if (value > 0x7FFFFFFFFFF) {
+        flag._value |= 0x40000000 >> (index - 1);
+    }
+    return (value << 20) >> 20;
+}
+
+int16_t GTE::calculateIR(unsigned int index, int64_t value, bool lm) {
+    if (lm && value < 0) {
+        flag._value |= 0x1000000 >> (index - 1);
+        return 0;
+    }
+    if (!lm && value < -0x8000) {
+        flag._value |= 0x1000000 >> (index - 1);
+        return -0x8000;
+    }
+    if (value > 0x7FFF) {
+        flag._value |= 0x1000000 >> (index - 1);
+        return 0x7FFF;
+    }
+
+    return value;
+}
+
+/*
+SQR      5        Square vector.
+Fields:  sf
+Opcode:  cop2 $0a00428
+                                                       sf=0    sf=1
+in:      [IR1,IR2,IR3]     vector                      [1,15,0][1,3,12]
+out:     [IR1,IR2,IR3]     vector^2                    [1,15,0][1,3,12]
+         [MAC1,MAC2,MAC3]  vector^2                    [1,31,0][1,19,12]
+
+Calculation: (left format sf=0, right format sf=1)
+
+[1,31,0][1,19,12] MAC1=A1[IR1*IR1]                     [1,43,0][1,31,12]
+[1,31,0][1,19,12] MAC2=A2[IR2*IR2]                     [1,43,0][1,31,12]
+[1,31,0][1,19,12] MAC3=A3[IR3*IR3]                     [1,43,0][1,31,12]
+[1,15,0][1,3,12]  IR1=Lm_B1[MAC1]                      [1,31,0][1,19,12][lm=1]
+[1,15,0][1,3,12]  IR2=Lm_B2[MAC2]                      [1,31,0][1,19,12][lm=1]
+[1,15,0][1,3,12]  IR3=Lm_B3[MAC3]                      [1,31,0][1,19,12][lm=1]
+*/
+void GTE::squareVector(GTEInstruction instruction) {
+    mac1 = calculateMAC(1, (ir1 * ir1) >> (instruction.shiftFraction * 12));
+    mac2 = calculateMAC(2, (ir2 * ir2) >> (instruction.shiftFraction * 12));
+    mac3 = calculateMAC(3, (ir3 * ir3) >> (instruction.shiftFraction * 12));
+
+    ir1 = calculateIR(1, mac1, instruction.lm);
+    ir2 = calculateIR(2, mac2, instruction.lm);
+    ir3 = calculateIR(3, mac3, instruction.lm);
 }
