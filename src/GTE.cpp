@@ -43,7 +43,8 @@ GTE::GTE(LogLevel logLevel) : logger(logLevel, "  GTE: "),
     dqa(0),
     dqb(0),
     zsf3(0),
-    zsf4(0)
+    zsf4(0),
+    flag(GTEFLAGRegister())
 {
 }
 
