@@ -641,8 +641,12 @@ void GTE::execute(uint32_t value) {
             squareVector(instruction);
             break;
         }
+        case 0x2d: {
+            averageOfThreeZValues(instruction);
+            break;
+        }
         default: {
-            logger.logMessage("Unhandled Geometry Transformation Engine command: %#x", instruction.command);
+            logger.logError("Unhandled Geometry Transformation Engine command: %#x", instruction.command);
             break;
         }
     }
@@ -683,6 +687,20 @@ int16_t GTE::calculateIR(unsigned int index, int64_t value, bool lm) {
     if (value > 0x7FFF) {
         flag._value |= 0x1000000 >> (index - 1);
         return 0x7FFF;
+    }
+
+    return value;
+}
+
+uint16_t GTE::calculateSZ3(int64_t value) {
+    if (value < 0) {
+        flag._value |= 0x40000;
+        return 0;
+    }
+
+    if (value > 0xFFFF) {
+        flag._value |= 0x40000;
+        return 0xFFFF;
     }
 
     return value;
@@ -732,4 +750,26 @@ void GTE::normalClipping(GTEInstruction instruction) {
     // TODO: unused
     (void)instruction;
     mac0 = calculateMAC0((int64_t)sxy0.x * sxy1.y + sxy1.x * sxy2.y + sxy2.x * sxy0.y - sxy0.x * sxy2.y - sxy1.x * sxy0.y - sxy2.x * sxy1.y);
+}
+
+/*
+AVSZ3    5        Average of three Z values
+fields:
+Opcode:  cop2 $158002D
+
+in:      SZ1, SZ2, SZ3     Z-Values                            [0,16,0]
+         ZSF3              Divider                             [1,3,12]
+out:     OTZ               Average.                            [0,16,0]
+         MAC0              Average.                            [1,31,0]
+
+Calculation:
+[1,31,0] MAC0=F[ZSF3*SZ1 + ZSF3*SZ2 + ZSF3*SZ3]                [1,31,12]
+[0,16,0] OTZ=Lm_D[MAC0]                                        [1,31,0]
+*/
+void GTE::averageOfThreeZValues(GTEInstruction instruction) {
+    // TODO: unused
+    (void)instruction;
+    int64_t average = (int64_t)zsf3 * sz1 + zsf3 * sz2 + zsf3 * sz3;
+    mac0 = calculateMAC0(average);
+    otz = calculateSZ3(average >> 12);
 }

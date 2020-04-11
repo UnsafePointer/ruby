@@ -192,7 +192,9 @@ public:
     int64_t calculateMAC(unsigned int index, int64_t value);
     int32_t calculateMAC0(int64_t value);
     int16_t calculateIR(unsigned int index, int64_t value, bool lm);
+    uint16_t calculateSZ3(int64_t value);
 
     void squareVector(GTEInstruction instruction);
     void normalClipping(GTEInstruction instruction);
+    void averageOfThreeZValues(GTEInstruction instruction);
 };
