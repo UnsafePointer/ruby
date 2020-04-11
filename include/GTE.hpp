@@ -190,7 +190,9 @@ public:
     void execute(uint32_t value);
 
     int64_t calculateMAC(unsigned int index, int64_t value);
+    int32_t calculateMAC0(int64_t value);
     int16_t calculateIR(unsigned int index, int64_t value, bool lm);
 
     void squareVector(GTEInstruction instruction);
+    void normalClipping(GTEInstruction instruction);
 };

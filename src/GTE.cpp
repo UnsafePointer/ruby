@@ -633,6 +633,10 @@ void GTE::execute(uint32_t value) {
     GTEInstruction instruction = GTEInstruction(value);
     flag._value = 0;
     switch (instruction.command) {
+        case 0x6: {
+            normalClipping(instruction);
+            break;
+        }
         case 0x28: {
             squareVector(instruction);
             break;
@@ -655,6 +659,16 @@ int64_t GTE::calculateMAC(unsigned int index, int64_t value) {
         flag._value |= 0x40000000 >> (index - 1);
     }
     return (value << 20) >> 20;
+}
+
+int32_t GTE::calculateMAC0(int64_t value) {
+    if (value < -(int64_t)0x80000000) {
+        flag._value |= 0x8000;
+    }
+    if (value > 0x7FFFFFFF) {
+        flag._value |= 0x10000;
+    }
+    return value;
 }
 
 int16_t GTE::calculateIR(unsigned int index, int64_t value, bool lm) {
@@ -700,4 +714,22 @@ void GTE::squareVector(GTEInstruction instruction) {
     ir1 = calculateIR(1, mac1, instruction.lm);
     ir2 = calculateIR(2, mac2, instruction.lm);
     ir3 = calculateIR(3, mac3, instruction.lm);
+}
+
+/*
+NCLIP    8        Normal clipping
+Fields:
+Opcode:  cop2 $1400006
+
+in:      SXY0,SXY1,SXY2    Screen coordinates                  [1,15,0]
+out:     MAC0              Outerproduct of SXY1 and SXY2 with  [1,31,0]
+                           SXY0 as origin.
+
+Calculation:
+[1,31,0] MAC0 = F[SX0*SY1+SX1*SY2+SX2*SY0-SX0*SY2-SX1*SY0-SX2*SY1] [1,43,0]
+*/
+void GTE::normalClipping(GTEInstruction instruction) {
+    // TODO: unused
+    (void)instruction;
+    mac0 = calculateMAC0((int64_t)sxy0.x * sxy1.y + sxy1.x * sxy2.y + sxy2.x * sxy0.y - sxy0.x * sxy2.y - sxy1.x * sxy0.y - sxy2.x * sxy1.y);
 }
