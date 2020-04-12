@@ -54,6 +54,24 @@ void GTEFlagRegister::setIR(unsigned int index) {
     return;
 }
 
+void GTEFlagRegister::setRGB(unsigned int index) {
+    switch (index) {
+        case 1: {
+            colorFifoR = 1;
+            break;
+        }
+        case 2: {
+            colorFifoG = 1;
+            break;
+        }
+        case 3: {
+            colorFifoB = 1;
+            break;
+        }
+    }
+    return;
+}
+
 int64_t GTEFlagRegister::calculateMAC(unsigned int index, int64_t value) {
     if (value < -0x80000000000) {
         setMACNegative(index);
@@ -101,6 +119,19 @@ uint16_t GTEFlagRegister::calculateSZ3(int64_t value) {
     if (value > 0xFFFF) {
         sz3OrOtz = 1;
         return 0xFFFF;
+    }
+
+    return value;
+}
+
+uint8_t GTEFlagRegister::calculateRGB(unsigned int index, int value) {
+    if (value < 0) {
+        setRGB(index);
+        return 0;
+    }
+    if (value > 0xFF) {
+        setRGB(index);
+        return 0xFF;
     }
 
     return value;
