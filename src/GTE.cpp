@@ -637,6 +637,10 @@ void GTE::execute(uint32_t value) {
             normalClipping(instruction);
             break;
         }
+        case 0xc: {
+            outerProductOfTwoVectors(instruction);
+            break;
+        }
         case 0x28: {
             squareVector(instruction);
             break;
@@ -747,4 +751,37 @@ void GTE::averageOfFourZValues(GTEInstruction instruction) {
     int64_t average = (int64_t)zsf4 * sz0 + zsf4 * sz1 + zsf4 * sz2 + zsf4 * sz3;
     mac0 = flag.calculateMAC0(average);
     otz = flag.calculateSZ3(average >> 12);
+}
+
+/*
+OP       6        Outer product of 2 vectors
+Fields:  sf
+Opcode:  cop2 $170000C
+
+in:      [R11R12,R22R23,R33] vector 1
+         [IR1,IR2,IR3]      vector 2
+out:     [IR1,IR2,IR3]      outer product
+         [MAC1,MAC2,MAC3]   outer product
+
+Calculation: (D1=R11R12,D2=R22R23,D3=R33)
+
+         MAC1=A1[D2*IR3 - D3*IR2]
+         MAC2=A2[D3*IR1 - D1*IR3]
+         MAC3=A3[D1*IR2 - D2*IR1]
+         IR1=Lm_B1[MAC0]
+         IR2=Lm_B2[MAC1]
+         IR3=Lm_B3[MAC2]
+*/
+void GTE::outerProductOfTwoVectors(GTEInstruction instruction) {
+    int16_t d1 = rt.v0.x;
+    int16_t d2 = rt.v1.y;
+    int16_t d3 = rt.v2.z;
+
+    mac1 = flag.calculateMAC(1, ((d2 * ir3) - (d3 * ir2)) >> (instruction.shiftFraction * 12));
+    mac2 = flag.calculateMAC(2, ((d3 * ir1) - (d1 * ir3)) >> (instruction.shiftFraction * 12));
+    mac3 = flag.calculateMAC(3, ((d1 * ir2) - (d2 * ir1)) >> (instruction.shiftFraction * 12));
+
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
 }
