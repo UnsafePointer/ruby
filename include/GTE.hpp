@@ -142,4 +142,5 @@ public:
     void averageOfFourZValues(GTEInstruction instruction);
     void outerProductOfTwoVectors(GTEInstruction instruction);
     void generalPurposeInterpolationGPF(GTEInstruction instruction);
+    void generalPurposeInterpolationGPL(GTEInstruction instruction);
 };

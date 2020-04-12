@@ -657,6 +657,10 @@ void GTE::execute(uint32_t value) {
             generalPurposeInterpolationGPF(instruction);
             break;
         }
+        case 0x3e: {
+            generalPurposeInterpolationGPL(instruction);
+            break;
+        }
         default: {
             logger.logError("Unhandled Geometry Transformation Engine command: %#x", instruction.command);
             break;
@@ -819,6 +823,54 @@ void GTE::generalPurposeInterpolationGPF(GTEInstruction instruction) {
     mac1 = flag.calculateMAC(1, (ir0 * ir1)) >> (instruction.shiftFraction * 12);
     mac2 = flag.calculateMAC(2, (ir0 * ir2)) >> (instruction.shiftFraction * 12);
     mac3 = flag.calculateMAC(3, (ir0 * ir3)) >> (instruction.shiftFraction * 12);
+
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
+
+    rgb0._value = rgb1._value;
+    rgb1._value = rgb2._value;
+
+    rgb2.r = flag.calculateRGB(1, mac1 >> 4);
+    rgb2.g = flag.calculateRGB(2, mac2 >> 4);
+    rgb2.b = flag.calculateRGB(3, mac3 >> 4);
+    rgb2.c = rgbc.c;
+}
+
+/*
+GPL      5        General purpose interpolation
+Fields:  sf
+Opcode:  cop2 $1A0003E
+
+in:      IR0               scaling factor
+         CODE              code field of RGB
+         [IR1,IR2,IR3]     vector
+         [MAC1,MAC2,MAC3]  vector
+out:     [IR1,IR2,IR3]     vector
+         [MAC1,MAC2,MAC3]  vector
+         RGB2              RGB fifo.
+
+Calculation:
+
+         MAC1=A1[MAC1 + IR0 * IR1]
+         MAC2=A2[MAC2 + IR0 * IR2]
+         MAC3=A3[MAC3 + IR0 * IR3]
+         IR1=Lm_B1[MAC1]
+         IR2=Lm_B2[MAC2]
+         IR3=Lm_B3[MAC3]
+[0,8,0]  Cd0<-Cd1<-Cd2<- CODE
+[0,8,0]  R0<-R1<-R2<- Lm_C1[MAC1]
+[0,8,0]  G0<-G1<-G2<- Lm_C2[MAC2]
+[0,8,0]  B0<-B1<-B2<- Lm_C3[MAC3]
+*/
+void GTE::generalPurposeInterpolationGPL(GTEInstruction instruction) {
+    int64_t m1 = (int64_t)mac1 << (instruction.shiftFraction * 12);
+    int64_t m2 = (int64_t)mac2 << (instruction.shiftFraction * 12);
+    int64_t m3 = (int64_t)mac3 << (instruction.shiftFraction * 12);
+
+    mac1 = flag.calculateMAC(1, m1 + (ir0 * ir1)) >> (instruction.shiftFraction * 12);
+    mac2 = flag.calculateMAC(2, m2 + (ir0 * ir2)) >> (instruction.shiftFraction * 12);
+    mac3 = flag.calculateMAC(3, m3 + (ir0 * ir3)) >> (instruction.shiftFraction * 12);
 
     ir1 = flag.calculateIR(1, mac1, instruction.lm);
     ir2 = flag.calculateIR(2, mac2, instruction.lm);
