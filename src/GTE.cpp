@@ -43,7 +43,7 @@ GTE::GTE(LogLevel logLevel) : logger(logLevel, "  GTE: "),
     dqb(0),
     zsf3(0),
     zsf4(0),
-    flag(GTEFLAGRegister())
+    flag(GTEFlagRegister())
 {
 }
 
@@ -655,57 +655,6 @@ void GTE::execute(uint32_t value) {
     }
 }
 
-int64_t GTE::calculateMAC(unsigned int index, int64_t value) {
-    if (value < -0x80000000000) {
-        flag._value |= 0x8000000 >> (index - 1);
-    }
-    if (value > 0x7FFFFFFFFFF) {
-        flag._value |= 0x40000000 >> (index - 1);
-    }
-    return (value << 20) >> 20;
-}
-
-int32_t GTE::calculateMAC0(int64_t value) {
-    if (value < -(int64_t)0x80000000) {
-        flag._value |= 0x8000;
-    }
-    if (value > 0x7FFFFFFF) {
-        flag._value |= 0x10000;
-    }
-    return value;
-}
-
-int16_t GTE::calculateIR(unsigned int index, int64_t value, bool lm) {
-    if (lm && value < 0) {
-        flag._value |= 0x1000000 >> (index - 1);
-        return 0;
-    }
-    if (!lm && value < -0x8000) {
-        flag._value |= 0x1000000 >> (index - 1);
-        return -0x8000;
-    }
-    if (value > 0x7FFF) {
-        flag._value |= 0x1000000 >> (index - 1);
-        return 0x7FFF;
-    }
-
-    return value;
-}
-
-uint16_t GTE::calculateSZ3(int64_t value) {
-    if (value < 0) {
-        flag._value |= 0x40000;
-        return 0;
-    }
-
-    if (value > 0xFFFF) {
-        flag._value |= 0x40000;
-        return 0xFFFF;
-    }
-
-    return value;
-}
-
 /*
 SQR      5        Square vector.
 Fields:  sf
@@ -725,13 +674,13 @@ Calculation: (left format sf=0, right format sf=1)
 [1,15,0][1,3,12]  IR3=Lm_B3[MAC3]                      [1,31,0][1,19,12][lm=1]
 */
 void GTE::squareVector(GTEInstruction instruction) {
-    mac1 = calculateMAC(1, (ir1 * ir1) >> (instruction.shiftFraction * 12));
-    mac2 = calculateMAC(2, (ir2 * ir2) >> (instruction.shiftFraction * 12));
-    mac3 = calculateMAC(3, (ir3 * ir3) >> (instruction.shiftFraction * 12));
+    mac1 = flag.calculateMAC(1, (ir1 * ir1) >> (instruction.shiftFraction * 12));
+    mac2 = flag.calculateMAC(2, (ir2 * ir2) >> (instruction.shiftFraction * 12));
+    mac3 = flag.calculateMAC(3, (ir3 * ir3) >> (instruction.shiftFraction * 12));
 
-    ir1 = calculateIR(1, mac1, instruction.lm);
-    ir2 = calculateIR(2, mac2, instruction.lm);
-    ir3 = calculateIR(3, mac3, instruction.lm);
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
 }
 
 /*
@@ -749,7 +698,7 @@ Calculation:
 void GTE::normalClipping(GTEInstruction instruction) {
     // TODO: unused
     (void)instruction;
-    mac0 = calculateMAC0((int64_t)sxy0.x * sxy1.y + sxy1.x * sxy2.y + sxy2.x * sxy0.y - sxy0.x * sxy2.y - sxy1.x * sxy0.y - sxy2.x * sxy1.y);
+    mac0 = flag.calculateMAC0((int64_t)sxy0.x * sxy1.y + sxy1.x * sxy2.y + sxy2.x * sxy0.y - sxy0.x * sxy2.y - sxy1.x * sxy0.y - sxy2.x * sxy1.y);
 }
 
 /*
@@ -770,6 +719,6 @@ void GTE::averageOfThreeZValues(GTEInstruction instruction) {
     // TODO: unused
     (void)instruction;
     int64_t average = (int64_t)zsf3 * sz1 + zsf3 * sz2 + zsf3 * sz3;
-    mac0 = calculateMAC0(average);
-    otz = calculateSZ3(average >> 12);
+    mac0 = flag.calculateMAC0(average);
+    otz = flag.calculateSZ3(average >> 12);
 }
