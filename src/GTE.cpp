@@ -645,6 +645,10 @@ void GTE::execute(uint32_t value) {
             averageOfThreeZValues(instruction);
             break;
         }
+        case 0x2e: {
+            averageOfFourZValues(instruction);
+            break;
+        }
         default: {
             logger.logError("Unhandled Geometry Transformation Engine command: %#x", instruction.command);
             break;
@@ -719,6 +723,28 @@ void GTE::averageOfThreeZValues(GTEInstruction instruction) {
     // TODO: unused
     (void)instruction;
     int64_t average = (int64_t)zsf3 * sz1 + zsf3 * sz2 + zsf3 * sz3;
+    mac0 = flag.calculateMAC0(average);
+    otz = flag.calculateSZ3(average >> 12);
+}
+
+/*
+AVSZ4    6        Average of four Z values
+Fields:
+Opcode:  cop2 $168002E
+
+in:      SZ1,SZ2,SZ3,SZ4   Z-Values                            [0,16,0]
+         ZSF4              Divider                             [1,3,12]
+out:     OTZ               Average.                            [0,16,0]
+         MAC0              Average.                            [1,31,0]
+
+Calculation:
+[1,31,0] MAC0=F[ZSF4*SZ0 + ZSF4*SZ1 + ZSF4*SZ2 + ZSF4*SZ3]     [1,31,12]
+[0,16,0] OTZ=Lm_D[MAC0]                                        [1,31,0]
+*/
+void GTE::averageOfFourZValues(GTEInstruction instruction) {
+    // TODO: unused
+    (void)instruction;
+    int64_t average = (int64_t)zsf4 * sz0 + zsf4 * sz1 + zsf4 * sz2 + zsf4 * sz3;
     mac0 = flag.calculateMAC0(average);
     otz = flag.calculateSZ3(average >> 12);
 }

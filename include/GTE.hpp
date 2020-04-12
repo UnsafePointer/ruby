@@ -139,4 +139,5 @@ public:
     void squareVector(GTEInstruction instruction);
     void normalClipping(GTEInstruction instruction);
     void averageOfThreeZValues(GTEInstruction instruction);
+    void averageOfFourZValues(GTEInstruction instruction);
 };
