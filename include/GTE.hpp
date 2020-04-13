@@ -145,4 +145,5 @@ public:
     void generalPurposeInterpolationGPL(GTEInstruction instruction);
     void perspectiveTransformation(GTEInstruction instruction, unsigned int index);
     void perspectiveTransformationOnThreePoints(GTEInstruction instruction);
+    void normalColor(GTEInstruction instruction);
 };
