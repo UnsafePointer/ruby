@@ -147,5 +147,6 @@ public:
     void perspectiveTransformationOnThreePoints(GTEInstruction instruction);
     void normalColorNCS(GTEInstruction instruction, unsigned int index);
     void normalColorNCT(GTEInstruction instruction);
-    void normalColorColorSingleVector(GTEInstruction instruction);
+    void normalColorColorSingleVector(GTEInstruction instruction, unsigned int index);
+    void normalColorColorTripleVector(GTEInstruction instruction);
 };

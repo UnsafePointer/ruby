@@ -646,7 +646,7 @@ void GTE::execute(uint32_t value) {
             break;
         }
         case 0x1b: {
-            normalColorColorSingleVector(instruction);
+            normalColorColorSingleVector(instruction, 0);
             break;
         }
         case 0x1e: {
@@ -679,6 +679,10 @@ void GTE::execute(uint32_t value) {
         }
         case 0x3e: {
             generalPurposeInterpolationGPL(instruction);
+            break;
+        }
+        case 0x3f: {
+            normalColorColorTripleVector(instruction);
             break;
         }
         default: {
@@ -1186,10 +1190,29 @@ Calculation:
 [0,8,0]   G0<-G1<-G2<- Lm_C2[MAC2]                              [1,27,4]
 [0,8,0]   B0<-B1<-B2<- Lm_C3[MAC3]                              [1,27,4]
 */
-void GTE::normalColorColorSingleVector(GTEInstruction instruction) {
-    mac1 = flag.calculateMAC(1, (int64_t)l.v0.x * v0.x + l.v0.y * v0.y + l.v0.z * v0.z) >> (instruction.shiftFraction * 12);
-    mac2 = flag.calculateMAC(2, (int64_t)l.v1.x * v0.x + l.v1.y * v0.y + l.v1.z * v0.z) >> (instruction.shiftFraction * 12);
-    mac3 = flag.calculateMAC(3, (int64_t)l.v2.x * v0.x + l.v2.y * v0.y + l.v2.z * v0.z) >> (instruction.shiftFraction * 12);
+void GTE::normalColorColorSingleVector(GTEInstruction instruction, unsigned int index) {
+    GTEVector3_16_t v = {};
+    switch (index) {
+        case 0: {
+            v = v0;
+            break;
+        }
+        case 1: {
+            v = v1;
+            break;
+        }
+        case 2: {
+            v = v2;
+            break;
+        }
+        default: {
+            logger.logError("Unhandled index in NCCS operation with index: %d", index);
+            break;
+        }
+    }
+    mac1 = flag.calculateMAC(1, (int64_t)l.v0.x * v.x + l.v0.y * v.y + l.v0.z * v.z) >> (instruction.shiftFraction * 12);
+    mac2 = flag.calculateMAC(2, (int64_t)l.v1.x * v.x + l.v1.y * v.y + l.v1.z * v.z) >> (instruction.shiftFraction * 12);
+    mac3 = flag.calculateMAC(3, (int64_t)l.v2.x * v.x + l.v2.y * v.y + l.v2.z * v.z) >> (instruction.shiftFraction * 12);
 
     ir1 = flag.calculateIR(1, mac1, instruction.lm);
     ir2 = flag.calculateIR(2, mac2, instruction.lm);
@@ -1235,4 +1258,29 @@ void GTE::normalColorColorSingleVector(GTEInstruction instruction) {
     rgb2.g = flag.calculateRGB(2, mac2 >> 4);
     rgb2.b = flag.calculateRGB(3, mac3 >> 4);
     rgb2.c = rgbc.c;
+}
+
+/*
+NCCT     39       Normal Color Color triple vector
+Fields:  none
+Opcode:  cop2 $118043F
+
+In:      V0                Normal vector 1                     [1,3,12]
+         V1                Normal vector 2                     [1,3,12]
+         V2                Normal vector 3                     [1,3,12]
+         BK                Background color       RBK,GBK,BBK  [1,19,12]
+         RGB               Primary color          R,G,B,CODE   [0,8,0]
+         LLM               Light matrix                        [1,3,12]
+         LCM               Color matrix                        [1,3,12]
+Out:     RGBn              RGB fifo.              Rn,Gn,Bn,CDn [0,8,0]
+         [IR1,IR2,IR3]     Color vector                        [1,11,4]
+         [MAC1,MAC2,MAC3]  Color vector                        [1,27,4]
+
+Calculation:
+Same as NCCS but repeats for v1 and v2.
+*/
+void GTE::normalColorColorTripleVector(GTEInstruction instruction) {
+    normalColorColorSingleVector(instruction, 0);
+    normalColorColorSingleVector(instruction, 1);
+    normalColorColorSingleVector(instruction, 2);
 }
