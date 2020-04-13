@@ -149,4 +149,5 @@ public:
     void normalColorNCT(GTEInstruction instruction);
     void normalColorColorSingleVector(GTEInstruction instruction, unsigned int index);
     void normalColorColorTripleVector(GTEInstruction instruction);
+    void colorColor(GTEInstruction instruction);
 };
