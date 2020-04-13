@@ -72,6 +72,20 @@ void GTEFlagRegister::setRGB(unsigned int index) {
     return;
 }
 
+void GTEFlagRegister::setSXY2(unsigned int index) {
+    switch (index) {
+        case 1: {
+            sx2 = 1;
+            break;
+        }
+        case 2: {
+            sy2 = 1;
+            break;
+        }
+    }
+    return;
+}
+
 int64_t GTEFlagRegister::calculateMAC(unsigned int index, int64_t value) {
     if (value < -0x80000000000) {
         setMACNegative(index);
@@ -111,6 +125,20 @@ int16_t GTEFlagRegister::calculateIR(unsigned int index, int64_t value, bool lm)
     return value;
 }
 
+int16_t GTEFlagRegister::calculateIR0(int64_t value) {
+    if (value < 0) {
+        ir0 = 1;
+        return 0;
+    }
+
+    if (value > 0x1000) {
+        ir0 = 1;
+        return 0x1000;
+    }
+
+    return value;
+}
+
 uint16_t GTEFlagRegister::calculateSZ3(int64_t value) {
     if (value < 0) {
         sz3OrOtz = 1;
@@ -132,6 +160,19 @@ uint8_t GTEFlagRegister::calculateRGB(unsigned int index, int value) {
     if (value > 0xFF) {
         setRGB(index);
         return 0xFF;
+    }
+
+    return value;
+}
+
+int16_t GTEFlagRegister::calculateSXY2(unsigned int index, int value) {
+    if (value < -0x400) {
+        setSXY2(index);
+        return -0x400;
+    }
+    if (value > 0x3FF) {
+        setSXY2(index);
+        return 0x3FF;
     }
 
     return value;

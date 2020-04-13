@@ -58,9 +58,12 @@ union GTEFlagRegister {
     void setMACPositive(unsigned int index);
     void setIR(unsigned int index);
     void setRGB(unsigned int index);
+    void setSXY2(unsigned int index);
     int64_t calculateMAC(unsigned int index, int64_t value);
     int32_t calculateMAC0(int64_t value);
     int16_t calculateIR(unsigned int index, int64_t value, bool lm);
+    int16_t calculateIR0(int64_t value);
     uint16_t calculateSZ3(int64_t value);
     uint8_t calculateRGB(unsigned int index, int value);
+    int16_t calculateSXY2(unsigned int index, int value);
 };
