@@ -143,5 +143,6 @@ public:
     void outerProductOfTwoVectors(GTEInstruction instruction);
     void generalPurposeInterpolationGPF(GTEInstruction instruction);
     void generalPurposeInterpolationGPL(GTEInstruction instruction);
-    void perspectiveTransformation(GTEInstruction instruction);
+    void perspectiveTransformation(GTEInstruction instruction, unsigned int index);
+    void perspectiveTransformationOnThreePoints(GTEInstruction instruction);
 };

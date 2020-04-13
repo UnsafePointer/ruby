@@ -634,7 +634,7 @@ void GTE::execute(uint32_t value) {
     flag._value = 0;
     switch (instruction.command) {
         case 0x1: {
-            perspectiveTransformation(instruction);
+            perspectiveTransformation(instruction, 0);
             break;
         }
         case 0x6: {
@@ -655,6 +655,10 @@ void GTE::execute(uint32_t value) {
         }
         case 0x2e: {
             averageOfFourZValues(instruction);
+            break;
+        }
+        case 0x30: {
+            perspectiveTransformationOnThreePoints(instruction);
             break;
         }
         case 0x3d: {
@@ -927,10 +931,29 @@ Calculation:
 [1,31,0] MAC0= F[DQB + DQA * (H/SZ)]                           [1,19,24]
 [1,15,0] IR0= Lm_H[MAC0]                                       [1,31,0]
 */
-void GTE::perspectiveTransformation(GTEInstruction instruction) {
-    mac1 = flag.calculateMAC(1, (tr.x * 0x1000 + rt.v0.x * v0.x + rt.v0.y * v0.y + rt.v0.z * v0.z) >> (instruction.shiftFraction * 12));
-    mac2 = flag.calculateMAC(2, (tr.y * 0x1000 + rt.v1.x * v0.x + rt.v1.y * v0.y + rt.v1.z * v0.z) >> (instruction.shiftFraction * 12));
-    mac3 = flag.calculateMAC(3, (tr.z * 0x1000 + rt.v2.x * v0.x + rt.v2.y * v0.y + rt.v2.z * v0.z) >> (instruction.shiftFraction * 12));
+void GTE::perspectiveTransformation(GTEInstruction instruction, unsigned int index) {
+    GTEVector3_16_t v = {};
+    switch (index) {
+        case 0: {
+            v = v0;
+            break;
+        }
+        case 1: {
+            v = v1;
+            break;
+        }
+        case 2: {
+            v = v2;
+            break;
+        }
+        default: {
+            logger.logError("Unhandled index in RTPS operation with index: %d", index);
+            break;
+        }
+    }
+    mac1 = flag.calculateMAC(1, (tr.x * 0x1000 + rt.v0.x * v.x + rt.v0.y * v.y + rt.v0.z * v.z) >> (instruction.shiftFraction * 12));
+    mac2 = flag.calculateMAC(2, (tr.y * 0x1000 + rt.v1.x * v.x + rt.v1.y * v.y + rt.v1.z * v.z) >> (instruction.shiftFraction * 12));
+    mac3 = flag.calculateMAC(3, (tr.z * 0x1000 + rt.v2.x * v.x + rt.v2.y * v.y + rt.v2.z * v.z) >> (instruction.shiftFraction * 12));
 
     ir1 = flag.calculateIR(1, mac1, false);
     ir2 = flag.calculateIR(2, mac2, false);
@@ -964,4 +987,39 @@ void GTE::perspectiveTransformation(GTEInstruction instruction) {
     sxy2.y = flag.calculateSXY2(2, mac0 / 0x10000);
     mac0 = result * dqa + dqb;
     ir0 = flag.calculateIR0(mac0 / 0x1000);
+}
+
+/*
+RTPT     23       Perspective Transformation on 3 points.
+Fields   none
+opcode   cop2 $0280030
+
+in       V0       Vector to transform.                         [1,15,0]
+         V1                                                    [1,15,0]
+         V2                                                    [1,15,0]
+         R        Rotation matrix                              [1,3,12]
+         TR       Translation vector                           [1,31,0]
+         H        View plane distance                          [0,16,0]
+         DQA      Depth que interpolation values.              [1,7,8]
+         DQB                                                   [1,7,8]
+         OFX      Screen offset values.                        [1,15,16]
+         OFY                                                   [1,15,16]
+out      SXY fifo Screen XY coordinates.(short)                [1,15,0]
+         SZ fifo  Screen Z coordinate.(short)                  [0,16,0]
+         IR0      Interpolation value for depth queing.        [1,3,12]
+         IR1      Screen X (short)                             [1,15,0]
+         IR2      Screen Y (short)                             [1,15,0]
+         IR3      Screen Z (short)                             [1,15,0]
+         MAC1     Screen X (long)                              [1,31,0]
+         MAC2     Screen Y (long)                              [1,31,0]
+         MAC3     Screen Z (long)                              [1,31,0]
+
+Calculation: Same as RTPS, but repeats for V1 and V2.
+*/
+void GTE::perspectiveTransformationOnThreePoints(GTEInstruction instruction) {
+    // TODO: unused
+    (void)instruction;
+    perspectiveTransformation(instruction, 0);
+    perspectiveTransformation(instruction, 1);
+    perspectiveTransformation(instruction, 2);
 }
