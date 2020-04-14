@@ -152,4 +152,5 @@ public:
     void colorColor(GTEInstruction instruction);
     void depthCueingDPCS(GTEInstruction instruction, bool useFIFO);
     void depthCueingDPCT(GTEInstruction instruction);
+    void interpolationOfVectorAndFarColorVector(GTEInstruction instruction);
 };

@@ -649,6 +649,10 @@ void GTE::execute(uint32_t value) {
             depthCueingDPCS(instruction, false);
             break;
         }
+        case 0x11: {
+            interpolationOfVectorAndFarColorVector(instruction);
+            break;
+        }
         case 0x1b: {
             normalColorColorSingleVector(instruction, 0);
             break;
@@ -1468,4 +1472,63 @@ void GTE::depthCueingDPCT(GTEInstruction instruction) {
     depthCueingDPCS(instruction, true);
     depthCueingDPCS(instruction, true);
     depthCueingDPCS(instruction, true);
+}
+
+/*
+INTPL    8        Interpolation of a vector and far color vector.
+Fields:  none
+Opcode:  cop2 $0980011
+
+In:      [IR1,IR2,IR3]     Vector                              [1,3,12]
+         IR0               Interpolation value                 [1,3,12]
+         CODE              Code value from RGB.           CODE [0,8,0]
+         FC                Far color              RFC,GFC,BFC  [1,27,4]
+Out:     RGBn              RGB fifo               Rn,Gn,Bn,CDn [0,8,0]
+         [IR1,IR2,IR3]     Color vector                        [1,11,4]
+         [MAC1,MAC2,MAC3]  Color vector                        [1,27,4]
+
+Calculations:
+[1,27,4]  MAC1=A1[IR1 + IR0*(Lm_B1[RFC - IR1])]                [1,27,16]
+[1,27,4]  MAC2=A2[IR2 + IR0*(Lm_B1[GFC - IR2])]                [1,27,16]
+[1,27,4]  MAC3=A3[IR3 + IR0*(Lm_B1[BFC - IR3])]                [1,27,16]
+[1,11,4]  IR1=Lm_B1[MAC1]                                      [1,27,4]
+[1,11,4]  IR2=Lm_B2[MAC2]                                      [1,27,4]
+[1,11,4]  IR3=Lm_B3[MAC3]                                      [1,27,4]
+[0,8,0]   Cd0<-Cd1<-Cd2<- CODE
+[0,8,0]   R0<-R1<-R2<- Lm_C1[MAC1]                             [1,27,4]
+[0,8,0]   G0<-G1<-G2<- Lm_C2[MAC2]                             [1,27,4]
+[0,8,0]   B0<-B1<-B2<- Lm_C3[MAC3]                             [1,27,4]
+*/
+void GTE::interpolationOfVectorAndFarColorVector(GTEInstruction instruction) {
+    mac1 = flag.calculateMAC(1, (int64_t)ir1 << 12);
+    mac2 = flag.calculateMAC(2, (int64_t)ir2 << 12);
+    mac3 = flag.calculateMAC(3, (int64_t)ir3 << 12);
+
+    int32_t mac1Input = mac1;
+    int32_t mac2Input = mac2;
+    int32_t mac3Input = mac3;
+
+    mac1 = flag.calculateMAC(1, ((int64_t)fc.r << 12) - mac1Input) >> instruction.shiftFraction * 12;
+    mac2 = flag.calculateMAC(2, ((int64_t)fc.g << 12) - mac2Input) >> instruction.shiftFraction * 12;
+    mac3 = flag.calculateMAC(3, ((int64_t)fc.b << 12) - mac3Input) >> instruction.shiftFraction * 12;
+
+    ir1 = flag.calculateIR(1, mac1, false);
+    ir2 = flag.calculateIR(2, mac2, false);
+    ir3 = flag.calculateIR(3, mac3, false);
+
+    mac1 = flag.calculateMAC(1, ((int64_t)ir1 * ir0) + mac1Input) >> instruction.shiftFraction * 12;
+    mac2 = flag.calculateMAC(2, ((int64_t)ir2 * ir0) + mac2Input) >> instruction.shiftFraction * 12;
+    mac3 = flag.calculateMAC(3, ((int64_t)ir3 * ir0) + mac3Input) >> instruction.shiftFraction * 12;
+
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
+
+    rgb0._value = rgb1._value;
+    rgb1._value = rgb2._value;
+
+    rgb2.r = flag.calculateRGB(1, mac1 >> 4);
+    rgb2.g = flag.calculateRGB(2, mac2 >> 4);
+    rgb2.b = flag.calculateRGB(3, mac3 >> 4);
+    rgb2.c = rgbc.c;
 }
