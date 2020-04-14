@@ -1427,9 +1427,19 @@ void CPU::operationLoadWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationLoadWordCoprocessor2(Instruction instruction) {
-    // TODO: unused
-    (void)instruction;
-    logger.logError("Unhandled GTE LWC: %#x", instruction.value);
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (address % 4 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::StoreAddress);
+        return;
+    }
+
+    uint32_t value = load<uint32_t>(address);
+    gte->setData(rt, value);
 }
 
 void CPU::operationLoadWordCoprocessor3(Instruction instruction) {
@@ -1451,9 +1461,19 @@ void CPU::operationStoreWordCoprocessor1(Instruction instruction) {
 }
 
 void CPU::operationStoreWordCoprocessor2(Instruction instruction) {
-    // TODO: unused
-    (void)instruction;
-    logger.logError("Unhandled GTE SWC: %#x", instruction.value);
+    uint32_t imm = instruction.immSE();
+    uint32_t rt = instruction.rt;
+    uint32_t rs = instruction.rs;
+
+    uint32_t address = registerAtIndex(rs) + imm;
+    if (address % 4 != 0) {
+        cop0->badVirtualAddress = address;
+        triggerException(ExceptionType::StoreAddress);
+        return;
+    }
+
+    uint32_t value = gte->getData(rt);
+    store<uint32_t>(address, value);
 }
 
 void CPU::operationStoreWordCoprocessor3(Instruction instruction) {

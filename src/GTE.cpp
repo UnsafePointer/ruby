@@ -653,6 +653,10 @@ void GTE::execute(uint32_t value) {
             interpolationOfVectorAndFarColorVector(instruction);
             break;
         }
+        case 0x12: {
+            multiplyVectorByMatrixAndVectorAddition(instruction);
+            break;
+        }
         case 0x13: {
             normalColorDepthCueSingleVector(instruction, 0);
             break;
@@ -1841,4 +1845,111 @@ void GTE::depthCueColorLight(GTEInstruction instruction) {
     rgb2.g = flag.calculateRGB(2, mac2 >> 4);
     rgb2.b = flag.calculateRGB(3, mac3 >> 4);
     rgb2.c = rgbc.c;
+}
+
+/*
+MVMVA    8        Multiply vector by matrix and vector addition.
+Fields:  sf,mx,v,cv,lm
+Opcode:  cop2 $0400012
+
+in:      V0/V1/V2/IR       Vector v0, v1, v2 or [IR1,IR2,IR3]
+         R/LLM/LCM         Rotation, light or color matrix.    [1,3,12]
+         TR/BK             Translation or background color vector.
+out:     [IR1,IR2,IR3]     Short vector
+         [MAC1,MAC2,MAC3]  Long vector
+
+Calculation:
+MX = matrix specified by mx
+V = vector specified by v
+CV = vector specified by cv
+
+
+         MAC1=A1[CV1 + MX11*V1 + MX12*V2 + MX13*V3]
+         MAC2=A2[CV2 + MX21*V1 + MX22*V2 + MX23*V3]
+         MAC3=A3[CV3 + MX31*V1 + MX32*V2 + MX33*V3]
+         IR1=Lm_B1[MAC1]
+         IR2=Lm_B2[MAC2]
+         IR3=Lm_B3[MAC3]
+
+Notes:
+The cv field allows selection of the far color vector, but this vector
+is not added correctly by the GTE.
+*/
+void GTE::multiplyVectorByMatrixAndVectorAddition(GTEInstruction instruction) {
+    GTEMatrix_16_t translationMatrix = {};
+    switch (instruction.mvmvaTranslationMatrix()) {
+        case GTEInstructionMVMVATranslationMatrix::Rotation: {
+            translationMatrix = rt;
+            break;
+        }
+        case GTEInstructionMVMVATranslationMatrix::Light: {
+            translationMatrix = l;
+            break;
+        }
+        case GTEInstructionMVMVATranslationMatrix::Color: {
+            translationMatrix = lr;
+            break;
+        }
+        case GTEInstructionMVMVATranslationMatrix::ReservedMatrix: {
+            logger.logWarning("MVMVA using reserved matrix");
+            break;
+        }
+        default: {
+            logger.logError("MVMVA unhandled translation matrix");
+            break;
+        }
+    }
+    GTEVector3_16_t multiplyVector = {};
+    switch (instruction.mvmvaMultiplyVector()) {
+        case GTEInstructionMVMVAMultiplyVector::V0: {
+            multiplyVector = v0;
+            break;
+        }
+        case GTEInstructionMVMVAMultiplyVector::V1: {
+            multiplyVector = v1;
+            break;
+        }
+        case GTEInstructionMVMVAMultiplyVector::V2: {
+            multiplyVector = v2;
+            break;
+        }
+        case GTEInstructionMVMVAMultiplyVector::IR: {
+            multiplyVector = { ir1, ir2, ir3 };
+            break;
+        }
+        default: {
+            logger.logError("MVMVA unhandled multiply matrix");
+            break;
+        }
+    }
+    GTEVector3_32_t translationVector = {};
+    switch (instruction.mvmvaTranslationVector()) {
+        case GTEInstructionMVMVATranslationVector::TR: {
+            translationVector = tr;
+            break;
+        }
+        case GTEInstructionMVMVATranslationVector::BK: {
+            translationVector = { bk.r, bk.g, bk.b };
+            break;
+        }
+        case GTEInstructionMVMVATranslationVector::FC: {
+            translationVector = { fc.r, fc.g, fc.b };
+            break;
+        }
+        case GTEInstructionMVMVATranslationVector::TranslationVectorNone: {
+            logger.logWarning("MVMVA using translation vector none");
+            break;
+        }
+        default: {
+            logger.logError("MVMVA unhandled translation vector");
+            break;
+        }
+    }
+    mac1 = flag.calculateMAC(1, (int64_t)(translationVector.x * 0x1000 + translationMatrix.v0.x * multiplyVector.x + translationMatrix.v0.y * multiplyVector.y + translationMatrix.v0.z * multiplyVector.z) >> (instruction.shiftFraction * 12));
+    mac2 = flag.calculateMAC(2, (int64_t)(translationVector.y * 0x1000 + translationMatrix.v1.x * multiplyVector.x + translationMatrix.v1.y * multiplyVector.y + translationMatrix.v1.z * multiplyVector.z) >> (instruction.shiftFraction * 12));
+    mac3 = flag.calculateMAC(3, (int64_t)(translationVector.z * 0x1000 + translationMatrix.v2.x * multiplyVector.x + translationMatrix.v2.y * multiplyVector.y + translationMatrix.v2.z * multiplyVector.z) >> (instruction.shiftFraction * 12));
+
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
 }

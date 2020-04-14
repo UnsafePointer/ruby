@@ -16,7 +16,7 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 - [x] Interrupts
 - [x] Timers
 - [x] Controllers and Memory Cards
-- [ ] GTE
+- [x] GTE
 - [x] SPU
 - [ ] SIO
 - [ ] PIO
@@ -143,6 +143,12 @@ $ ./build/ruby --exe TESTNAME.exe
 ![gpu_tests_quads](/images/gpu_tests_quads.png)  ![gpu_tests_textured_quads](/images/gpu_tests_textured_quads.png)
 ![gpu_tests_polys](/images/gpu_tests_polys.png)  ![gpu_tests_textured_polys](/images/gpu_tests_textured_polys.png)
 ![gpu_tests_lines](/images/gpu_tests_lines.png)
+
+### GTE Tests
+
+[amidog GTE tests](https://psx.amidog.se/doku.php?id=psx:download:gte): psxtest_gte.exe (SHA1: 1de49e77203d55ae82a04eecc715bf61bbc5ef9b)
+
+![gte_tests.png](/images/gte_tests.png)
 
 ## Acknowledgments
 

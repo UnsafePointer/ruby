@@ -1,6 +1,27 @@
 #pragma once
 #include <cstdint>
 
+enum GTEInstructionMVMVATranslationVector {
+    TR,
+    BK,
+    FC,
+    TranslationVectorNone
+};
+
+enum GTEInstructionMVMVAMultiplyVector {
+    V0,
+    V1,
+    V2,
+    IR
+};
+
+enum GTEInstructionMVMVATranslationMatrix {
+    Rotation,
+    Light,
+    Color,
+    ReservedMatrix
+};
+
 /*
 GTE Command Encoding (COP2 imm25 opcodes)
 0-5    Real GTE Command Number (00h..3Fh) (used by hardware)
@@ -31,4 +52,8 @@ union GTEInstruction {
 
     GTEInstruction() : value(0) {}
     GTEInstruction(uint32_t value);
+
+    GTEInstructionMVMVATranslationVector mvmvaTranslationVector();
+    GTEInstructionMVMVAMultiplyVector mvmvaMultiplyVector();
+    GTEInstructionMVMVATranslationMatrix mvmvaTranslationMatrix();
 };
