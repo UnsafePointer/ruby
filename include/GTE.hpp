@@ -157,4 +157,5 @@ public:
     void normalColorDepthCueSingleVector(GTEInstruction instruction, unsigned int index);
     void normalColorDepthCueTripleVector(GTEInstruction instruction);
     void depthCueColorLight(GTEInstruction instruction);
+    void multiplyVectorByMatrixAndVectorAddition(GTEInstruction instruction);
 };
