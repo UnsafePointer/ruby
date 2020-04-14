@@ -150,5 +150,6 @@ public:
     void normalColorColorSingleVector(GTEInstruction instruction, unsigned int index);
     void normalColorColorTripleVector(GTEInstruction instruction);
     void colorColor(GTEInstruction instruction);
-    void depthCueing(GTEInstruction instruction);
+    void depthCueingDPCS(GTEInstruction instruction, bool useFIFO);
+    void depthCueingDPCT(GTEInstruction instruction);
 };

@@ -646,7 +646,7 @@ void GTE::execute(uint32_t value) {
             break;
         }
         case 0x10: {
-            depthCueing(instruction);
+            depthCueingDPCS(instruction, false);
             break;
         }
         case 0x1b: {
@@ -667,6 +667,10 @@ void GTE::execute(uint32_t value) {
         }
         case 0x28: {
             squareVector(instruction);
+            break;
+        }
+        case 0x2a: {
+            depthCueingDPCT(instruction);
             break;
         }
         case 0x2d: {
@@ -1390,10 +1394,19 @@ Calculations:
 [0,8,0]   G0<-G1<-G2<- Lm_C2[MAC2]                             [1,27,4]
 [0,8,0]   B0<-B1<-B2<- Lm_C3[MAC3]                             [1,27,4]
 */
-void GTE::depthCueing(GTEInstruction instruction) {
-    mac1 = flag.calculateMAC(1, rgbc.r) << 16;
-    mac2 = flag.calculateMAC(2, rgbc.g) << 16;
-    mac3 = flag.calculateMAC(3, rgbc.b) << 16;
+void GTE::depthCueingDPCS(GTEInstruction instruction, bool useFIFO) {
+    uint8_t r = rgbc.r;
+    uint8_t g = rgbc.g;
+    uint8_t b = rgbc.b;
+    if (useFIFO) {
+        r = rgb0.r;
+        g = rgb0.g;
+        b = rgb0.b;
+    }
+
+    mac1 = flag.calculateMAC(1, r) << 16;
+    mac2 = flag.calculateMAC(2, g) << 16;
+    mac3 = flag.calculateMAC(3, b) << 16;
 
     int32_t mac1Input = mac1;
     int32_t mac2Input = mac2;
@@ -1422,4 +1435,37 @@ void GTE::depthCueing(GTEInstruction instruction) {
     rgb2.g = flag.calculateRGB(2, mac2 >> 4);
     rgb2.b = flag.calculateRGB(3, mac3 >> 4);
     rgb2.c = rgbc.c;
+}
+
+/*
+DPCT     17       Depth Cueing.
+Fields:  none
+Opcode:  cop2 $0F8002A
+
+In:      IR0               Interpolation value                 [1,3,12]
+         RGB0,RGB1,RGB2    Colors in RGB fifo.    Rn,Gn,Bn,CDn [0,8,0]
+         FC                Far color              RFC,GFC,BFC  [1,27,4]
+Out:     RGBn              RGB fifo               Rn,Gn,Bn,CDn [0,8,0]
+         [IR1,IR2,IR3]     Color vector                        [1,11,4]
+         [MAC1,MAC2,MAC3]  Color vector                        [1,27,4]
+
+Calculations:
+[1,27,4]  MAC1=A1[R0+ IR0*(Lm_B1[RFC - R0])]                   [1,27,16][lm=0]
+[1,27,4]  MAC2=A2[G0+ IR0*(Lm_B1[GFC - G0])]                   [1,27,16][lm=0]
+[1,27,4]  MAC3=A3[B0+ IR0*(Lm_B1[BFC - B0])]                   [1,27,16][lm=0]
+[1,11,4]  IR1=Lm_B1[MAC1]                                      [1,27,4][lm=0]
+[1,11,4]  IR2=Lm_B2[MAC2]                                      [1,27,4][lm=0]
+[1,11,4]  IR3=Lm_B3[MAC3]                                      [1,27,4][lm=0]
+[0,8,0]   Cd0<-Cd1<-Cd2<- CODE
+[0,8,0]   R0<-R1<-R2<- Lm_C1[MAC1]                             [1,27,4]
+[0,8,0]   G0<-G1<-G2<- Lm_C2[MAC2]                             [1,27,4]
+[0,8,0]   B0<-B1<-B2<- Lm_C3[MAC3]                             [1,27,4]
+
+Performs this calculation 3 times, so all three RGB values have been
+replaced by the depth cued RGB values.
+*/
+void GTE::depthCueingDPCT(GTEInstruction instruction) {
+    depthCueingDPCS(instruction, true);
+    depthCueingDPCS(instruction, true);
+    depthCueingDPCS(instruction, true);
 }
