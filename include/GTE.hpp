@@ -154,4 +154,5 @@ public:
     void depthCueingDPCT(GTEInstruction instruction);
     void interpolationOfVectorAndFarColorVector(GTEInstruction instruction);
     void colorDepthQue(GTEInstruction instruction);
+    void normalColorDepthCueSingleVector(GTEInstruction instruction);
 };

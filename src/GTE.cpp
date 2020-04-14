@@ -653,6 +653,10 @@ void GTE::execute(uint32_t value) {
             interpolationOfVectorAndFarColorVector(instruction);
             break;
         }
+        case 0x13: {
+            normalColorDepthCueSingleVector(instruction);
+            break;
+        }
         case 0x14: {
             colorDepthQue(instruction);
             break;
@@ -1571,6 +1575,107 @@ Calculation:
 [0,8,0]   B0<-B1<-B2<- Lm_C3[MAC3]                             [1,27,4]
 */
 void GTE::colorDepthQue(GTEInstruction instruction) {
+    int64_t temporalMAC = 0;
+
+    temporalMAC = flag.calculateMAC(1, (int64_t)bk.r * 0x1000 + lr.v0.x * ir1);
+    temporalMAC = flag.calculateMAC(1, temporalMAC + (int64_t)lr.v0.y * ir2);
+    temporalMAC = flag.calculateMAC(1, temporalMAC + (int64_t)lr.v0.z * ir3);
+    mac1 = temporalMAC >> (instruction.shiftFraction * 12);
+
+    temporalMAC = flag.calculateMAC(2, (int64_t)bk.g * 0x1000 + lr.v1.x * ir1);
+    temporalMAC = flag.calculateMAC(2, temporalMAC + (int64_t)lr.v1.y * ir2);
+    temporalMAC = flag.calculateMAC(2, temporalMAC + (int64_t)lr.v1.z * ir3);
+    mac2 = temporalMAC >> (instruction.shiftFraction * 12);
+
+    temporalMAC = flag.calculateMAC(3, (int64_t)bk.b * 0x1000 + lr.v2.x * ir1);
+    temporalMAC = flag.calculateMAC(3, temporalMAC + (int64_t)lr.v2.y * ir2);
+    temporalMAC = flag.calculateMAC(3, temporalMAC + (int64_t)lr.v2.z * ir3);
+    mac3 = temporalMAC >> (instruction.shiftFraction * 12);
+
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
+
+    mac1 = flag.calculateMAC(1, (rgbc.r * ir1) << 4);
+    mac2 = flag.calculateMAC(2, (rgbc.g * ir2) << 4);
+    mac3 = flag.calculateMAC(3, (rgbc.b * ir3) << 4);
+
+    int32_t mac1Input = mac1;
+    int32_t mac2Input = mac2;
+    int32_t mac3Input = mac3;
+
+    mac1 = flag.calculateMAC(1, ((int64_t)fc.r << 12) - mac1Input) >> instruction.shiftFraction * 12;
+    mac2 = flag.calculateMAC(2, ((int64_t)fc.g << 12) - mac2Input) >> instruction.shiftFraction * 12;
+    mac3 = flag.calculateMAC(3, ((int64_t)fc.b << 12) - mac3Input) >> instruction.shiftFraction * 12;
+
+    ir1 = flag.calculateIR(1, mac1, false);
+    ir2 = flag.calculateIR(2, mac2, false);
+    ir3 = flag.calculateIR(3, mac3, false);
+
+    mac1 = flag.calculateMAC(1, ((int64_t)ir1 * ir0) + mac1Input) >> instruction.shiftFraction * 12;
+    mac2 = flag.calculateMAC(2, ((int64_t)ir2 * ir0) + mac2Input) >> instruction.shiftFraction * 12;
+    mac3 = flag.calculateMAC(3, ((int64_t)ir3 * ir0) + mac3Input) >> instruction.shiftFraction * 12;
+
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
+
+    rgb0._value = rgb1._value;
+    rgb1._value = rgb2._value;
+
+    rgb2.r = flag.calculateRGB(1, mac1 >> 4);
+    rgb2.g = flag.calculateRGB(2, mac2 >> 4);
+    rgb2.b = flag.calculateRGB(3, mac3 >> 4);
+    rgb2.c = rgbc.c;
+}
+
+/*
+NCDS     19       Normal color depth cue single vector
+Fields:  none
+Opcode:  cop2 $0e80413
+In:      V0                Normal vector                       [1,3,12]
+         BK                Background color       RBK,GBK,BBK  [1,19,12]
+         RGB               Primary color          R,G,B,CODE   [0,8,0]
+         LLM               Light matrix                        [1,3,12]
+         LCM               Color matrix                        [1,3,12]
+         IR0               Interpolation value                 [1,3,12]
+Out:     RGBn              RGB fifo.              Rn,Gn,Bn,CDn [0,8,0]
+         [IR1,IR2,IR3]     Color vector                        [1,11,4]
+         [MAC1,MAC2,MAC3]  Color vector                        [1,27,4]
+
+Calculation:
+[1,19,12] MAC1=A1[L11*VX0 + L12*VY0 + L13*VZ0]                 [1,19,24]
+[1,19,12] MAC2=A1[L21*VX0 + L22*VY0 + L23*VZ0]                 [1,19,24]
+[1,19,12] MAC3=A1[L31*VX0 + L32*VY0 + L33*VZ0]                 [1,19,24]
+[1,3,12]  IR1= Lm_B1[MAC1]                                     [1,19,12][lm=1]
+[1,3,12]  IR2= Lm_B2[MAC2]                                     [1,19,12][lm=1]
+[1,3,12]  IR3= Lm_B3[MAC3]                                     [1,19,12][lm=1]
+[1,19,12] MAC1=A1[RBK + LR1*IR1 + LR2*IR2 + LR3*IR3]           [1,19,24]
+[1,19,12] MAC2=A1[GBK + LG1*IR1 + LG2*IR2 + LG3*IR3]           [1,19,24]
+[1,19,12] MAC3=A1[BBK + LB1*IR1 + LB2*IR2 + LB3*IR3]           [1,19,24]
+[1,3,12]  IR1= Lm_B1[MAC1]                                     [1,19,12][lm=1]
+[1,3,12]  IR2= Lm_B2[MAC2]                                     [1,19,12][lm=1]
+[1,3,12]  IR3= Lm_B3[MAC3]                                     [1,19,12][lm=1]
+[1,27,4]  MAC1=A1[R*IR1 + IR0*(Lm_B1[RFC-R*IR1])]              [1,27,16][lm=0]
+[1,27,4]  MAC2=A1[G*IR2 + IR0*(Lm_B2[GFC-G*IR2])]              [1,27,16][lm=0]
+[1,27,4]  MAC3=A1[B*IR3 + IR0*(Lm_B3[BFC-B*IR3])]              [1,27,16][lm=0]
+[1,3,12]  IR1= Lm_B1[MAC1]                                     [1,27,4][lm=1]
+[1,3,12]  IR2= Lm_B2[MAC2]                                     [1,27,4][lm=1]
+[1,3,12]  IR3= Lm_B3[MAC3]                                     [1,27,4][lm=1]
+[0,8,0]   Cd0<-Cd1<-Cd2<- CODE
+[0,8,0]   R0<-R1<-R2<- Lm_C1[MAC1]                             [1,27,4]
+[0,8,0]   G0<-G1<-G2<- Lm_C2[MAC2]                             [1,27,4]
+[0,8,0]   B0<-B1<-B2<- Lm_C3[MAC3]                             [1,27,4]
+*/
+void GTE::normalColorDepthCueSingleVector(GTEInstruction instruction) {
+    mac1 = flag.calculateMAC(1, (int64_t)l.v0.x * v0.x + l.v0.y * v0.y + l.v0.z * v0.z) >> (instruction.shiftFraction * 12);
+    mac2 = flag.calculateMAC(2, (int64_t)l.v1.x * v0.x + l.v1.y * v0.y + l.v1.z * v0.z) >> (instruction.shiftFraction * 12);
+    mac3 = flag.calculateMAC(3, (int64_t)l.v2.x * v0.x + l.v2.y * v0.y + l.v2.z * v0.z) >> (instruction.shiftFraction * 12);
+
+    ir1 = flag.calculateIR(1, mac1, instruction.lm);
+    ir2 = flag.calculateIR(2, mac2, instruction.lm);
+    ir3 = flag.calculateIR(3, mac3, instruction.lm);
+
     int64_t temporalMAC = 0;
 
     temporalMAC = flag.calculateMAC(1, (int64_t)bk.r * 0x1000 + lr.v0.x * ir1);
