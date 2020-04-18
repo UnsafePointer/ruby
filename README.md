@@ -5,6 +5,7 @@
 ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(console)) emulator written in C++.
 
 ![current_progress.gif](/images/current_progress.gif)
+![current_progress.gif](/images/toshinden.gif)
 
 ## Progress
 
@@ -20,6 +21,14 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 - [x] SPU
 - [ ] SIO
 - [ ] PIO
+
+## Known issues
+
+* Timers are not triggering interrupts yet.
+* Controllers only support one digital joypad.
+* SPU only supports read/writes to registries, there is no sound output.
+* There are a lot of problems with the GPU OpenGL renderer, notably 24BPP mode, GP0(02h) and GP0(E5h) are not working causing many rendering artifacts in some games.
+* CD-ROM is missing a lot of commands.
 
 ## Building
 
