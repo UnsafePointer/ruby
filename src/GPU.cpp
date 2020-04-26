@@ -122,7 +122,18 @@ void GPU::executeGp0(uint32_t value) {
         uint32_t opCode = (value >> 24) & 0xff;
         logger.logMessage("GP0 [W] with opcode: %#x (%#x)", opCode, value);
         switch (opCode) {
+            case 0x2b: {
+                logger.logMessage("GP0 0x29");
+                goto noop;
+                break;
+            }
+            case 0x29: {
+                logger.logMessage("GP0 0x29");
+                goto noop;
+                break;
+            }
             case 0x00: {
+noop:
                 gp0WordsRemaining = 1;
                 gp0InstructionMethod = [&]() {
                     this->operationGp0Nop();
