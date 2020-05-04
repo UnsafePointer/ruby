@@ -23,7 +23,7 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog
 
     buffer = make_unique<RendererBuffer<Vertex>>(program, RENDERER_BUFFER_SIZE);
 
-    offsetUniform = program->findProgramAttribute("offset");
+    offsetUniform = program->findProgramUniform("offset");
     glUniform2i(offsetUniform, 0, 0);
 
     // TODO: Use a single vertex shader

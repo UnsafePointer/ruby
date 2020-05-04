@@ -69,3 +69,11 @@ GLuint RendererProgram::findProgramAttribute(string attribute) const {
     rendererDebugger->checkForOpenGLErrors();
     return index;
 }
+
+GLuint RendererProgram::findProgramUniform(std::string uniform) const {
+    const GLchar *attrib = uniform.c_str();
+    GLint index = glGetUniformLocation(program, attrib);
+    RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+    rendererDebugger->checkForOpenGLErrors();
+    return index;
+}
