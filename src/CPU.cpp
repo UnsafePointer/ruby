@@ -7,7 +7,7 @@
 
 using namespace std;
 
-CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte) : logger(logLevel),
+CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte, std::unique_ptr<InterruptController> &interruptController) : logger(logLevel),
              programCounter(0xbfc00000),
              jumpDestination(0),
              isBranching(false),
@@ -19,7 +19,8 @@ CPU::CPU(LogLevel logLevel, unique_ptr<Interconnect> &interconnect, unique_ptr<C
              cop0(cop0),
              currentInstruction(Instruction(0x0)),
              logBiosFunctionCalls(logBiosFunctionCalls),
-             gte(gte)
+             gte(gte),
+             interruptController(interruptController)
 {
     fill_n(registers, 32, 0);
 }
@@ -97,10 +98,18 @@ void CPU::printAllRegisters() {
     logger.logDebug("pc: %#x", programCounter);
 }
 
-bool CPU::executeNextInstruction() {
+void CPU::handleInterrupts() {
+    if (interruptController->areInterruptsPending()) {
+        cop0->cause.value |= 0x400;
+    } else {
+        cop0->cause.value &= ~0x400;
+    }
     if (cop0->areInterruptsPending()) {
         triggerException(ExceptionType::Interrupt);
     }
+}
+
+bool CPU::executeNextInstruction() {
     if (cop0->breakPointControl & (1 << 24) && programCounter == cop0->breakPointOnExecute) {
         cop0->breakPointControl  &= ~(1 << 24);
         return false;

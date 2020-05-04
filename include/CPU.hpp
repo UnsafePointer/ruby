@@ -7,6 +7,7 @@
 #include "COP0.hpp"
 #include "Logger.hpp"
 #include "GTE.hpp"
+#include "InterruptController.hpp"
 
 struct LoadSlot {
     uint32_t registerIndex;
@@ -47,6 +48,7 @@ class CPU {
     Instruction currentInstruction;
     bool logBiosFunctionCalls;
     std::unique_ptr<GTE> &gte;
+    std::unique_ptr<InterruptController> &interruptController;
 
     void moveLoadDelaySlots();
     void loadDelaySlot(uint32_t registerIndex, uint32_t value);
@@ -141,7 +143,7 @@ class CPU {
 
     void operationIllegal(Instruction instruction);
 public:
-    CPU(LogLevel logLevel, std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte);
+    CPU(LogLevel logLevel, std::unique_ptr<Interconnect> &interconnect, std::unique_ptr<COP0> &cop0, bool logBiosFunctionCalls, std::unique_ptr<GTE> &gte, std::unique_ptr<InterruptController> &interruptController);
     ~CPU();
 
     std::unique_ptr<COP0>& cop0Ref();
@@ -152,6 +154,7 @@ public:
     inline void store(uint32_t address, T value) const;
 
     bool executeNextInstruction();
+    void handleInterrupts();
     // GDB register naming and order used here:
     // r0-r31
     std::array<uint32_t, 32> getRegisters();

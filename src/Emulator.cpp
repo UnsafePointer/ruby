@@ -27,7 +27,7 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer() {
     bios = make_unique<BIOS>(configurationManager->biosLogLevel());
     ram = make_unique<RAM>();
     scratchpad = make_unique<Scratchpad>();
-    interruptController = make_unique<InterruptController>(configurationManager->interruptLogLevel(), cop0);
+    interruptController = make_unique<InterruptController>(configurationManager->interruptLogLevel());
     gpu = make_unique<GPU>(configurationManager->gpuLogLevel(), mainWindow, interruptController, debugInfoRenderer);
     LogLevel cdromLogLevel = configurationManager->cdromLogLevel();
     cdrom = make_unique<CDROM>(cdromLogLevel, interruptController);
@@ -40,7 +40,7 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer() {
     spu = make_unique<SPU>(configurationManager->spuLogLevel());
     interconnect = make_unique<Interconnect>(configurationManager->interconnectLogLevel(), cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller, spu);
     gte = make_unique<GTE>(configurationManager->gteLogLevel());
-    cpu = make_unique<CPU>(configurationManager->cpuLogLevel(), interconnect, cop0, logBiosFunctionCalls, gte);
+    cpu = make_unique<CPU>(configurationManager->cpuLogLevel(), interconnect, cop0, logBiosFunctionCalls, gte, interruptController);
 }
 
 Emulator::~Emulator() {}
@@ -73,6 +73,7 @@ void Emulator::emulateFrame() {
         timer1->step(systemClockStep);
         timer2->step(systemClockStep);
         gpu->step(systemClockStep);
+        cpu->handleInterrupts();
     }
 }
 

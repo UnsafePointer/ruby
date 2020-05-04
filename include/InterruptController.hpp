@@ -60,22 +60,20 @@ Mask: Read/Write I_MASK (0=Disabled, 1=Enabled)
 */
 class InterruptController {
     Logger logger;
-    std::unique_ptr<COP0> &cop0;
 
     IRQ status;
     IRQ mask;
 
     void setStatus(uint16_t status);
     void setMask(uint16_t mask);
-    bool isActive();
-    void update();
 
     std::string requestNumberDescription(InterruptRequestNumber requestNumber) const;
 public:
-    InterruptController(LogLevel logLevel, std::unique_ptr<COP0> &cop0);
+    InterruptController(LogLevel logLevel);
     ~InterruptController();
 
     void trigger(InterruptRequestNumber irq);
+    bool areInterruptsPending();
 
     template <typename T>
     inline T load(uint32_t offset) const;
