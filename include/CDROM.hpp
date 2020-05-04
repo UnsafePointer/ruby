@@ -360,6 +360,7 @@ Command          Parameters      Response(s)
     void operationGetTD();
     void operationStop();
     void operationSeekP();
+    void operationPlay();
 
     void handleUnsupportedOperation(uint8_t operation);
 public:

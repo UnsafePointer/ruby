@@ -139,6 +139,10 @@ void CDROM::execute(uint8_t value) {
             operationSetloc();
             break;
         }
+        case 0x03: {
+            operationPlay();
+            break;
+        }
         case 0x06: {
             operationReadN();
             break;
@@ -445,6 +449,19 @@ void CDROM::operationSeekP() {
     internalState = CDROMInternalState::SeekingState;
 
     logger.logMessage("CMD SeekP");
+}
+
+/*
+Play - Command 03h (,track) --> INT3(stat) --> optional INT1(report bytes)
+*/
+void CDROM::operationPlay() {
+    statusCode.setState(CDROMState::Playing);
+
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT3);
+
+
+    logger.logMessage("CMD Play");
 }
 
 /*
