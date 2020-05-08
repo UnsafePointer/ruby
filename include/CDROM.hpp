@@ -111,13 +111,38 @@ union CDROMStatus {
 */
 union CDROMInterrupt {
     struct {
-        uint8_t enable : 4;
-        uint8_t unknown : 4;
+        uint8_t enable : 5;
+        uint8_t unknown : 3;
     };
 
     uint8_t _value;
 
     CDROMInterrupt() : _value(0) {}
+};
+
+/*
+1F801803h.Index1 - Interrupt Flag Register (R/W)
+1F801803h.Index3 - Interrupt Flag Register (R) (Mirror)
+  0-2   Read: Response Received   Write: 7=Acknowledge   ;INT1..INT7
+  3     Read: Unknown (usually 0) Write: 1=Acknowledge   ;INT8  ;XXX CLRBFEMPT
+  4     Read: Command Start       Write: 1=Acknowledge   ;INT10h;XXX CLRBFWRDY
+  5     Read: Always 1 ;XXX "_"   Write: 1=Unknown              ;XXX SMADPCLR
+  6     Read: Always 1 ;XXX "_"   Write: 1=Reset Parameter Fifo ;XXX CLRPRM
+  7     Read: Always 1 ;XXX "_"   Write: 1=Unknown              ;XXX CHPRST
+*/
+union CDROMInterruptFlag {
+    struct {
+        uint8_t responseReceived : 3;
+        uint8_t unknown : 1;
+        uint8_t commandStart : 1;
+        uint8_t unknown2 : 1;
+        uint8_t unknown3 : 1;
+        uint8_t unknown4 : 1;
+    };
+
+    uint8_t _value;
+
+    CDROMInterruptFlag() : _value(0) {};
 };
 
 enum CDROMState : uint8_t {
@@ -215,6 +240,13 @@ union CDROMMode {
     CDROMModeSpeed speed() { return CDROMModeSpeed(_speed); }
 };
 
+enum CDROMInternalState : uint8_t {
+    IdleState,
+    SeekingState,
+    ReadingState,
+    ReadingTableOfContentsState,
+};
+
 class CDROM {
     Logger logger;
     std::unique_ptr<InterruptController> &interruptController;
@@ -222,8 +254,10 @@ class CDROM {
 
     CDROMStatus status;
     CDROMInterrupt interrupt;
+    CDROMInterruptFlag interruptFlag;
     CDROMStatusCode statusCode;
     CDROMMode mode;
+    CDROMInternalState internalState;
 
     std::queue<uint8_t> parameters;
     std::queue<uint8_t> response;
@@ -248,7 +282,7 @@ class CDROM {
     void setAudioVolumeRightCDToLeftSPURegister(uint8_t value);
     void execute(uint8_t value);
 
-    uint8_t getStatusRegister() const;
+    uint8_t getStatusRegister();
     uint8_t getInterruptFlagRegister() const;
     uint8_t getReponse();
     uint8_t getInterruptRegister() const;

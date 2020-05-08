@@ -17,7 +17,7 @@ should be: SystemClock*930h/4/44100Hz for Single Speed (and half as much for Dou
 const uint32_t SystemClocksPerCDROMInt1SingleSpeed = SystemClocksPerSecond / 75;
 const uint32_t SystemClocksPerCDROMInt1DoubleSpeed = SystemClocksPerSecond / 150;
 
-CDROM::CDROM(LogLevel logLevel, unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  CD-ROM: "), interruptController(interruptController), image(), status(), interrupt(), statusCode(), mode(), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex(), leftCDToLeftSPUVolume(), leftCDToRightSPUVolume(), rightCDToLeftSPUVolume() {
+CDROM::CDROM(LogLevel logLevel, unique_ptr<InterruptController> &interruptController) : logger(logLevel, "  CD-ROM: "), interruptController(interruptController), image(), status(), interrupt(), interruptFlag(), statusCode(), mode(), internalState(IdleState), parameters(), response(), interruptQueue(), seekSector(), readSector(), counter(), currentSector(), readBuffer(), readBufferIndex(), leftCDToLeftSPUVolume(), leftCDToRightSPUVolume(), rightCDToLeftSPUVolume() {
 
 }
 
@@ -26,20 +26,49 @@ CDROM::~CDROM() {
 }
 
 void CDROM::step(uint32_t cycles) {
-    if (!interruptQueue.empty()) {
-        if ((interrupt.enable & 0x7) & (interruptQueue.front() & 0x7)) {
-            interruptController->trigger(InterruptRequestNumber::CDROMIRQ);
-        }
+    counter += cycles;
+    if (!interruptQueue.empty() && interruptFlag._value == 0) {
+        interruptFlag._value |= interruptQueue.front();
+        interruptQueue.pop();
     }
-    if ((statusCode.play || statusCode.read)) {
-        counter += cycles;
-        if (counter >= SystemClocksPerCDROMInt1DoubleSpeed) {
+    if (interrupt._value & interruptFlag._value) {
+        status._transmissionBusy = true;
+        interruptController->trigger(InterruptRequestNumber::CDROMIRQ);
+        return;
+    }
+    switch (internalState) {
+        case IdleState: {
+            if (!interruptQueue.empty()) {
+                return;
+            }
+            counter = 0;
+            break;
+        }
+        case SeekingState: {
+            // TODO: This is what works but not sure how far this is going to fly
+            if (counter < 100000 || !interruptQueue.empty()) {
+                return;
+            }
+            counter = 0;
+            break;
+        }
+        case ReadingState: {
+            if (counter < SystemClocksPerCDROMInt1DoubleSpeed) {
+                return;
+            }
+            currentSector = image.readSector(readSector);
+            if (!interruptQueue.empty()) {
+                return;
+            }
             interruptQueue.push(INT1);
             pushResponse(statusCode._value);
             counter = 0;
-
-            currentSector = image.readSector(readSector);
             readSector++;
+            break;
+        }
+        case ReadingTableOfContentsState: {
+            logger.logError("Unhandled reading TOC");
+            break;
         }
     }
 }
@@ -58,9 +87,10 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
     logger.logMessage("INTF [W]: %#x", value);
     if (value & 0x40) {
         clearParameters();
-        updateStatusRegister();
     }
+    interruptFlag._value &= ~(value & 0x1F);
     if (!interruptQueue.empty()) {
+        interruptFlag._value |= interruptQueue.front();
         interruptQueue.pop();
     }
 }
@@ -68,8 +98,8 @@ void CDROM::setInterruptFlagRegister(uint8_t value) {
 void CDROM::setRequestRegister(uint8_t value) {
     logger.logMessage("REQ [W]: %#x", value);
     if (value & 0x80) {
-        readBuffer.clear();
         if (isReadBufferEmpty()) {
+            readBuffer.clear();
             CDROMModeSectorSize sectorSize = mode.sectorSize();
             if (sectorSize == DataOnly800h) {
                 copy(&currentSector.data[0], &currentSector.data[0x800], back_inserter(readBuffer));
@@ -77,11 +107,10 @@ void CDROM::setRequestRegister(uint8_t value) {
                 copy(&currentSector.header[0], &currentSector.ECC[276], back_inserter(readBuffer));
             }
             readBufferIndex = 0;
-            status.setDataFifoEmpty(DataFifoNotEmpty);
-        } else {
-            readBufferIndex = 0;
-            status.setDataFifoEmpty(DataFifoEmpty);
         }
+    } else {
+        readBufferIndex = 0;
+        readBuffer.clear();
     }
 }
 
@@ -100,6 +129,7 @@ void CDROM::setAudioVolumeRightCDToLeftSPURegister(uint8_t value) {
 void CDROM::execute(uint8_t value) {
     clearInterruptQueue();
     clearResponse();
+    status._transmissionBusy = true;
     switch (value) {
         case 0x01: {
             operationGetstat();
@@ -165,30 +195,25 @@ void CDROM::execute(uint8_t value) {
             handleUnsupportedOperation(value);
         }
     }
-    clearParameters();
-    updateStatusRegister();
 }
 
-uint8_t CDROM::getStatusRegister() const {
+uint8_t CDROM::getStatusRegister() {
+    updateStatusRegister();
     logger.logMessage("STATUS [R]: %#x", status._value);
     return status._value;
 }
 
 uint8_t CDROM::getInterruptFlagRegister() const {
-    uint8_t flags = 0b11100000;
-    if (!interruptQueue.empty()) {
-        flags |= interruptQueue.front() & 0x7;
-    }
+    uint8_t flags = 0xe0 | interruptFlag._value;
     logger.logMessage("INTF [R]: %#x", flags);
     return flags;
 }
 
 uint8_t CDROM::getReponse() {
-    uint8_t value = 0;
+    uint8_t value = 0xFF;
     if (!response.empty()) {
         value = response.front();
         response.pop();
-        updateStatusRegister();
     }
     logger.logMessage("RESPONSE [R]: %#x", value);
     return value;
@@ -219,7 +244,6 @@ void CDROM::pushParameter(uint8_t value) {
         logger.logError("Parameter FIFO full");
     }
     parameters.push(value);
-    updateStatusRegister();
 }
 
 void CDROM::pushResponse(uint8_t value) {
@@ -227,7 +251,6 @@ void CDROM::pushResponse(uint8_t value) {
         logger.logError("Response FIFO full");
     }
     response.push(value);
-    updateStatusRegister();
 }
 
 uint8_t CDROM::popParameter() {
@@ -235,7 +258,6 @@ uint8_t CDROM::popParameter() {
     if (!parameters.empty()) {
         value = parameters.front();
         parameters.pop();
-        updateStatusRegister();
     }
     return value;
 }
@@ -257,6 +279,7 @@ void CDROM::updateStatusRegister() {
     status.setParameterFifoEmpty(parameters.empty() ? ParameterFifoEmpty : ParameterFifoNotEmpty);
     status.setParameterFifoFull(parameters.size() >= 16 ? ParameterFifoFull : ParameterFifoNotFull);
     status.setResponseFifoEmpty(response.empty() ? ResponseFifoEmpty : ResponseFifoNotEmpty);
+    status.setDataFifoEmpty(isReadBufferEmpty() ? DataFifoEmpty : DataFifoNotEmpty);
 }
 
 /*
@@ -378,6 +401,9 @@ void CDROM::operationSetloc() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
+    pushResponse(statusCode._value);
+    interruptQueue.push(INT2);
+
     logger.logMessage("CMD Setloc(%d, %d, %d)", minute, second, sector);
 }
 
@@ -395,6 +421,8 @@ void CDROM::operationSeekL() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
 
+    internalState = CDROMInternalState::SeekingState;
+
     logger.logMessage("CMD SeekL");
 }
 
@@ -411,6 +439,8 @@ void CDROM::operationSeekP() {
 
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
+
+    internalState = CDROMInternalState::SeekingState;
 
     logger.logMessage("CMD SeekP");
 }
@@ -439,6 +469,8 @@ void CDROM::operationReadN() {
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
+    internalState = CDROMInternalState::ReadingState;
+
     logger.logMessage("CMD ReadN");
 }
 
@@ -446,10 +478,12 @@ void CDROM::operationReadN() {
 Pause - Command 09h --> INT3(stat) --> INT2(stat)
 */
 void CDROM::operationPause() {
+    statusCode.setState(CDROMState::Unknown);
+    internalState = CDROMInternalState::IdleState;
+
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
-    statusCode.setState(CDROMState::Unknown);
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
 
@@ -460,13 +494,10 @@ void CDROM::operationPause() {
 Init - Command 0Ah --> INT3(stat) --> INT2(stat)
 */
 void CDROM::operationInit() {
+    statusCode.setShellOpen(false);
+
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
-
-    statusCode.spindleMotor = 1;
-    statusCode.setState(CDROMState::Unknown);
-
-    mode._value = 0x0;
 
     pushResponse(statusCode._value);
     interruptQueue.push(INT2);
@@ -510,6 +541,8 @@ void CDROM::operationReadS() {
 
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
+
+    internalState = CDROMInternalState::ReadingState;
 
     logger.logMessage("CMD ReadS");
 }
@@ -569,7 +602,6 @@ void CDROM::loadCDROMImageFile(std::filesystem::path filePath) {
     if (!std::filesystem::exists(filePath)) {
         return;
     }
-    statusCode.setShellOpen(false);
     image.open(filePath);
 }
 
@@ -592,8 +624,6 @@ uint8_t CDROM::loadByteFromReadBuffer() {
 
     uint8_t value = readBuffer[readBufferIndex];
     readBufferIndex++;
-
-    status.setDataFifoEmpty(isReadBufferEmpty() ? DataFifoEmpty : DataFifoNotEmpty);
 
     return value;
 }
