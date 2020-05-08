@@ -856,6 +856,7 @@ void GPU::operationGp0SetDrawingAreaTopLeft() {
     uint32_t value = gp0InstructionBuffer[0];
     drawingAreaTop = ((value >> 10) & 0x3ff);
     drawingAreaLeft = (value & 0x3ff);
+    logger.logMessage("GP0(E3h) - Set Drawing Area top left: %d, %d", drawingAreaTop, drawingAreaLeft);
 }
 
 /*
@@ -871,6 +872,7 @@ void GPU::operationGp0SetDrawingAreaBottomRight() {
     uint32_t value = gp0InstructionBuffer[0];
     drawingAreaBottom = ((value >> 10) & 0x3ff);
     drawingAreaRight = (value & 0x3ff);
+    logger.logMessage("GP0(E3h) - Set Drawing Area bottom right: %d, %d", drawingAreaBottom, drawingAreaRight);
 }
 
 /*
@@ -889,6 +891,7 @@ void GPU::operationGp0SetDrawingOffset() {
     int16_t drawingOffsetY = ((int16_t)(y << 5)) >> 5;
 
     renderer->setDrawingOffset(drawingOffsetX, drawingOffsetY);
+    logger.logMessage("GP0(E3h) - Set Drawing Offset: %d, %d", drawingOffsetX, drawingOffsetY);
 }
 
 /*
