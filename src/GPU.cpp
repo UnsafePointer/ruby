@@ -662,6 +662,10 @@ Point GPU::getDisplayAreaStart() {
     return { (int16_t)displayVRAMStartX, (int16_t)displayVRAMStartY };
 }
 
+void GPU::toggleRenderPolygonOneByOne() {
+    renderer->toggleRenderPolygonOneByOne();
+}
+
 void GPU::executeGp1(uint32_t value) {
     uint32_t opCode = (value >> 24) & 0xff;
     switch (opCode) {

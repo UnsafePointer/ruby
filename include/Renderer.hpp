@@ -34,7 +34,9 @@ class Renderer {
     bool resizeToFitFramebuffer;
     Point displayAreaStart;
     Dimensions screenResolution;
+    bool renderPolygonOneByOne;
 
+    void checkRenderPolygonOneByOne();
     void checkForceDraw(unsigned int verticesToRender, GLenum newMode);
 public:
     Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu);
@@ -51,4 +53,5 @@ public:
     void resetMainWindow();
     void setDisplayAreaSart(Point point);
     void setScreenResolution(Dimensions dimensions);
+    void toggleRenderPolygonOneByOne();
 };

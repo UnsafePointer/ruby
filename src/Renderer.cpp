@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), renderPolygonOneByOne(false) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -51,6 +51,15 @@ Renderer::~Renderer() {
     SDL_Quit();
 }
 
+void Renderer::checkRenderPolygonOneByOne() {
+    if (!renderPolygonOneByOne) {
+        return;
+    }
+    prepareFrame();
+    renderFrame();
+    finalizeFrame();
+}
+
 void Renderer::checkForceDraw(unsigned int verticesToRender, GLenum newMode) {
     unsigned int verticesToRenderTotal = verticesToRender;
     if (verticesToRender == 4) {
@@ -74,6 +83,7 @@ void Renderer::pushLine(std::vector<Vertex> vertices) {
     checkForceDraw(size, GL_LINES);
     mode = GL_LINES;
     buffer->addData(vertices);
+    checkRenderPolygonOneByOne();
     return;
 }
 
@@ -88,11 +98,14 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     switch (size) {
         case 3: {
             buffer->addData(vertices);
+            checkRenderPolygonOneByOne();
             break;
         }
         case 4: {
             buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
+            checkRenderPolygonOneByOne();
             buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
+            checkRenderPolygonOneByOne();
             break;
         }
     }
@@ -109,6 +122,10 @@ void Renderer::setDisplayAreaSart(Point point) {
 
 void Renderer::setScreenResolution(Dimensions dimensions) {
     screenResolution = dimensions;
+}
+
+void Renderer::toggleRenderPolygonOneByOne() {
+    renderPolygonOneByOne = !renderPolygonOneByOne;
 }
 
 void Renderer::prepareFrame() {

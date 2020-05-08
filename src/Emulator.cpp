@@ -118,6 +118,10 @@ void Emulator::toggleDebugInfoWindow() {
     debugWindow->toggleHidden();
 }
 
+void Emulator::toggleRenderPolygonOneByOne() {
+    gpu->toggleRenderPolygonOneByOne();
+}
+
 void Emulator::loadCDROMImageFile(std::filesystem::path filePath) {
     cdrom->loadCDROMImageFile(filePath);
 }
