@@ -887,8 +887,8 @@ void GPU::operationGp0SetDrawingOffset() {
     uint16_t x = (value & 0x7ff);
     uint16_t y = ((value >> 11) & 0x7ff);
 
-    int16_t drawingOffsetX = ((int16_t)(x << 5)) >> 5;
-    int16_t drawingOffsetY = ((int16_t)(y << 5)) >> 5;
+    drawingOffsetX = ((int16_t)(x << 5)) >> 5;
+    drawingOffsetY = ((int16_t)(y << 5)) >> 5;
 
     renderer->setDrawingOffset(drawingOffsetX, drawingOffsetY);
     logger.logMessage("GP0(E3h) - Set Drawing Offset: %d, %d", drawingOffsetX, drawingOffsetY);
