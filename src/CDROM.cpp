@@ -494,8 +494,6 @@ void CDROM::operationPause() {
 Init - Command 0Ah --> INT3(stat) --> INT2(stat)
 */
 void CDROM::operationInit() {
-    statusCode.setShellOpen(false);
-
     pushResponse(statusCode._value);
     interruptQueue.push(INT3);
 
@@ -602,6 +600,7 @@ void CDROM::loadCDROMImageFile(std::filesystem::path filePath) {
     if (!std::filesystem::exists(filePath)) {
         return;
     }
+    statusCode.setShellOpen(false);
     image.open(filePath);
 }
 
