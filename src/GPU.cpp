@@ -58,7 +58,7 @@ GPU::GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow, std::unique_ptr
              debugInfoRenderer(debugInfoRenderer),
              frameCounter(0)
 {
-    renderer = make_unique<Renderer>(mainWindow);
+    renderer = make_unique<Renderer>(mainWindow, this);
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     showDebugInfoWindow = configurationManager->shouldShowDebugInfoWindow();
 }
@@ -617,7 +617,7 @@ void GPU::render() {
     logger.logMessage("Rendering frame: %ld", frameCounter);
     renderer->prepareFrame();
     renderer->renderFrame();
-    renderer->finalizeFrame(this);
+    renderer->finalizeFrame();
     if (showDebugInfoWindow) {
         debugInfoRenderer->update();
         // This application makes most of the OpenGL work on the main window, so after
@@ -831,6 +831,7 @@ void GPU::operationGp1DisplayMode(uint32_t value) {
         // This is supposed to be bit 14 on GPUSTAT
         logger.logError("Unsupported display mode: distorted");
     }
+    renderer->setScreenResolution(getResolution());
 }
 
 /*
@@ -934,6 +935,7 @@ void GPU::operationGp1StartOfDisplayArea(uint32_t value) {
     logger.logMessage("GP1(05h) - Start of Display area (in VRAM): %#x", value);
     displayVRAMStartX = (value & 0x3fe);
     displayVRAMStartY = ((value >> 10) & 0x1ff);
+    renderer->setDisplayAreaSart(getDisplayAreaStart());
 }
 
 /*
