@@ -184,6 +184,10 @@ void DMA::executeBlock(DMAPort port, Channel& channel) {
                         source = cdrom->loadWordFromReadBuffer();
                         break;
                     }
+                    case DMAPort::GPUP: {
+                        goto unhandled;
+                        break;
+                    }
                     default: {
                         logger.logError("Unhandled DMA block transfer to RAM from source port: %s", portDescription(port).c_str());
                         break;
