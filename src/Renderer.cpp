@@ -23,7 +23,7 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog
 
     buffer = make_unique<RendererBuffer<Vertex>>(program, RENDERER_BUFFER_SIZE);
 
-    offsetUniform = program->findProgramAttribute("offset");
+    offsetUniform = program->findProgramUniform("offset");
     glUniform2i(offsetUniform, 0, 0);
 
     // TODO: Use a single vertex shader
@@ -145,6 +145,8 @@ void Renderer::updateWindowTitle(string title) {
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
+    loadImageTexture->bind(GL_TEXTURE0);
+    Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->draw(mode);
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }

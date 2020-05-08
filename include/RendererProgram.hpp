@@ -15,4 +15,5 @@ public:
 
     void useProgram() const;
     GLuint findProgramAttribute(std::string attribute) const;
+    GLuint findProgramUniform(std::string uniform) const;
 };
