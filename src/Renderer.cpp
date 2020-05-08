@@ -145,6 +145,8 @@ void Renderer::updateWindowTitle(string title) {
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
+    loadImageTexture->bind(GL_TEXTURE0);
+    Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->draw(mode);
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }

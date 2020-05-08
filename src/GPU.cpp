@@ -1824,7 +1824,9 @@ void GPU::operationGp0FillRectagleInVRAM() {
         bottomLeft,
         bottomRight,
     };
+    renderer->setDrawingOffset(0, 0);
     renderer->pushPolygon(vertices);
+    renderer->setDrawingOffset(drawingOffsetX, drawingOffsetY);
     return;
 }
 
