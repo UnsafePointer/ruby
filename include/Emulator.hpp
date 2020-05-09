@@ -68,5 +68,6 @@ public:
     void handleSDLEvent(SDL_Event event);
     bool shouldTerminate();
     void toggleDebugInfoWindow();
+    void toggleRenderPolygonOneByOne();
     void loadCDROMImageFile(std::filesystem::path filePath);
 };

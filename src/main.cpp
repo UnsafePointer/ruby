@@ -39,6 +39,10 @@ int main(int argc, char* argv[]) {
                         emulator->toggleDebugInfoWindow();
                         break;
                     }
+                    case SDLK_r: {
+                        emulator->toggleRenderPolygonOneByOne();
+                        break;
+                    }
                 }
             }
             emulator->handleSDLEvent(event);

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), renderPolygonOneByOne(false) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -42,10 +42,22 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow) : logger(LogLevel::NoLog
     screenTexture = make_unique<Texture>(((GLsizei) screenDimensions.width), ((GLsizei) screenDimensions.height));
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
     rendererDebugger->checkForOpenGLErrors();
+
+    displayAreaStart = gpu->getDisplayAreaStart();
+    screenResolution = gpu->getResolution();
 }
 
 Renderer::~Renderer() {
     SDL_Quit();
+}
+
+void Renderer::checkRenderPolygonOneByOne() {
+    if (!renderPolygonOneByOne) {
+        return;
+    }
+    prepareFrame();
+    renderFrame();
+    finalizeFrame();
 }
 
 void Renderer::checkForceDraw(unsigned int verticesToRender, GLenum newMode) {
@@ -71,6 +83,7 @@ void Renderer::pushLine(std::vector<Vertex> vertices) {
     checkForceDraw(size, GL_LINES);
     mode = GL_LINES;
     buffer->addData(vertices);
+    checkRenderPolygonOneByOne();
     return;
 }
 
@@ -85,11 +98,14 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     switch (size) {
         case 3: {
             buffer->addData(vertices);
+            checkRenderPolygonOneByOne();
             break;
         }
         case 4: {
             buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
+            checkRenderPolygonOneByOne();
             buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
+            checkRenderPolygonOneByOne();
             break;
         }
     }
@@ -98,6 +114,18 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices) {
 
 void Renderer::resetMainWindow() {
     mainWindow->makeCurrent();
+}
+
+void Renderer::setDisplayAreaSart(Point point) {
+    displayAreaStart = point;
+}
+
+void Renderer::setScreenResolution(Dimensions dimensions) {
+    screenResolution = dimensions;
+}
+
+void Renderer::toggleRenderPolygonOneByOne() {
+    renderPolygonOneByOne = !renderPolygonOneByOne;
 }
 
 void Renderer::prepareFrame() {
@@ -112,7 +140,7 @@ void Renderer::renderFrame() {
     rendererDebugger->checkForOpenGLErrors();
 }
 
-void Renderer::finalizeFrame(GPU *gpu) {
+void Renderer::finalizeFrame() {
     buffer->draw(mode);
     screenTexture->bind(GL_TEXTURE0);
     vector<Pixel> pixels;
@@ -124,8 +152,6 @@ void Renderer::finalizeFrame(GPU *gpu) {
             Pixel(1.0f, 1.0f, 1.0f, 0.0f),
         };
     } else {
-        Point displayAreaStart = gpu->getDisplayAreaStart();
-        Dimensions screenResolution = gpu->getResolution();
         pixels = {
             Pixel(-1.0f, -1.0f, displayAreaStart.x, displayAreaStart.y + screenResolution.height),
             Pixel(1.0f, -1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y + screenResolution.height),

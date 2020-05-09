@@ -32,10 +32,14 @@ class Renderer {
 
     GLenum mode;
     bool resizeToFitFramebuffer;
+    Point displayAreaStart;
+    Dimensions screenResolution;
+    bool renderPolygonOneByOne;
 
+    void checkRenderPolygonOneByOne();
     void checkForceDraw(unsigned int verticesToRender, GLenum newMode);
 public:
-    Renderer(std::unique_ptr<Window> &mainWindow);
+    Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu);
     ~Renderer();
 
     void pushLine(std::vector<Vertex> vertices);
@@ -43,8 +47,11 @@ public:
     void setDrawingOffset(int16_t x, int16_t y);
     void prepareFrame();
     void renderFrame();
-    void finalizeFrame(GPU *gpu);
+    void finalizeFrame();
     void updateWindowTitle(std::string title);
     void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);
     void resetMainWindow();
+    void setDisplayAreaSart(Point point);
+    void setScreenResolution(Dimensions dimensions);
+    void toggleRenderPolygonOneByOne();
 };

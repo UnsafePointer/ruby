@@ -279,4 +279,5 @@ public:
     void step(uint32_t cycles);
     Dimensions getResolution();
     Point getDisplayAreaStart();
+    void toggleRenderPolygonOneByOne();
 };
