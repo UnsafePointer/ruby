@@ -208,5 +208,5 @@ inline void Interconnect::store(uint32_t address, T value) const {
         logger.logWarning("Unhandled MDEC write at offset: %#x", *offset);
         return;
     }
-    logger.logError("Unhandled write at: %#x", address);
+    logger.logWarning("Unhandled write at: %#x", address);
 }

@@ -242,7 +242,7 @@ void CDROM::clearResponse() {
 void CDROM::pushParameter(uint8_t value) {
     logger.logMessage("PARAM [W]: %#x", value);
     if (parameters.size() >= 16) {
-        logger.logError("Parameter FIFO full");
+        logger.logWarning("Parameter FIFO full");
     }
     parameters.push(value);
 }
