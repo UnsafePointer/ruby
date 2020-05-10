@@ -122,6 +122,9 @@ void GPU::executeGp0(uint32_t value) {
         uint32_t opCode = (value >> 24) & 0xff;
         logger.logMessage("GP0 [W] with opcode: %#x (%#x)", opCode, value);
         switch (opCode) {
+            case 0x5: {
+                [[fallthrough]];
+            }
             case 0x00: {
                 gp0WordsRemaining = 1;
                 gp0InstructionMethod = [&]() {
