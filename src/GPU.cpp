@@ -630,6 +630,13 @@ void GPU::render() {
     renderer->updateWindowTitle(title.str());
 }
 
+void GPU::updateDrawingArea() {
+    Point topLeft = getDrawingAreaTopLeft();
+    Dimensions size = getDrawingAreaSize();
+    logger.logMessage("Updating renderer drawing area with top left: x=%d, y=%d and size: w=%d, h=%d", topLeft.x, topLeft.y, size.width, size.height);
+    renderer->setDrawingArea(topLeft, size);
+}
+
 Dimensions GPU::getResolution() {
     uint32_t verticalResolution = 240;
     if (this->verticalResolution == VerticalResolution::Y480) {
@@ -660,6 +667,16 @@ Dimensions GPU::getResolution() {
 
 Point GPU::getDisplayAreaStart() {
     return { (int16_t)displayVRAMStartX, (int16_t)displayVRAMStartY };
+}
+
+Dimensions GPU::getDrawingAreaSize() {
+    uint32_t width = drawingAreaRight - drawingAreaLeft;
+    uint32_t height = drawingAreaBottom - drawingAreaTop;
+    return { (uint32_t)width, (uint32_t)height };
+}
+
+Point GPU::getDrawingAreaTopLeft() {
+    return { (int16_t)drawingAreaLeft, (int16_t)drawingAreaTop };
 }
 
 void GPU::toggleRenderPolygonOneByOne() {
@@ -861,6 +878,7 @@ void GPU::operationGp0SetDrawingAreaTopLeft() {
     uint32_t value = gp0InstructionBuffer[0];
     drawingAreaTop = ((value >> 10) & 0x3ff);
     drawingAreaLeft = (value & 0x3ff);
+    updateDrawingArea();
     logger.logMessage("GP0(E3h) - Set Drawing Area top left: %d, %d", drawingAreaTop, drawingAreaLeft);
 }
 
@@ -877,6 +895,7 @@ void GPU::operationGp0SetDrawingAreaBottomRight() {
     uint32_t value = gp0InstructionBuffer[0];
     drawingAreaBottom = ((value >> 10) & 0x3ff);
     drawingAreaRight = (value & 0x3ff);
+    updateDrawingArea();
     logger.logMessage("GP0(E3h) - Set Drawing Area bottom right: %d, %d", drawingAreaBottom, drawingAreaRight);
 }
 

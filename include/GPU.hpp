@@ -266,6 +266,7 @@ GP1(07h) - Vertical Display range (on Screen)
     uint8_t horizontalResolutionFromValues(uint8_t value1, uint8_t value2) const;
 
     void render();
+    void updateDrawingArea();
 public:
     GPU(LogLevel logLevel, std::unique_ptr<Window> &mainWindow, std::unique_ptr<InterruptController> &interruptController, std::unique_ptr<DebugInfoRenderer> &debugInfoRenderer);
     ~GPU();
@@ -279,5 +280,7 @@ public:
     void step(uint32_t cycles);
     Dimensions getResolution();
     Point getDisplayAreaStart();
+    Dimensions getDrawingAreaSize();
+    Point getDrawingAreaTopLeft();
     void toggleRenderPolygonOneByOne();
 };
