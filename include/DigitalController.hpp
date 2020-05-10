@@ -90,4 +90,5 @@ public:
     CommunicationSequenceStage getCurrentStage();
     bool getAcknowledge();
     void updateInput();
+    void resetCommunicationSequence();
 };

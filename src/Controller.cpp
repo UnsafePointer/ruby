@@ -25,6 +25,10 @@ void Controller::setControlRegister(uint16_t value) {
     if (control.acknowledge) {
         status.interruptRequest = false;
     }
+    if (!control.joyOutput) {
+        currentDevice = Device::NoDevice;
+        digitalController->resetCommunicationSequence();
+    }
 }
 
 void Controller::setJoypadBaudRegister(uint16_t value) {

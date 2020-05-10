@@ -193,3 +193,7 @@ void DigitalController::updateInput() {
         updateWithJoystick();
     }
 }
+
+void DigitalController::resetCommunicationSequence() {
+    currentStage = ControllerAccess;
+}
