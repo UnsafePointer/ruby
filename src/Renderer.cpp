@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), renderPolygonOneByOne(false) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), drawingAreaTopLeft(), drawingAreaSize({}), renderPolygonOneByOne(false) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -75,12 +75,39 @@ void Renderer::checkForceDraw(unsigned int verticesToRender, GLenum newMode) {
         verticesToRenderTotal = 6;
     }
     if (buffer->remainingCapacity() < verticesToRenderTotal) {
-        renderFrame();
+        forceDraw();
     }
     if (mode != newMode) {
-        renderFrame();
+        forceDraw();
     }
     return;
+}
+
+void Renderer::forceDraw() {
+    loadImageTexture->bind(GL_TEXTURE0);
+    Framebuffer framebuffer = Framebuffer(screenTexture);
+    buffer->draw(mode);
+}
+
+void Renderer::applyScissor() {
+    // TODO: there must be a better way of doing this
+    // Scissor test is specified in window coordinates, but we get PlayStation screen buffer
+    // from the GPU commands, so we need to translate between coordinate systems. The problem here
+    // is that we need to handle different modes: full framebuffer and display area cropped.
+    Dimensions windowSize = mainWindow->getDimensions();
+
+    // Conveniently the width is the same for both modes, so nothing to do here
+    GLsizei width = drawingAreaSize.width;
+    GLint x = drawingAreaTopLeft.x;
+
+    GLsizei height = ((float)drawingAreaSize.height / VRAM_HEIGHT * windowSize.height);
+    GLint y = windowSize.height - height - ((float)drawingAreaTopLeft.y / VRAM_HEIGHT * windowSize.height);
+
+    if (resizeToFitFramebuffer) {
+        height = drawingAreaSize.height;
+        y = VRAM_HEIGHT - height - drawingAreaTopLeft.y;
+    }
+    glScissor(x, y, width, height);
 }
 
 void Renderer::pushLine(std::vector<Vertex> vertices) {
@@ -133,12 +160,23 @@ void Renderer::setScreenResolution(Dimensions dimensions) {
     screenResolution = dimensions;
 }
 
+void Renderer::setDrawingArea(Point topLeft, Dimensions size) {
+    forceDraw();
+
+    drawingAreaTopLeft = topLeft;
+    drawingAreaSize = size;
+
+    applyScissor();
+}
+
 void Renderer::toggleRenderPolygonOneByOne() {
     renderPolygonOneByOne = !renderPolygonOneByOne;
 }
 
 void Renderer::prepareFrame() {
     resetMainWindow();
+    applyScissor();
+    glEnable(GL_SCISSOR_TEST);
     loadImageTexture->bind(GL_TEXTURE0);
 }
 
@@ -152,6 +190,7 @@ void Renderer::renderFrame() {
 void Renderer::finalizeFrame() {
     buffer->draw(mode);
     screenTexture->bind(GL_TEXTURE0);
+    glDisable(GL_SCISSOR_TEST);
     vector<Pixel> pixels;
     if (resizeToFitFramebuffer) {
         pixels = {
@@ -168,6 +207,7 @@ void Renderer::finalizeFrame() {
             Pixel(1.0f, 1.0f, displayAreaStart.x + screenResolution.width, displayAreaStart.y),
         };
     }
+
     screenBuffer->addData(pixels);
     screenBuffer->draw(GL_TRIANGLE_STRIP);
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
@@ -180,9 +220,7 @@ void Renderer::updateWindowTitle(string title) {
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
-    loadImageTexture->bind(GL_TEXTURE0);
-    Framebuffer framebuffer = Framebuffer(screenTexture);
-    buffer->draw(mode);
+    forceDraw();
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }
 
@@ -194,8 +232,10 @@ void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     tie(width, height) = imageBuffer->resolution();
     vector<Point> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
     textureBuffer->addData(data);
+    glDisable(GL_SCISSOR_TEST);
     Framebuffer framebuffer = Framebuffer(screenTexture);
     textureBuffer->draw(GL_TRIANGLE_STRIP);
+    glEnable(GL_SCISSOR_TEST);
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
     rendererDebugger->checkForOpenGLErrors();
 }
