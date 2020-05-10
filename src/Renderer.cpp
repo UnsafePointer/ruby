@@ -26,21 +26,30 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLe
     offsetUniform = program->findProgramUniform("offset");
     glUniform2i(offsetUniform, 0, 0);
 
-    // TODO: Use a single vertex shader
+    Dimensions screenDimensions = mainWindow->getDimensions();
+
     string screenVertexFile = "./glsl/screen_vertex.glsl";
-    if (resizeToFitFramebuffer) {
-        screenVertexFile = "./glsl/screen_full_vram_vertex.glsl";
-    }
     screenRendererProgram = make_unique<RendererProgram>(screenVertexFile, "./glsl/screen_fragment.glsl");
+    screenRendererProgram->useProgram();
+    GLuint screenWidthUniform = screenRendererProgram->findProgramUniform("screen_width");
+    glUniform1f(screenWidthUniform, screenDimensions.width);
+    GLuint screenHeightUniform = screenRendererProgram->findProgramUniform("screen_height");
+    glUniform1f(screenHeightUniform, screenDimensions.height);
+    GLuint vramWidthUniform = screenRendererProgram->findProgramUniform("vram_width");
+    glUniform1f(vramWidthUniform, VRAM_WIDTH);
+    GLuint vramHeightUniform = screenRendererProgram->findProgramUniform("vram_height");
+    glUniform1f(vramHeightUniform, VRAM_HEIGHT);
+    GLuint fullFramebufferUniform = screenRendererProgram->findProgramUniform("full_framebuffer");
+    glUniform1f(fullFramebufferUniform, resizeToFitFramebuffer);
 
     screenBuffer = make_unique<RendererBuffer<Pixel>>(screenRendererProgram, RENDERER_BUFFER_SIZE);
 
     // TODO: handle resolution for other targets
     loadImageTexture = make_unique<Texture>(((GLsizei) VRAM_WIDTH), ((GLsizei) VRAM_HEIGHT));
 
-    Dimensions screenDimensions = mainWindow->getDimensions();
     screenTexture = make_unique<Texture>(((GLsizei) screenDimensions.width), ((GLsizei) screenDimensions.height));
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
+
     rendererDebugger->checkForOpenGLErrors();
 
     displayAreaStart = gpu->getDisplayAreaStart();
