@@ -179,7 +179,7 @@ public:
     ~Controller();
 
     void step(uint32_t steps);
-    void updateInput();
+    void updateInput(SDL_Event event);
 
     template <typename T>
     inline T load(uint32_t offset);

@@ -50,7 +50,6 @@ CPU* Emulator::getCPU() {
 }
 
 void Emulator::emulateFrame() {
-    controller->updateInput();
     // Emulate cpu for given time slice (21 * magicNumber cycles),
     // then check what events occured during that time slice,
     // finally simulate rest of hardware to accommodate for that
@@ -101,6 +100,7 @@ void Emulator::setupOpenGL() {
 
 void Emulator::handleSDLEvent(SDL_Event event) {
     mainWindow->handleSDLEvent(event);
+    controller->updateInput(event);
     if (showDebugInfoWindow) {
         debugWindow->handleSDLEvent(event);
         debugInfoRenderer->handleSDLEvent(event);

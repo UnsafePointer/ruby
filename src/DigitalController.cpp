@@ -89,107 +89,124 @@ bool DigitalController::getAcknowledge() {
     return currentStage != ControllerAccess;
 }
 
-void DigitalController::updateWithJoystick() {
-    if (SDL_JoystickGetButton(joystick, 0) != 0) { // TRIANGLE
-        switches.triangle = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 1) != 0) { // CIRCLE
-        switches.circle = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 2) != 0) { // X
-        switches.x = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 3) != 0) { // SQUARE
-        switches.square = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 4) != 0) { // L2
-        switches.L2 = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 5) != 0) { // R2
-        switches.R2 = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 6) != 0) { // L1
-        switches.L1 = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 7) != 0) { // R1
-        switches.R1 = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 8) != 0) { // SELECT
-        switches.select = false;
-    }
-    if (SDL_JoystickGetButton(joystick, 9) != 0) { // START
-        switches.start = false;
-    }
-    Sint16 X = SDL_JoystickGetAxis(joystick, 0); // LEFT OR RIGHT
-    if (X != 0) {
-        if (X == std::numeric_limits<int16_t>::max()) {
-            switches.right = false;
-        } else {
-            switches.left = false;
+void DigitalController::updateInput(SDL_Event event) {
+    if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
+            case SDLK_w: { // TRIANGLE
+                switches.triangle = false;
+                break;
+            }
+            case SDLK_d: { // CIRCLE
+                switches.circle = false;
+                break;
+            }
+            case SDLK_s: { // X
+                switches.x = false;
+                break;
+            }
+            case SDLK_a: { // SQUARE
+                switches.square = false;
+                break;
+            }
+            case SDLK_1: { // L2
+                switches.L2 = false;
+                break;
+            }
+            case SDLK_3: { // R2
+                switches.R2 = false;
+                break;
+            }
+            case SDLK_q: { // R1
+                switches.R1 = false;
+                break;
+            }
+            case SDLK_e: { // L1
+                switches.L1 = false;
+                break;
+            }
+            case SDLK_SPACE: { // SELECT
+                switches.select = false;
+                break;
+            }
+            case SDLK_RETURN: { // START
+                switches.start = false;
+                break;
+            }
+            case SDLK_LEFT: { // LEFT
+                switches.left = false;
+                break;
+            }
+            case SDLK_RIGHT: { // RIGHT
+                switches.right = false;
+                break;
+            }
+            case SDLK_UP: { // UP
+                switches.up = false;
+                break;
+            }
+            case SDLK_DOWN: { // DOWN
+                switches.down = false;
+                break;
+            }
         }
-    }
-    Sint16 Y = SDL_JoystickGetAxis(joystick, 1); // UP OR DOWN
-    if (Y != 0) {
-        if (Y == std::numeric_limits<int16_t>::max()) {
-            switches.down = false;
-        } else {
-            switches.up = false;
+    } else if (event.type == SDL_KEYUP) {
+        switch (event.key.keysym.sym) {
+            case SDLK_w: { // TRIANGLE
+                switches.triangle = true;
+                break;
+            }
+            case SDLK_d: { // CIRCLE
+                switches.circle = true;
+                break;
+            }
+            case SDLK_s: { // X
+                switches.x = true;
+                break;
+            }
+            case SDLK_a: { // SQUARE
+                switches.square = true;
+                break;
+            }
+            case SDLK_1: { // L2
+                switches.L2 = true;
+                break;
+            }
+            case SDLK_3: { // R2
+                switches.R2 = true;
+                break;
+            }
+            case SDLK_q: { // R1
+                switches.R1 = true;
+                break;
+            }
+            case SDLK_e: { // L1
+                switches.L1 = true;
+                break;
+            }
+            case SDLK_SPACE: { // SELECT
+                switches.select = true;
+                break;
+            }
+            case SDLK_RETURN: { // START
+                switches.start = true;
+                break;
+            }
+            case SDLK_LEFT: { // LEFT
+                switches.left = true;
+                break;
+            }
+            case SDLK_RIGHT: { // RIGHT
+                switches.right = true;
+                break;
+            }
+            case SDLK_UP: { // UP
+                switches.up = true;
+                break;
+            }
+            case SDLK_DOWN: { // DOWN
+                switches.down = true;
+                break;
+            }
         }
-    }
-}
-
-void DigitalController::updateWithKeyboard() {
-    const Uint8 *state = SDL_GetKeyboardState(NULL);
-    if (state[SDL_SCANCODE_W]) { // TRIANGLE
-        switches.triangle = false;
-    }
-    if (state[SDL_SCANCODE_D]) { // CIRCLE
-        switches.circle = false;
-    }
-    if (state[SDL_SCANCODE_S]) { // X
-        switches.x = false;
-    }
-    if (state[SDL_SCANCODE_A]) { // SQUARE
-        switches.square = false;
-    }
-    if (state[SDL_SCANCODE_1]) { // L2
-        switches.L2 = false;
-    }
-    if (state[SDL_SCANCODE_3]) { // R2
-        switches.R2 = false;
-    }
-    if (state[SDL_SCANCODE_Q]) { // L1
-        switches.L1 = false;
-    }
-    if (state[SDL_SCANCODE_E]) { // R1
-        switches.R1 = false;
-    }
-    if (state[SDL_SCANCODE_SPACE]) { // SELECT
-        switches.select = false;
-    }
-    if (state[SDL_SCANCODE_RETURN]) { // START
-        switches.start = false;
-    }
-    if (state[SDL_SCANCODE_LEFT]) { // LEFT
-        switches.left = false;
-    }
-    if (state[SDL_SCANCODE_RIGHT]) { // RIGHT
-        switches.right = false;
-    }
-    if (state[SDL_SCANCODE_UP]) { // UP
-        switches.up = false;
-    }
-    if (state[SDL_SCANCODE_DOWN]) { // DOWN
-        switches.down = false;
-    }
-}
-
-void DigitalController::updateInput() {
-    switches.reset();
-
-    if (joystick == nullptr) {
-        updateWithKeyboard();
-    } else {
-        updateWithJoystick();
     }
 }

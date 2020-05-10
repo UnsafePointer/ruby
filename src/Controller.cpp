@@ -111,6 +111,6 @@ void Controller::step(uint32_t steps) {
     }
 }
 
-void Controller::updateInput() {
-    digitalController->updateInput();
+void Controller::updateInput(SDL_Event event) {
+    digitalController->updateInput(event);
 }
