@@ -108,6 +108,7 @@ void Renderer::applyScissor() {
         y = VRAM_HEIGHT - height - drawingAreaTopLeft.y;
     }
     glScissor(x, y, width, height);
+    glEnable(GL_SCISSOR_TEST);
 }
 
 void Renderer::pushLine(std::vector<Vertex> vertices) {

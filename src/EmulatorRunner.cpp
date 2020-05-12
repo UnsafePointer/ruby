@@ -154,6 +154,9 @@ void EmulatorRunner::setup() {
     CPU *cpu = emulator->getCPU();
     cpu->setProgramCounter(programCounter());
     cpu->setGlobalPointer(globalPointer());
-    cpu->setStackPointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
-    cpu->setFramePointer(initialStackFramePointerBase() + initialStackFramePointeroffset());
+    uint32_t stackFramePointerBaseAddress = initialStackFramePointerBase();
+    if (stackFramePointerBaseAddress != 0) {
+        cpu->setStackPointer(stackFramePointerBaseAddress + initialStackFramePointeroffset());
+        cpu->setFramePointer(stackFramePointerBaseAddress + initialStackFramePointeroffset());
+    }
 }
