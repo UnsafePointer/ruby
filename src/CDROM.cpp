@@ -333,6 +333,7 @@ sub  params  response           ;Effect
 */
 void CDROM::operationTest() {
     uint8_t subfunction = parameters.front();
+    parameters.pop();
     switch (subfunction) {
         case 0x20: {
             pushResponse(0x94); // 148
