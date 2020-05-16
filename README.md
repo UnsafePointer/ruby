@@ -24,11 +24,10 @@ ruby (ルビィ) is a [PlayStation](https://en.wikipedia.org/wiki/PlayStation_(c
 
 ## Known issues
 
-* Timers are not triggering interrupts yet.
 * Controllers only support one digital joypad.
 * SPU only supports read/writes to registries, there is no sound output.
-* There are a lot of problems with the GPU OpenGL renderer, notably 24BPP mode, GP0(02h) and GP0(E5h) are not working causing many rendering artifacts in some games.
-* CD-ROM is missing a lot of commands.
+* There are a lot of problems with the GPU OpenGL renderer. Notably 24BPP mode and transparent pixel rendering are not working causing many rendering artifacts in some games.
+* CD-ROM is missing a lot of commands and only supports single-track games.
 
 ## Building
 
