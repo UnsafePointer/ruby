@@ -33,9 +33,9 @@ Emulator::Emulator() : logger(LogLevel::NoLog), ttyBuffer() {
     cdrom = make_unique<CDROM>(cdromLogLevel, interruptController);
     dma = make_unique<DMA>(configurationManager->dmaLogLevel(), ram, gpu, cdrom, interruptController);
     expansion1 = make_unique<Expansion1>();
-    timer0 = make_unique<Timer0>();
-    timer1 = make_unique<Timer1>();
-    timer2 = make_unique<Timer2>();
+    timer0 = make_unique<Timer0>(interruptController);
+    timer1 = make_unique<Timer1>(interruptController);
+    timer2 = make_unique<Timer2>(interruptController);
     controller = make_unique<Controller>(configurationManager->controllerLogLevel(), interruptController);
     spu = make_unique<SPU>(configurationManager->spuLogLevel());
     interconnect = make_unique<Interconnect>(configurationManager->interconnectLogLevel(), cop0, bios, ram, gpu, dma, scratchpad, cdrom, interruptController, expansion1, timer0, timer1, timer2, controller, spu);
