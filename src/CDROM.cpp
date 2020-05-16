@@ -240,6 +240,7 @@ void CDROM::clearResponse() {
 }
 
 void CDROM::pushParameter(uint8_t value) {
+    logger.logMessage("PARAM [W]: %#x", value);
     if (parameters.size() >= 16) {
         logger.logError("Parameter FIFO full");
     }
@@ -332,6 +333,7 @@ sub  params  response           ;Effect
 */
 void CDROM::operationTest() {
     uint8_t subfunction = parameters.front();
+    parameters.pop();
     switch (subfunction) {
         case 0x20: {
             pushResponse(0x94); // 148

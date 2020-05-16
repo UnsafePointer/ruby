@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include "Logger.hpp"
+#include <memory>
+#include "InterruptController.hpp"
 
 enum Timer0SyncMode {
     PauseDuringHblank = 0,
@@ -41,6 +43,16 @@ enum TimerResetCounter {
     AfterTarget = 1
 };
 
+enum TimerPulseOrToggleMode {
+    ShortPulse = 0,
+    Toggle = 1
+};
+
+enum TimerOnceOrRepeatMode {
+    OneShot = 0,
+    Repeatedly = 1
+};
+
 /*
 1F801104h+N*10h - Timer 0..2 Counter Mode (R/W)
 0     Synchronization Enable (0=Free Run, 1=Synchronize via Bit1-2)
@@ -77,8 +89,8 @@ union TimerCounterMode {
         uint32_t _resetCounter : 1;
         uint32_t IRQWhenTarget : 1;
         uint32_t IRQWhenOverflow : 1;
-        uint32_t IRQOnceOrRepeatMode : 1;
-        uint32_t IRQPulseOrToggle : 1;
+        uint32_t _IRQOnceOrRepeatMode : 1;
+        uint32_t _IRQPulseOrToggle : 1;
         uint32_t _clockSource : 2;
         uint32_t IRQ : 1;
         uint32_t rearchedTarget : 1;
@@ -92,6 +104,10 @@ union TimerCounterMode {
     TimerCounterMode() : _value(0) {}
 
     TimerResetCounter timerResetCounter() { return TimerResetCounter(_resetCounter); }
+
+    TimerPulseOrToggleMode timerPulseOrToggleMode() { return TimerPulseOrToggleMode(_IRQPulseOrToggle); }
+
+    TimerOnceOrRepeatMode timerOnceOrRepeatMode() { return TimerOnceOrRepeatMode(_IRQOnceOrRepeatMode); }
 
     Timer0SyncMode timer0SyncMode() { return Timer0SyncMode(_syncMode); }
     Timer1SyncMode timer1SyncMode() { return Timer1SyncMode(_syncMode); }
@@ -160,6 +176,7 @@ union TimerCounterTarget {
 
 class Timer {
     Logger logger;
+    std::unique_ptr<InterruptController> &interruptController;
 protected:
     uint8_t identity;
     TimerCounterValue counterValue;
@@ -167,8 +184,9 @@ protected:
     TimerCounterTarget counterTarget;
 
     uint32_t counter;
+    bool oneShotTimerFired;
 public:
-    Timer(uint8_t identity);
+    Timer(uint8_t identity, std::unique_ptr<InterruptController> &interruptController);
     ~Timer();
 
     virtual void step(uint32_t cycles) = 0;
@@ -180,6 +198,7 @@ public:
     void setCounterTargetRegister(uint32_t value);
     void checkTargetsAndOverflows();
     void checkInterruptRequest();
+    virtual InterruptRequestNumber interruptRequestNumber() = 0;
 
     template <typename T>
     inline T load(uint32_t offset);
@@ -189,19 +208,22 @@ public:
 
 class Timer0 : public Timer {
 public:
-    Timer0() : Timer(0) {}
+    Timer0(std::unique_ptr<InterruptController> &interruptController) : Timer(0, interruptController) {}
     void step(uint32_t cycles) override;
     void setCounterModeRegister(uint32_t value) override;
+    InterruptRequestNumber interruptRequestNumber() override { return InterruptRequestNumber::TIMER0; };
 };
 class Timer1 : public Timer {
 public:
-    Timer1() : Timer(1) {}
+    Timer1(std::unique_ptr<InterruptController> &interruptController) : Timer(1, interruptController) {}
     void step(uint32_t cycles) override;
     void setCounterModeRegister(uint32_t value) override;
+    InterruptRequestNumber interruptRequestNumber() override { return InterruptRequestNumber::TIMER1; };
 };
 class Timer2 : public Timer {
 public:
-    Timer2() : Timer(2) {}
+    Timer2(std::unique_ptr<InterruptController> &interruptController) : Timer(2, interruptController) {}
     void step(uint32_t cycles) override;
     void setCounterModeRegister(uint32_t value) override;
+    InterruptRequestNumber interruptRequestNumber() override { return InterruptRequestNumber::TIMER2; };
 };

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-InterruptController::InterruptController(LogLevel logLevel, unique_ptr<COP0> &cop0) : logger(logLevel, "  IRQ: "), cop0(cop0), status(), mask() {
+InterruptController::InterruptController(LogLevel logLevel) : logger(logLevel, "  IRQ: "), status(), mask() {
 
 }
 
@@ -42,25 +42,16 @@ string InterruptController::requestNumberDescription(InterruptRequestNumber requ
 void InterruptController::trigger(InterruptRequestNumber irq) {
     logger.logMessage("%s interrupt request enabled", requestNumberDescription(irq).c_str());
     status.value |= (1 << irq);
-    update();
 }
 
-bool InterruptController::isActive() {
+bool InterruptController::areInterruptsPending() {
     return (status.value & mask.value) != 0;
 }
 
-void InterruptController::update() {
-    cop0->cause.interruptPending = isActive() ? 4 : 0;
-}
-
 void InterruptController::setStatus(uint16_t status) {
-    this->status.value &= status;
-
-    update();
+    this->status.value &= status & 0x7FF;
 }
 
 void InterruptController::setMask(uint16_t mask) {
-    this->mask.value = mask;
-
-    update();
+    this->mask.value = mask & 0x7FF;
 }

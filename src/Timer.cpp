@@ -1,7 +1,7 @@
 #include "Timer.hpp"
 #include "Constants.h"
 
-Timer::Timer(uint8_t identity) : logger(LogLevel::NoLog), identity(identity), counterValue(), counterMode(), counterTarget(), counter() {}
+Timer::Timer(uint8_t identity, std::unique_ptr<InterruptController> &interruptController) : logger(LogLevel::NoLog), interruptController(interruptController), identity(identity), counterValue(), counterMode(), counterTarget(), counter(), oneShotTimerFired(false) {}
 
 Timer::~Timer() {}
 
@@ -117,5 +117,19 @@ void Timer::checkTargetsAndOverflows() {
 }
 
 void Timer::checkInterruptRequest() {
-    logger.logWarning("Unhandled interrupt trigger for timer %d", identity);
+    if (counterMode.timerPulseOrToggleMode() == TimerPulseOrToggleMode::Toggle) {
+        counterMode.IRQ = !counterMode.IRQ;
+    } else {
+        counterMode.IRQ = false;
+    }
+
+    if (counterMode.timerOnceOrRepeatMode() == TimerOnceOrRepeatMode::OneShot && oneShotTimerFired) {
+        return;
+    }
+
+    if (!counterMode.IRQ) {
+        interruptController->trigger(interruptRequestNumber());
+        oneShotTimerFired = true;
+    }
+    counterMode.IRQ = true;
 }
