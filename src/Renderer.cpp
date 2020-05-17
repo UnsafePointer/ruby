@@ -75,23 +75,12 @@ void Renderer::checkForceDraw(unsigned int verticesToRender, GLenum newMode) {
         verticesToRenderTotal = 6;
     }
     if (buffer->remainingCapacity() < verticesToRenderTotal) {
-        forceDraw();
+        renderFrame();
     }
     if (mode != newMode) {
-        forceDraw();
+        renderFrame();
     }
     return;
-}
-
-void Renderer::forceDraw() {
-    loadImageTexture->bind(GL_TEXTURE0);
-    Framebuffer framebuffer = Framebuffer(screenTexture);
-    buffer->addData(opaqueVertices);
-    buffer->addData(transparentVertices);
-    opaqueVertices.clear();
-    transparentVertices.clear();
-    buffer->draw(mode);
-    orderingIndex = 0;
 }
 
 void Renderer::applyScissor() {
@@ -183,7 +172,7 @@ void Renderer::setScreenResolution(Dimensions dimensions) {
 }
 
 void Renderer::setDrawingArea(Point2D topLeft, Dimensions size) {
-    forceDraw();
+    renderFrame();
 
     drawingAreaTopLeft = topLeft;
     drawingAreaSize = size;
@@ -199,10 +188,10 @@ void Renderer::prepareFrame() {
     resetMainWindow();
     applyScissor();
     glEnable(GL_SCISSOR_TEST);
-    loadImageTexture->bind(GL_TEXTURE0);
 }
 
 void Renderer::renderFrame() {
+    loadImageTexture->bind(GL_TEXTURE0);
     Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->addData(opaqueVertices);
     buffer->addData(transparentVertices);
@@ -215,12 +204,6 @@ void Renderer::renderFrame() {
 }
 
 void Renderer::finalizeFrame() {
-    buffer->addData(opaqueVertices);
-    buffer->addData(transparentVertices);
-    opaqueVertices.clear();
-    transparentVertices.clear();
-    buffer->draw(mode);
-    orderingIndex = 0;
     screenTexture->bind(GL_TEXTURE0);
     glDisable(GL_SCISSOR_TEST);
     vector<Pixel> pixels;
@@ -252,7 +235,7 @@ void Renderer::updateWindowTitle(string title) {
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
-    forceDraw();
+    renderFrame();
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }
 

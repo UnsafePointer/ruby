@@ -44,7 +44,6 @@ class Renderer {
 
     void checkRenderPolygonOneByOne();
     void checkForceDraw(unsigned int verticesToRender, GLenum newMode);
-    void forceDraw();
     void applyScissor();
     void insertVertices(std::vector<Vertex> vertices, bool opaque);
 public:
