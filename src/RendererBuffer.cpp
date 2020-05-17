@@ -73,7 +73,7 @@ unsigned int RendererBuffer<T>::remainingCapacity() {
 template <>
 void RendererBuffer<Vertex>::enableAttributes() const {
     GLuint positionIdx = program->findProgramAttribute("vertex_point");
-    glVertexAttribIPointer(positionIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, point));
+    glVertexAttribIPointer(positionIdx, 3, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, point));
     glEnableVertexAttribArray(positionIdx);
 
     GLuint colorIdx = program->findProgramAttribute("vertex_color");

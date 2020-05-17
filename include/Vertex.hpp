@@ -23,6 +23,14 @@ struct Point2D {
     static Point2D forClut(uint16_t clutData);
 };
 
+struct Point3D {
+    GLshort x, y, z;
+
+    Point3D();
+    Point3D(GLshort x, GLshort y, GLshort z);
+    Point3D(uint32_t position);
+};
+
 struct Color {
     GLubyte r, g, b;
 
@@ -36,7 +44,7 @@ enum TextureBlendMode {
 };
 
 struct Vertex {
-    Point2D point;
+    Point3D point;
     Color color;
     Point2D texturePosition;
     GLuint textureBlendMode;
@@ -44,8 +52,8 @@ struct Vertex {
     GLuint textureDepthShift;
     Point2D clut;
 
-    Vertex(Point2D point, Color color);
-    Vertex(Point2D point, Color color, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut);
+    Vertex(Point3D point, Color color);
+    Vertex(Point3D point, Color color, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut);
     ~Vertex();
 };
 

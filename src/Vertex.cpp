@@ -41,15 +41,25 @@ Point2D Point2D::forClut(uint16_t clutData) {
     return {x, y};
 }
 
+Point3D::Point3D() : x(), y(), z() {}
+
+Point3D::Point3D(GLshort x, GLshort y, GLshort z) : x(x), y(y), z(z) {}
+
+Point3D::Point3D(uint32_t position) {
+    x = ((GLshort)(position & 0xffff));
+    y = ((GLshort)((position >> 16) & 0xffff));
+    z = 0;
+}
+
 Color::Color(uint32_t color) {
     r = ((GLubyte)(color & 0xff));
     g = ((GLubyte)((color >> 8) & 0xff));
     b = ((GLubyte)((color >> 16) & 0xff));
 }
 
-Vertex::Vertex(Point2D point, Color color) : point(point), color(color), texturePosition(), textureBlendMode(), texturePage(), textureDepthShift(), clut() {}
+Vertex::Vertex(Point3D point, Color color) : point(point), color(color), texturePosition(), textureBlendMode(), texturePage(), textureDepthShift(), clut() {}
 
-Vertex::Vertex(Point2D point, Color color, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut) : point(point), color(color), texturePosition(texturePosition), textureBlendMode(textureBlendMode), texturePage(texturePage), textureDepthShift(textureDepthShift), clut(clut) {}
+Vertex::Vertex(Point3D point, Color color, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut) : point(point), color(color), texturePosition(texturePosition), textureBlendMode(textureBlendMode), texturePage(texturePage), textureDepthShift(textureDepthShift), clut(clut) {}
 
 Vertex::~Vertex() {}
 

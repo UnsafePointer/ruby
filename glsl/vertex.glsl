@@ -1,6 +1,6 @@
 #version 450 core
 
-in ivec2 vertex_point;
+in ivec3 vertex_point;
 in uvec3 vertex_color;
 in ivec2 texture_point;
 in uint texture_blend_mode;
@@ -18,7 +18,7 @@ flat out uvec2 fragment_clut;
 uniform ivec2 offset;
 
 void main() {
-    ivec2 position = vertex_point + offset;
+    ivec2 position = vertex_point.xy + offset;
 
     float x_pos = (float(position.x) / 512) - 1.0;
     float y_pos = 1.0 - (float(position.y) / 256);
