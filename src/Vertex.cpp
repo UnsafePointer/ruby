@@ -57,9 +57,9 @@ Color::Color(uint32_t color) {
     b = ((GLubyte)((color >> 16) & 0xff));
 }
 
-Vertex::Vertex(Point3D point, Color color) : point(point), color(color), texturePosition(), textureBlendMode(), texturePage(), textureDepthShift(), clut() {}
+Vertex::Vertex(Point3D point, Color color, GLuint opaque) : point(point), color(color), transparent(!opaque), texturePosition(), textureBlendMode(), texturePage(), textureDepthShift(), clut() {}
 
-Vertex::Vertex(Point3D point, Color color, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut) : point(point), color(color), texturePosition(texturePosition), textureBlendMode(textureBlendMode), texturePage(texturePage), textureDepthShift(textureDepthShift), clut(clut) {}
+Vertex::Vertex(Point3D point, Color color, GLuint opaque, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut) : point(point), color(color),  transparent(!opaque), texturePosition(texturePosition), textureBlendMode(textureBlendMode), texturePage(texturePage), textureDepthShift(textureDepthShift), clut(clut) {}
 
 Vertex::~Vertex() {}
 

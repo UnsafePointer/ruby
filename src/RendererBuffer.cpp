@@ -80,6 +80,10 @@ void RendererBuffer<Vertex>::enableAttributes() const {
     glVertexAttribIPointer(colorIdx, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
     glEnableVertexAttribArray(colorIdx);
 
+    GLuint transparentPositionIdx = program->findProgramAttribute("transparent");
+    glVertexAttribIPointer(transparentPositionIdx, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void*)offsetof(struct Vertex, transparent));
+    glEnableVertexAttribArray(transparentPositionIdx);
+
     GLuint texturePositionIdx = program->findProgramAttribute("texture_point");
     glVertexAttribIPointer(texturePositionIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, texturePosition));
     glEnableVertexAttribArray(texturePositionIdx);

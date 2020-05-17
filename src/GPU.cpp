@@ -1833,14 +1833,14 @@ void GPU::operationGp0FillRectagleInVRAM() {
     Color color = Color(gp0InstructionBuffer[0]);
     Point3D point = Point3D(gp0InstructionBuffer[1]);
     Dimensions dimentions = Dimensions(gp0InstructionBuffer[2]);
-    Vertex topLeft = Vertex(point, color);
+    Vertex topLeft = Vertex(point, color, true);
     uint32_t width = dimentions.width;
     uint32_t height = dimentions.height;
-    Vertex topRight = Vertex(gp0InstructionBuffer[1], color);
+    Vertex topRight = Vertex(gp0InstructionBuffer[1], color, true);
     topRight.point.x = topRight.point.x + width;
-    Vertex bottomLeft = Vertex(gp0InstructionBuffer[1], color);
+    Vertex bottomLeft = Vertex(gp0InstructionBuffer[1], color, true);
     bottomLeft.point.y = bottomLeft.point.y + height;
-    Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color);
+    Vertex bottomRight = Vertex(gp0InstructionBuffer[1], color, true);
     bottomRight.point.x = bottomRight.point.x + width;
     bottomRight.point.y = bottomRight.point.y + height;
     vector<Vertex> vertices = {
@@ -1880,10 +1880,10 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
     GLuint textureDepthShift = 2 - texturePageColors;
     Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
     vector<Vertex> vertices = {
-        Vertex(point1, color, texturePoint1, textureBlendMode, texturePage, textureDepthShift, clut),
-        Vertex(point2, color, texturePoint2, textureBlendMode, texturePage, textureDepthShift, clut),
-        Vertex(point3, color, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
-        Vertex(point4, color, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
+        Vertex(point1, color, opaque, texturePoint1, textureBlendMode, texturePage, textureDepthShift, clut),
+        Vertex(point2, color, opaque, texturePoint2, textureBlendMode, texturePage, textureDepthShift, clut),
+        Vertex(point3, color, opaque, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
+        Vertex(point4, color, opaque, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
     };
     renderer->pushPolygon(vertices, opaque);
     return;
@@ -1892,12 +1892,12 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
 void GPU::quad(Dimensions dimensions, bool opaque) {
     Color color = Color(gp0InstructionBuffer[0]);
     Point3D point = Point3D(gp0InstructionBuffer[1]);
-    Vertex topLeft = Vertex(point, color);
-    Vertex topRight = Vertex(point, color);
+    Vertex topLeft = Vertex(point, color, opaque);
+    Vertex topRight = Vertex(point, color, opaque);
     topRight.point.x += + dimensions.width;
-    Vertex bottomLeft = Vertex(point, color);
+    Vertex bottomLeft = Vertex(point, color, opaque);
     bottomLeft.point.y += dimensions.height;
-    Vertex bottomRight = Vertex(point, color);
+    Vertex bottomRight = Vertex(point, color, opaque);
     bottomRight.point.x += dimensions.width;
     bottomRight.point.y += dimensions.height;
     vector<Vertex> vertices = {
@@ -1915,7 +1915,7 @@ void GPU::monochromePolygon(unsigned int numberOfPoints, bool opaque) {
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 1; i <= numberOfPoints; i++) {
         Point3D point = Point3D(gp0InstructionBuffer[i]);
-        vertices.push_back(Vertex(point, color));
+        vertices.push_back(Vertex(point, color, opaque));
     }
     renderer->pushPolygon(vertices, opaque);
 }
@@ -1925,7 +1925,7 @@ void GPU::shadedPolygon(unsigned int numberOfPoints, bool opaque) {
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
         Point3D point = Point3D(gp0InstructionBuffer[i*2+1]);
-        vertices.push_back(Vertex(point, color));
+        vertices.push_back(Vertex(point, color, opaque));
     }
     renderer->pushPolygon(vertices, opaque);
 }
@@ -1941,7 +1941,7 @@ void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlend
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Point3D point = Point3D(gp0InstructionBuffer[i*2+1]);
         Point2D texturePoint = Point2D::forTexturePosition(gp0InstructionBuffer[i*2+2] & 0xffff);
-        Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
+        Vertex vertex = Vertex(point, color, opaque, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
     renderer->pushPolygon(vertices, opaque);
@@ -1957,7 +1957,7 @@ void GPU::shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, Textur
         Color color = Color(gp0InstructionBuffer[i*3]);
         Point3D point = Point3D(gp0InstructionBuffer[i*3+1]);
         Point2D texturePoint = Point2D::forTexturePosition(gp0InstructionBuffer[i*3+2] & 0xffff);
-        Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
+        Vertex vertex = Vertex(point, color, opaque, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
     renderer->pushPolygon(vertices, opaque);
@@ -1968,7 +1968,7 @@ void GPU::monochromeLine(unsigned int numberOfPoints, bool opaque) {
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 1; i <= numberOfPoints; i++) {
         Point3D point = Point3D(gp0InstructionBuffer[i]);
-        vertices.push_back(Vertex(point, color));
+        vertices.push_back(Vertex(point, color, opaque));
     }
     if (numberOfPoints == 2) {
         renderer->pushLine(vertices, opaque);
@@ -1988,7 +1988,7 @@ void GPU::shadedLine(unsigned int numberOfPoints, bool opaque) {
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
         Point3D point = Point3D(gp0InstructionBuffer[i*2+1]);
-        vertices.push_back(Vertex(point, color));
+        vertices.push_back(Vertex(point, color, opaque));
     }
     if (numberOfPoints == 2) {
         renderer->pushLine(vertices, opaque);

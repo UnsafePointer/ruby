@@ -46,14 +46,15 @@ enum TextureBlendMode {
 struct Vertex {
     Point3D point;
     Color color;
+    GLuint transparent;
     Point2D texturePosition;
     GLuint textureBlendMode;
     Point2D texturePage;
     GLuint textureDepthShift;
     Point2D clut;
 
-    Vertex(Point3D point, Color color);
-    Vertex(Point3D point, Color color, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut);
+    Vertex(Point3D point, Color color, GLuint opaque);
+    Vertex(Point3D point, Color color, GLuint opaque, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut);
     ~Vertex();
 };
 

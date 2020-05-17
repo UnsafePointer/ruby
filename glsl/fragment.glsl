@@ -3,6 +3,7 @@
 uniform sampler2D frame_buffer_texture;
 
 in vec3 color;
+flat in uint fragment_transparent;
 in vec2 fragment_texture_point;
 flat in uint fragment_texture_blend_mode;
 flat in uvec2 fragment_texture_page;
@@ -63,6 +64,10 @@ void main() {
         }
 
         if (is_transparent(texel)) {
+            discard;
+        }
+
+        if (fragment_transparent == 1) {
             discard;
         }
 
