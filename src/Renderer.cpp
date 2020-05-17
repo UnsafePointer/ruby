@@ -16,7 +16,7 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLe
 
     textureRendererProgram = make_unique<RendererProgram>("./glsl/texture_load_vertex.glsl", "./glsl/texture_load_fragment.glsl");
 
-    textureBuffer = make_unique<RendererBuffer<Point>>(textureRendererProgram, RENDERER_BUFFER_SIZE);
+    textureBuffer = make_unique<RendererBuffer<Point2D>>(textureRendererProgram, RENDERER_BUFFER_SIZE);
 
     program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
     program->useProgram();
@@ -153,7 +153,7 @@ void Renderer::resetMainWindow() {
     mainWindow->makeCurrent();
 }
 
-void Renderer::setDisplayAreaSart(Point point) {
+void Renderer::setDisplayAreaSart(Point2D point) {
     displayAreaStart = point;
 }
 
@@ -161,7 +161,7 @@ void Renderer::setScreenResolution(Dimensions dimensions) {
     screenResolution = dimensions;
 }
 
-void Renderer::setDrawingArea(Point topLeft, Dimensions size) {
+void Renderer::setDrawingArea(Point2D topLeft, Dimensions size) {
     forceDraw();
 
     drawingAreaTopLeft = topLeft;
@@ -231,7 +231,7 @@ void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     uint16_t x, y, width, height;
     tie(x, y) = imageBuffer->destination();
     tie(width, height) = imageBuffer->resolution();
-    vector<Point> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
+    vector<Point2D> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
     textureBuffer->addData(data);
     glDisable(GL_SCISSOR_TEST);
     Framebuffer framebuffer = Framebuffer(screenTexture);

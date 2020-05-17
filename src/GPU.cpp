@@ -631,7 +631,7 @@ void GPU::render() {
 }
 
 void GPU::updateDrawingArea() {
-    Point topLeft = getDrawingAreaTopLeft();
+    Point2D topLeft = getDrawingAreaTopLeft();
     Dimensions size = getDrawingAreaSize();
     logger.logMessage("Updating renderer drawing area with top left: x=%d, y=%d and size: w=%d, h=%d", topLeft.x, topLeft.y, size.width, size.height);
     renderer->setDrawingArea(topLeft, size);
@@ -665,7 +665,7 @@ Dimensions GPU::getResolution() {
     return { 0, 0 };
 }
 
-Point GPU::getDisplayAreaStart() {
+Point2D GPU::getDisplayAreaStart() {
     return { (int16_t)displayVRAMStartX, (int16_t)displayVRAMStartY };
 }
 
@@ -675,7 +675,7 @@ Dimensions GPU::getDrawingAreaSize() {
     return { (uint32_t)width, (uint32_t)height };
 }
 
-Point GPU::getDrawingAreaTopLeft() {
+Point2D GPU::getDrawingAreaTopLeft() {
     return { (int16_t)drawingAreaLeft, (int16_t)drawingAreaTop };
 }
 
@@ -996,7 +996,7 @@ GP0(A0h) - Copy Rectangle (CPU to VRAM)
 ...  Data              (...)      <--- usually transferred via DMA
 */
 void GPU::operationGp0CopyRectangleCPUToVRAM() {
-    Point point = Point(gp0InstructionBuffer[1]);
+    Point2D point = Point2D(gp0InstructionBuffer[1]);
     Dimensions dimensions = Dimensions(gp0InstructionBuffer[2]);
     uint32_t imageSize = dimensions.width * dimensions.height;
     // Pixels are 16 bit wide and transactions are 32 bit wide
@@ -1831,7 +1831,7 @@ GP0(02h) - Fill Rectangle in VRAM
 */
 void GPU::operationGp0FillRectagleInVRAM() {
     Color color = Color(gp0InstructionBuffer[0]);
-    Point point = Point(gp0InstructionBuffer[1]);
+    Point2D point = Point2D(gp0InstructionBuffer[1]);
     Dimensions dimentions = Dimensions(gp0InstructionBuffer[2]);
     Vertex topLeft = Vertex(point, color);
     uint32_t width = dimentions.width;
@@ -1860,28 +1860,28 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
     (void)opaque;
     (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
-    Point point1 = Point(gp0InstructionBuffer[1]);
-    Point texturePoint1 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
-    Point point2 = Point(gp0InstructionBuffer[1]);
+    Point2D point1 = Point2D(gp0InstructionBuffer[1]);
+    Point2D texturePoint1 = Point2D::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    Point2D point2 = Point2D(gp0InstructionBuffer[1]);
     point2.x += dimensions.width;
-    Point texturePoint2 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    Point2D texturePoint2 = Point2D::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
     texturePoint2.x += dimensions.width;
-    Point point3 = Point(gp0InstructionBuffer[1]);
+    Point2D point3 = Point2D(gp0InstructionBuffer[1]);
     point3.y += dimensions.height;
-    Point texturePoint3 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    Point2D texturePoint3 = Point2D::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
     texturePoint3.y += dimensions.height;
-    Point point4 = Point(gp0InstructionBuffer[1]);
+    Point2D point4 = Point2D(gp0InstructionBuffer[1]);
     point4.x += dimensions.width;
     point4.y += dimensions.height;
-    Point texturePoint4 = Point::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
+    Point2D texturePoint4 = Point2D::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
     texturePoint4.x += dimensions.width;
     texturePoint4.y += dimensions.height;
     uint16_t texturePageData = texturePageBaseY;
     texturePageData <<= 4;
     texturePageData |= texturePageBaseX;
-    Point texturePage = Point::forTexturePage(texturePageData);
+    Point2D texturePage = Point2D::forTexturePage(texturePageData);
     GLuint textureDepthShift = 2 - texturePageColors;
-    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
+    Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
     vector<Vertex> vertices = {
         Vertex(point1, color, texturePoint1, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point2, color, texturePoint2, textureBlendMode, texturePage, textureDepthShift, clut),
@@ -1896,7 +1896,7 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
     // TODO: unused
     (void)opaque;
     Color color = Color(gp0InstructionBuffer[0]);
-    Point point = Point(gp0InstructionBuffer[1]);
+    Point2D point = Point2D(gp0InstructionBuffer[1]);
     Vertex topLeft = Vertex(point, color);
     Vertex topRight = Vertex(point, color);
     topRight.point.x += + dimensions.width;
@@ -1921,7 +1921,7 @@ void GPU::monochromePolygon(unsigned int numberOfPoints, bool opaque) {
     Color color = Color(gp0InstructionBuffer[0]);
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 1; i <= numberOfPoints; i++) {
-        Point point = Point(gp0InstructionBuffer[i]);
+        Point2D point = Point2D(gp0InstructionBuffer[i]);
         vertices.push_back(Vertex(point, color));
     }
     renderer->pushPolygon(vertices);
@@ -1933,7 +1933,7 @@ void GPU::shadedPolygon(unsigned int numberOfPoints, bool opaque) {
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
-        Point point = Point(gp0InstructionBuffer[i*2+1]);
+        Point2D point = Point2D(gp0InstructionBuffer[i*2+1]);
         vertices.push_back(Vertex(point, color));
     }
     renderer->pushPolygon(vertices);
@@ -1944,15 +1944,15 @@ void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlend
     (void)opaque;
     (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
-    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
-    Point texturePage = Point::forTexturePage(gp0InstructionBuffer[4] >> 16);
+    Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
+    Point2D texturePage = Point2D::forTexturePage(gp0InstructionBuffer[4] >> 16);
     TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[4] >> 16) >> 7) & 0x3);
     GLuint textureDepthShift = 2 - texturePageColors;
 
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 0; i < numberOfPoints; i++) {
-        Point point = Point(gp0InstructionBuffer[i*2+1]);
-        Point texturePoint = Point::forTexturePosition(gp0InstructionBuffer[i*2+2] & 0xffff);
+        Point2D point = Point2D(gp0InstructionBuffer[i*2+1]);
+        Point2D texturePoint = Point2D::forTexturePosition(gp0InstructionBuffer[i*2+2] & 0xffff);
         Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
@@ -1963,15 +1963,15 @@ void GPU::shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, Textur
     // TODO: unused
     (void)opaque;
     (void)textureBlendMode;
-    Point clut = Point::forClut(gp0InstructionBuffer[2] >> 16);
-    Point texturePage = Point::forTexturePage(gp0InstructionBuffer[5] >> 16);
+    Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
+    Point2D texturePage = Point2D::forTexturePage(gp0InstructionBuffer[5] >> 16);
     TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[5] >> 16) >> 7) & 0x3);
     GLuint textureDepthShift = 2 - texturePageColors;
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*3]);
-        Point point = Point(gp0InstructionBuffer[i*3+1]);
-        Point texturePoint = Point::forTexturePosition(gp0InstructionBuffer[i*3+2] & 0xffff);
+        Point2D point = Point2D(gp0InstructionBuffer[i*3+1]);
+        Point2D texturePoint = Point2D::forTexturePosition(gp0InstructionBuffer[i*3+2] & 0xffff);
         Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
@@ -1984,7 +1984,7 @@ void GPU::monochromeLine(unsigned int numberOfPoints, bool opaque) {
     Color color = Color(gp0InstructionBuffer[0]);
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 1; i <= numberOfPoints; i++) {
-        Point point = Point(gp0InstructionBuffer[i]);
+        Point2D point = Point2D(gp0InstructionBuffer[i]);
         vertices.push_back(Vertex(point, color));
     }
     if (numberOfPoints == 2) {
@@ -2006,7 +2006,7 @@ void GPU::shadedLine(unsigned int numberOfPoints, bool opaque) {
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
-        Point point = Point(gp0InstructionBuffer[i*2+1]);
+        Point2D point = Point2D(gp0InstructionBuffer[i*2+1]);
         vertices.push_back(Vertex(point, color));
     }
     if (numberOfPoints == 2) {
