@@ -37,6 +37,7 @@ class Renderer {
     Point2D drawingAreaTopLeft;
     Dimensions drawingAreaSize;
     bool renderPolygonOneByOne;
+    uint32_t orderingIndex;
 
     void checkRenderPolygonOneByOne();
     void checkForceDraw(unsigned int verticesToRender, GLenum newMode);

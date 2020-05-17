@@ -22,8 +22,9 @@ void main() {
 
     float x_pos = (float(position.x) / 512) - 1.0;
     float y_pos = 1.0 - (float(position.y) / 256);
+    float z_pos = 1.0 - (float(vertex_point.z) / 32768);
 
-    gl_Position.xyzw = vec4(x_pos, y_pos, 0.0, 1.0);
+    gl_Position.xyzw = vec4(x_pos, y_pos, z_pos, 1.0);
     color = vec3(float(vertex_color.r) / 255, float(vertex_color.g) / 255, float(vertex_color.b) / 255);
     fragment_texture_point = vec2(texture_point);
     fragment_texture_blend_mode = texture_blend_mode;

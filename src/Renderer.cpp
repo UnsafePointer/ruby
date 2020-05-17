@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), drawingAreaTopLeft(), drawingAreaSize({}), renderPolygonOneByOne(false) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), drawingAreaTopLeft(), drawingAreaSize({}), renderPolygonOneByOne(false), orderingIndex(0) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -87,6 +87,7 @@ void Renderer::forceDraw() {
     loadImageTexture->bind(GL_TEXTURE0);
     Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->draw(mode);
+    orderingIndex = 0;
 }
 
 void Renderer::applyScissor() {
@@ -121,6 +122,10 @@ void Renderer::pushLine(std::vector<Vertex> vertices, bool opaque) {
     }
     checkForceDraw(size, GL_LINES);
     mode = GL_LINES;
+    orderingIndex++;
+    for (auto& vertix : vertices) {
+        vertix.point.z = orderingIndex;
+    }
     buffer->addData(vertices);
     checkRenderPolygonOneByOne();
     return;
@@ -136,6 +141,10 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices, bool opaque) {
     }
     checkForceDraw(size, GL_TRIANGLES);
     mode = GL_TRIANGLES;
+    orderingIndex++;
+    for (auto& vertix : vertices) {
+        vertix.point.z = orderingIndex;
+    }
     switch (size) {
         case 3: {
             buffer->addData(vertices);
@@ -188,12 +197,14 @@ void Renderer::prepareFrame() {
 void Renderer::renderFrame() {
     Framebuffer framebuffer = Framebuffer(screenTexture);
     buffer->draw(mode);
+    orderingIndex = 0;
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
     rendererDebugger->checkForOpenGLErrors();
 }
 
 void Renderer::finalizeFrame() {
     buffer->draw(mode);
+    orderingIndex = 0;
     screenTexture->bind(GL_TEXTURE0);
     glDisable(GL_SCISSOR_TEST);
     vector<Pixel> pixels;
