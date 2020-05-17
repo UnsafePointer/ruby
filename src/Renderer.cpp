@@ -111,7 +111,9 @@ void Renderer::applyScissor() {
     glEnable(GL_SCISSOR_TEST);
 }
 
-void Renderer::pushLine(std::vector<Vertex> vertices) {
+void Renderer::pushLine(std::vector<Vertex> vertices, bool opaque) {
+    // TODO: unused
+    (void)opaque;
     unsigned int size = vertices.size();
     if (size < 2) {
         logger.logError("Unhandled line with %d vertices", size);
@@ -124,7 +126,9 @@ void Renderer::pushLine(std::vector<Vertex> vertices) {
     return;
 }
 
-void Renderer::pushPolygon(std::vector<Vertex> vertices) {
+void Renderer::pushPolygon(std::vector<Vertex> vertices, bool opaque) {
+    // TODO: unused
+    (void)opaque;
     unsigned int size = vertices.size();
     if (size < 3 || size > 4) {
         logger.logError("Unhandled polygon with %d vertices", size);

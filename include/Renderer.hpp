@@ -46,8 +46,8 @@ public:
     Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu);
     ~Renderer();
 
-    void pushLine(std::vector<Vertex> vertices);
-    void pushPolygon(std::vector<Vertex> vertices);
+    void pushLine(std::vector<Vertex> vertices, bool opaque);
+    void pushPolygon(std::vector<Vertex> vertices, bool opaque);
     void setDrawingOffset(int16_t x, int16_t y);
     void prepareFrame();
     void renderFrame();

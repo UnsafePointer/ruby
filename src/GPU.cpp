@@ -1850,14 +1850,12 @@ void GPU::operationGp0FillRectagleInVRAM() {
         bottomRight,
     };
     renderer->setDrawingOffset(0, 0);
-    renderer->pushPolygon(vertices);
+    renderer->pushPolygon(vertices, true);
     renderer->setDrawingOffset(drawingOffsetX, drawingOffsetY);
     return;
 }
 
 void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode) {
-    // TODO: unused
-    (void)opaque;
     (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
     Point3D point1 = Point3D(gp0InstructionBuffer[1]);
@@ -1888,13 +1886,11 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
         Vertex(point3, color, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point4, color, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
     };
-    renderer->pushPolygon(vertices);
+    renderer->pushPolygon(vertices, opaque);
     return;
 }
 
 void GPU::quad(Dimensions dimensions, bool opaque) {
-    // TODO: unused
-    (void)opaque;
     Color color = Color(gp0InstructionBuffer[0]);
     Point3D point = Point3D(gp0InstructionBuffer[1]);
     Vertex topLeft = Vertex(point, color);
@@ -1911,37 +1907,31 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
         bottomLeft,
         bottomRight,
     };
-    renderer->pushPolygon(vertices);
+    renderer->pushPolygon(vertices, opaque);
     return;
 }
 
 void GPU::monochromePolygon(unsigned int numberOfPoints, bool opaque) {
-    // TODO: unused
-    (void)opaque;
     Color color = Color(gp0InstructionBuffer[0]);
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 1; i <= numberOfPoints; i++) {
         Point3D point = Point3D(gp0InstructionBuffer[i]);
         vertices.push_back(Vertex(point, color));
     }
-    renderer->pushPolygon(vertices);
+    renderer->pushPolygon(vertices, opaque);
 }
 
 void GPU::shadedPolygon(unsigned int numberOfPoints, bool opaque) {
-    // TODO: unused
-    (void)opaque;
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
         Point3D point = Point3D(gp0InstructionBuffer[i*2+1]);
         vertices.push_back(Vertex(point, color));
     }
-    renderer->pushPolygon(vertices);
+    renderer->pushPolygon(vertices, opaque);
 }
 
 void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
-    // TODO: unused
-    (void)opaque;
     (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
     Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
@@ -1956,12 +1946,10 @@ void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlend
         Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
-    renderer->pushPolygon(vertices);
+    renderer->pushPolygon(vertices, opaque);
 }
 
 void GPU::shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
-    // TODO: unused
-    (void)opaque;
     (void)textureBlendMode;
     Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
     Point2D texturePage = Point2D::forTexturePage(gp0InstructionBuffer[5] >> 16);
@@ -1975,12 +1963,10 @@ void GPU::shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, Textur
         Vertex vertex = Vertex(point, color, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
-    renderer->pushPolygon(vertices);
+    renderer->pushPolygon(vertices, opaque);
 }
 
 void GPU::monochromeLine(unsigned int numberOfPoints, bool opaque) {
-    // TODO: unused
-    (void)opaque;
     Color color = Color(gp0InstructionBuffer[0]);
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 1; i <= numberOfPoints; i++) {
@@ -1988,21 +1974,19 @@ void GPU::monochromeLine(unsigned int numberOfPoints, bool opaque) {
         vertices.push_back(Vertex(point, color));
     }
     if (numberOfPoints == 2) {
-        renderer->pushLine(vertices);
+        renderer->pushLine(vertices, opaque);
         return;
     }
     vector<Vertex> lines = vector<Vertex>();
     for (unsigned int i = 0; i < vertices.size() - 1; i++) {
         lines.push_back(vertices[i]);
         lines.push_back(vertices[i+1]);
-        renderer->pushLine(lines);
+        renderer->pushLine(lines, opaque);
         lines.clear();
     }
 }
 
 void GPU::shadedLine(unsigned int numberOfPoints, bool opaque) {
-    // TODO: unused
-    (void)opaque;
     vector<Vertex> vertices = vector<Vertex>();
     for (unsigned int i = 0; i < numberOfPoints; i++) {
         Color color = Color(gp0InstructionBuffer[i*2]);
@@ -2010,14 +1994,14 @@ void GPU::shadedLine(unsigned int numberOfPoints, bool opaque) {
         vertices.push_back(Vertex(point, color));
     }
     if (numberOfPoints == 2) {
-        renderer->pushLine(vertices);
+        renderer->pushLine(vertices, opaque);
         return;
     }
     vector<Vertex> lines = vector<Vertex>();
     for (unsigned int i = 0; i < vertices.size() - 1; i++) {
         lines.push_back(vertices[i]);
         lines.push_back(vertices[i+1]);
-        renderer->pushLine(lines);
+        renderer->pushLine(lines, opaque);
         lines.clear();
     }
 }
