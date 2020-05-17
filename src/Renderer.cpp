@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), drawingAreaTopLeft(), drawingAreaSize({}), renderPolygonOneByOne(false), orderingIndex(0) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), opaqueVertices(), transparentVertices(), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), drawingAreaTopLeft(), drawingAreaSize({}), renderPolygonOneByOne(false), orderingIndex(0) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
@@ -86,6 +86,10 @@ void Renderer::checkForceDraw(unsigned int verticesToRender, GLenum newMode) {
 void Renderer::forceDraw() {
     loadImageTexture->bind(GL_TEXTURE0);
     Framebuffer framebuffer = Framebuffer(screenTexture);
+    buffer->addData(opaqueVertices);
+    buffer->addData(transparentVertices);
+    opaqueVertices.clear();
+    transparentVertices.clear();
     buffer->draw(mode);
     orderingIndex = 0;
 }
@@ -112,9 +116,15 @@ void Renderer::applyScissor() {
     glEnable(GL_SCISSOR_TEST);
 }
 
+void Renderer::insertVertices(std::vector<Vertex> vertices, bool opaque) {
+    if (opaque) {
+        opaqueVertices.insert(opaqueVertices.end(), vertices.begin(), vertices.end());
+    } else {
+        transparentVertices.insert(transparentVertices.end(), vertices.begin(), vertices.end());
+    }
+}
+
 void Renderer::pushLine(std::vector<Vertex> vertices, bool opaque) {
-    // TODO: unused
-    (void)opaque;
     unsigned int size = vertices.size();
     if (size < 2) {
         logger.logError("Unhandled line with %d vertices", size);
@@ -126,14 +136,12 @@ void Renderer::pushLine(std::vector<Vertex> vertices, bool opaque) {
     for (auto& vertix : vertices) {
         vertix.point.z = orderingIndex;
     }
-    buffer->addData(vertices);
+    insertVertices(vertices, opaque);
     checkRenderPolygonOneByOne();
     return;
 }
 
 void Renderer::pushPolygon(std::vector<Vertex> vertices, bool opaque) {
-    // TODO: unused
-    (void)opaque;
     unsigned int size = vertices.size();
     if (size < 3 || size > 4) {
         logger.logError("Unhandled polygon with %d vertices", size);
@@ -147,14 +155,14 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices, bool opaque) {
     }
     switch (size) {
         case 3: {
-            buffer->addData(vertices);
+            insertVertices(vertices, opaque);
             checkRenderPolygonOneByOne();
             break;
         }
         case 4: {
-            buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
+            insertVertices(vector<Vertex>(vertices.begin(), vertices.end() - 1), opaque);
             checkRenderPolygonOneByOne();
-            buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
+            insertVertices(vector<Vertex>(vertices.begin() + 1, vertices.end()), opaque);
             checkRenderPolygonOneByOne();
             break;
         }
@@ -196,6 +204,10 @@ void Renderer::prepareFrame() {
 
 void Renderer::renderFrame() {
     Framebuffer framebuffer = Framebuffer(screenTexture);
+    buffer->addData(opaqueVertices);
+    buffer->addData(transparentVertices);
+    opaqueVertices.clear();
+    transparentVertices.clear();
     buffer->draw(mode);
     orderingIndex = 0;
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
@@ -203,6 +215,10 @@ void Renderer::renderFrame() {
 }
 
 void Renderer::finalizeFrame() {
+    buffer->addData(opaqueVertices);
+    buffer->addData(transparentVertices);
+    opaqueVertices.clear();
+    transparentVertices.clear();
     buffer->draw(mode);
     orderingIndex = 0;
     screenTexture->bind(GL_TEXTURE0);

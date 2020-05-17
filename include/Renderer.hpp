@@ -17,6 +17,9 @@ class Renderer {
     Logger logger;
     GLuint offsetUniform;
 
+    std::vector<Vertex> opaqueVertices;
+    std::vector<Vertex> transparentVertices;
+
     std::unique_ptr<Window> &mainWindow;
 
     std::unique_ptr<RendererProgram> program;
@@ -43,6 +46,7 @@ class Renderer {
     void checkForceDraw(unsigned int verticesToRender, GLenum newMode);
     void forceDraw();
     void applyScissor();
+    void insertVertices(std::vector<Vertex> vertices, bool opaque);
 public:
     Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu);
     ~Renderer();
