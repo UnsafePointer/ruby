@@ -188,17 +188,30 @@ void Renderer::prepareFrame() {
     resetMainWindow();
     applyScissor();
     glEnable(GL_SCISSOR_TEST);
+    glBlendColor(0.25, 0.25, 0.25, 0.5);
 }
 
 void Renderer::renderFrame() {
     loadImageTexture->bind(GL_TEXTURE0);
+
     Framebuffer framebuffer = Framebuffer(screenTexture);
+
+    glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+    glDisable(GL_BLEND);
+
     buffer->addData(opaqueVertices);
-    buffer->addData(transparentVertices);
     opaqueVertices.clear();
+    buffer->draw(mode);
+
+    glBlendFuncSeparate(GL_CONSTANT_ALPHA, GL_CONSTANT_ALPHA, GL_ONE, GL_ZERO);
+    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    glEnable(GL_BLEND);
+
+    buffer->addData(transparentVertices);
     transparentVertices.clear();
     buffer->draw(mode);
     orderingIndex = 0;
+
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
     rendererDebugger->checkForOpenGLErrors();
 }
@@ -206,6 +219,8 @@ void Renderer::renderFrame() {
 void Renderer::finalizeFrame() {
     screenTexture->bind(GL_TEXTURE0);
     glDisable(GL_SCISSOR_TEST);
+    glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+    glDisable(GL_BLEND);
     vector<Pixel> pixels;
     if (resizeToFitFramebuffer) {
         pixels = {

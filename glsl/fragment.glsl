@@ -35,7 +35,7 @@ vec4 get_pixel_from_vram(uint x, uint y) {
 
 void main() {
     if (fragment_texture_blend_mode == BLEND_MODE_NO_TEXTURE) {
-        fragment_color = vec4(color, 1.0);
+        fragment_color = vec4(color, .0);
     } else {
         uint pixel_per_hw = 1U << fragment_texture_depth_shift;
 
