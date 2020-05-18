@@ -1,6 +1,7 @@
 #version 450 core
 
 uniform sampler2D frame_buffer_texture;
+uniform uint draw_transparent_texture_blend;
 
 in vec3 color;
 flat in uint fragment_transparent;
@@ -67,7 +68,11 @@ void main() {
             discard;
         }
 
-        if (fragment_transparent == 1) {
+        // Bit 15
+        uint transparency_flag = uint(floor(texel.a + 0.5));
+        uint texel_semi_transparent = transparency_flag & fragment_transparent;
+
+        if (texel_semi_transparent != draw_transparent_texture_blend) {
             discard;
         }
 

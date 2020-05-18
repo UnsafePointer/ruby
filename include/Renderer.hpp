@@ -16,6 +16,7 @@ class GPU;
 class Renderer {
     Logger logger;
     GLuint offsetUniform;
+    GLuint drawTransparentTextureBlendUniform;
 
     std::vector<Vertex> opaqueVertices;
     std::vector<Vertex> transparentVertices;
@@ -45,13 +46,13 @@ class Renderer {
     void checkRenderPolygonOneByOne();
     void checkForceDraw(unsigned int verticesToRender, GLenum newMode);
     void applyScissor();
-    void insertVertices(std::vector<Vertex> vertices, bool opaque);
+    void insertVertices(std::vector<Vertex> vertices, bool opaque, TextureBlendMode textureBlendMode);
 public:
     Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu);
     ~Renderer();
 
     void pushLine(std::vector<Vertex> vertices, bool opaque);
-    void pushPolygon(std::vector<Vertex> vertices, bool opaque);
+    void pushPolygon(std::vector<Vertex> vertices, bool opaque, TextureBlendMode textureBlendMode);
     void setDrawingOffset(int16_t x, int16_t y);
     void prepareFrame();
     void renderFrame();

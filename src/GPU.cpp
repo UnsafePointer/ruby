@@ -1345,7 +1345,7 @@ GP0(3Eh) - Shaded Textured four-point polygon, semi-transparent, tex-blend
  (12th) Texcoord4        (0000YyXxh) (if any)
 */
 void GPU::operationGp0TexturedShadedFourPointSemiTransparentTextureBlending() {
-    shadedTexturedPolygon(4, true, TextureBlendModeTextureBlend);
+    shadedTexturedPolygon(4, false, TextureBlendModeTextureBlend);
     return;
 }
 
@@ -1850,7 +1850,7 @@ void GPU::operationGp0FillRectagleInVRAM() {
         bottomRight,
     };
     renderer->setDrawingOffset(0, 0);
-    renderer->pushPolygon(vertices, true);
+    renderer->pushPolygon(vertices, true, TextureBlendMode::TextureBlendModeNoTexture);
     renderer->setDrawingOffset(drawingOffsetX, drawingOffsetY);
     return;
 }
@@ -1885,7 +1885,7 @@ void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode text
         Vertex(point3, color, opaque, texturePoint3, textureBlendMode, texturePage, textureDepthShift, clut),
         Vertex(point4, color, opaque, texturePoint4, textureBlendMode, texturePage, textureDepthShift, clut),
     };
-    renderer->pushPolygon(vertices, opaque);
+    renderer->pushPolygon(vertices, opaque, textureBlendMode);
     return;
 }
 
@@ -1906,7 +1906,7 @@ void GPU::quad(Dimensions dimensions, bool opaque) {
         bottomLeft,
         bottomRight,
     };
-    renderer->pushPolygon(vertices, opaque);
+    renderer->pushPolygon(vertices, opaque, TextureBlendMode::TextureBlendModeNoTexture);
     return;
 }
 
@@ -1917,7 +1917,7 @@ void GPU::monochromePolygon(unsigned int numberOfPoints, bool opaque) {
         Point3D point = Point3D(gp0InstructionBuffer[i]);
         vertices.push_back(Vertex(point, color, opaque));
     }
-    renderer->pushPolygon(vertices, opaque);
+    renderer->pushPolygon(vertices, opaque, TextureBlendMode::TextureBlendModeNoTexture);
 }
 
 void GPU::shadedPolygon(unsigned int numberOfPoints, bool opaque) {
@@ -1927,7 +1927,7 @@ void GPU::shadedPolygon(unsigned int numberOfPoints, bool opaque) {
         Point3D point = Point3D(gp0InstructionBuffer[i*2+1]);
         vertices.push_back(Vertex(point, color, opaque));
     }
-    renderer->pushPolygon(vertices, opaque);
+    renderer->pushPolygon(vertices, opaque, TextureBlendMode::TextureBlendModeNoTexture);
 }
 
 void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
@@ -1944,7 +1944,7 @@ void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlend
         Vertex vertex = Vertex(point, color, opaque, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
-    renderer->pushPolygon(vertices, opaque);
+    renderer->pushPolygon(vertices, opaque, textureBlendMode);
 }
 
 void GPU::shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
@@ -1960,7 +1960,7 @@ void GPU::shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, Textur
         Vertex vertex = Vertex(point, color, opaque, texturePoint, textureBlendMode, texturePage, textureDepthShift, clut);
         vertices.push_back(vertex);
     }
-    renderer->pushPolygon(vertices, opaque);
+    renderer->pushPolygon(vertices, opaque, textureBlendMode);
 }
 
 void GPU::monochromeLine(unsigned int numberOfPoints, bool opaque) {
