@@ -12,15 +12,23 @@ union Dimensions {
     Dimensions(uint32_t width, uint32_t height) : width(width), height(height) {}
 };
 
-struct Point {
+struct Point2D {
     GLshort x, y;
 
-    Point();
-    Point(GLshort x, GLshort y);
-    Point(uint32_t position);
-    static Point forTexturePosition(uint16_t position);
-    static Point forTexturePage(uint32_t texturePage);
-    static Point forClut(uint16_t clutData);
+    Point2D();
+    Point2D(GLshort x, GLshort y);
+    Point2D(uint32_t position);
+    static Point2D forTexturePosition(uint16_t position);
+    static Point2D forTexturePage(uint32_t texturePage);
+    static Point2D forClut(uint16_t clutData);
+};
+
+struct Point3D {
+    GLshort x, y, z;
+
+    Point3D();
+    Point3D(GLshort x, GLshort y, GLshort z);
+    Point3D(uint32_t position);
 };
 
 struct Color {
@@ -36,16 +44,17 @@ enum TextureBlendMode {
 };
 
 struct Vertex {
-    Point point;
+    Point3D point;
     Color color;
-    Point texturePosition;
+    GLuint transparent;
+    Point2D texturePosition;
     GLuint textureBlendMode;
-    Point texturePage;
+    Point2D texturePage;
     GLuint textureDepthShift;
-    Point clut;
+    Point2D clut;
 
-    Vertex(Point point, Color color);
-    Vertex(Point point, Color color, Point texturePosition, TextureBlendMode textureBlendMode, Point texturePage, GLuint textureDepthShift, Point clut);
+    Vertex(Point3D point, Color color, GLuint opaque);
+    Vertex(Point3D point, Color color, GLuint opaque, Point2D texturePosition, TextureBlendMode textureBlendMode, Point2D texturePage, GLuint textureDepthShift, Point2D clut);
     ~Vertex();
 };
 

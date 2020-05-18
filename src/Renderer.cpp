@@ -10,13 +10,13 @@
 
 using namespace std;
 
-Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), drawingAreaTopLeft(), drawingAreaSize({}), renderPolygonOneByOne(false) {
+Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLevel::NoLog), opaqueVertices(), transparentVertices(), mainWindow(mainWindow), mode(GL_TRIANGLES), displayAreaStart(), screenResolution({}), drawingAreaTopLeft(), drawingAreaSize({}), renderPolygonOneByOne(false), orderingIndex(0) {
     ConfigurationManager *configurationManager = ConfigurationManager::getInstance();
     resizeToFitFramebuffer = configurationManager->shouldResizeWindowToFitFramebuffer();
 
     textureRendererProgram = make_unique<RendererProgram>("./glsl/texture_load_vertex.glsl", "./glsl/texture_load_fragment.glsl");
 
-    textureBuffer = make_unique<RendererBuffer<Point>>(textureRendererProgram, RENDERER_BUFFER_SIZE);
+    textureBuffer = make_unique<RendererBuffer<Point2D>>(textureRendererProgram, RENDERER_BUFFER_SIZE);
 
     program = make_unique<RendererProgram>("glsl/vertex.glsl", "glsl/fragment.glsl");
     program->useProgram();
@@ -25,6 +25,9 @@ Renderer::Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu) : logger(LogLe
 
     offsetUniform = program->findProgramUniform("offset");
     glUniform2i(offsetUniform, 0, 0);
+
+    drawTransparentTextureBlendUniform = program->findProgramUniform("draw_transparent_texture_blend");
+    glUniform1ui(drawTransparentTextureBlendUniform, 0);
 
     Dimensions screenDimensions = mainWindow->getDimensions();
 
@@ -75,18 +78,12 @@ void Renderer::checkForceDraw(unsigned int verticesToRender, GLenum newMode) {
         verticesToRenderTotal = 6;
     }
     if (buffer->remainingCapacity() < verticesToRenderTotal) {
-        forceDraw();
+        renderFrame();
     }
     if (mode != newMode) {
-        forceDraw();
+        renderFrame();
     }
     return;
-}
-
-void Renderer::forceDraw() {
-    loadImageTexture->bind(GL_TEXTURE0);
-    Framebuffer framebuffer = Framebuffer(screenTexture);
-    buffer->draw(mode);
 }
 
 void Renderer::applyScissor() {
@@ -111,7 +108,17 @@ void Renderer::applyScissor() {
     glEnable(GL_SCISSOR_TEST);
 }
 
-void Renderer::pushLine(std::vector<Vertex> vertices) {
+void Renderer::insertVertices(std::vector<Vertex> vertices, bool opaque, TextureBlendMode textureBlendMode) {
+    bool shouldDrawOpaque = opaque || textureBlendMode != TextureBlendMode::TextureBlendModeNoTexture;
+    if (shouldDrawOpaque) {
+        opaqueVertices.insert(opaqueVertices.end(), vertices.begin(), vertices.end());
+    }
+    if (!opaque) {
+        transparentVertices.insert(transparentVertices.end(), vertices.begin(), vertices.end());
+    }
+}
+
+void Renderer::pushLine(std::vector<Vertex> vertices, bool opaque) {
     unsigned int size = vertices.size();
     if (size < 2) {
         logger.logError("Unhandled line with %d vertices", size);
@@ -119,12 +126,16 @@ void Renderer::pushLine(std::vector<Vertex> vertices) {
     }
     checkForceDraw(size, GL_LINES);
     mode = GL_LINES;
-    buffer->addData(vertices);
+    orderingIndex++;
+    for (auto& vertix : vertices) {
+        vertix.point.z = orderingIndex;
+    }
+    insertVertices(vertices, opaque, TextureBlendMode::TextureBlendModeNoTexture);
     checkRenderPolygonOneByOne();
     return;
 }
 
-void Renderer::pushPolygon(std::vector<Vertex> vertices) {
+void Renderer::pushPolygon(std::vector<Vertex> vertices, bool opaque, TextureBlendMode textureBlendMode) {
     unsigned int size = vertices.size();
     if (size < 3 || size > 4) {
         logger.logError("Unhandled polygon with %d vertices", size);
@@ -132,16 +143,20 @@ void Renderer::pushPolygon(std::vector<Vertex> vertices) {
     }
     checkForceDraw(size, GL_TRIANGLES);
     mode = GL_TRIANGLES;
+    orderingIndex++;
+    for (auto& vertix : vertices) {
+        vertix.point.z = orderingIndex;
+    }
     switch (size) {
         case 3: {
-            buffer->addData(vertices);
+            insertVertices(vertices, opaque, textureBlendMode);
             checkRenderPolygonOneByOne();
             break;
         }
         case 4: {
-            buffer->addData(vector<Vertex>(vertices.begin(), vertices.end() - 1));
+            insertVertices(vector<Vertex>(vertices.begin(), vertices.end() - 1), opaque, textureBlendMode);
             checkRenderPolygonOneByOne();
-            buffer->addData(vector<Vertex>(vertices.begin() + 1, vertices.end()));
+            insertVertices(vector<Vertex>(vertices.begin() + 1, vertices.end()), opaque, textureBlendMode);
             checkRenderPolygonOneByOne();
             break;
         }
@@ -153,7 +168,7 @@ void Renderer::resetMainWindow() {
     mainWindow->makeCurrent();
 }
 
-void Renderer::setDisplayAreaSart(Point point) {
+void Renderer::setDisplayAreaSart(Point2D point) {
     displayAreaStart = point;
 }
 
@@ -161,8 +176,8 @@ void Renderer::setScreenResolution(Dimensions dimensions) {
     screenResolution = dimensions;
 }
 
-void Renderer::setDrawingArea(Point topLeft, Dimensions size) {
-    forceDraw();
+void Renderer::setDrawingArea(Point2D topLeft, Dimensions size) {
+    renderFrame();
 
     drawingAreaTopLeft = topLeft;
     drawingAreaSize = size;
@@ -178,20 +193,42 @@ void Renderer::prepareFrame() {
     resetMainWindow();
     applyScissor();
     glEnable(GL_SCISSOR_TEST);
-    loadImageTexture->bind(GL_TEXTURE0);
+    glBlendColor(0.25, 0.25, 0.25, 0.5);
 }
 
 void Renderer::renderFrame() {
+    program->useProgram();
+    loadImageTexture->bind(GL_TEXTURE0);
+
     Framebuffer framebuffer = Framebuffer(screenTexture);
+
+    glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+    glDisable(GL_BLEND);
+    glUniform1ui(drawTransparentTextureBlendUniform, 0);
+
+    buffer->addData(opaqueVertices);
+    opaqueVertices.clear();
     buffer->draw(mode);
+
+    glBlendFuncSeparate(GL_CONSTANT_ALPHA, GL_CONSTANT_ALPHA, GL_ONE, GL_ZERO);
+    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    glEnable(GL_BLEND);
+    glUniform1ui(drawTransparentTextureBlendUniform, 1);
+
+    buffer->addData(transparentVertices);
+    transparentVertices.clear();
+    buffer->draw(mode);
+    orderingIndex = 0;
+
     RendererDebugger *rendererDebugger = RendererDebugger::getInstance();
     rendererDebugger->checkForOpenGLErrors();
 }
 
 void Renderer::finalizeFrame() {
-    buffer->draw(mode);
     screenTexture->bind(GL_TEXTURE0);
     glDisable(GL_SCISSOR_TEST);
+    glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+    glDisable(GL_BLEND);
     vector<Pixel> pixels;
     if (resizeToFitFramebuffer) {
         pixels = {
@@ -221,7 +258,7 @@ void Renderer::updateWindowTitle(string title) {
 }
 
 void Renderer::setDrawingOffset(int16_t x, int16_t y) {
-    forceDraw();
+    renderFrame();
     glUniform2i(offsetUniform, ((GLint)x), ((GLint)y));
 }
 
@@ -231,7 +268,7 @@ void Renderer::loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer) {
     uint16_t x, y, width, height;
     tie(x, y) = imageBuffer->destination();
     tie(width, height) = imageBuffer->resolution();
-    vector<Point> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
+    vector<Point2D> data = { {(GLshort)x, (GLshort)y}, {(GLshort)(x + width), (GLshort)y}, {(GLshort)x, (GLshort)(y + height)}, {(GLshort)(x + width), (GLshort)(y + height)} };
     textureBuffer->addData(data);
     glDisable(GL_SCISSOR_TEST);
     Framebuffer framebuffer = Framebuffer(screenTexture);

@@ -279,8 +279,8 @@ public:
     void executeGp0(uint32_t value);
     void step(uint32_t cycles);
     Dimensions getResolution();
-    Point getDisplayAreaStart();
+    Point2D getDisplayAreaStart();
     Dimensions getDrawingAreaSize();
-    Point getDrawingAreaTopLeft();
+    Point2D getDrawingAreaTopLeft();
     void toggleRenderPolygonOneByOne();
 };

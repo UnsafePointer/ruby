@@ -73,12 +73,16 @@ unsigned int RendererBuffer<T>::remainingCapacity() {
 template <>
 void RendererBuffer<Vertex>::enableAttributes() const {
     GLuint positionIdx = program->findProgramAttribute("vertex_point");
-    glVertexAttribIPointer(positionIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, point));
+    glVertexAttribIPointer(positionIdx, 3, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, point));
     glEnableVertexAttribArray(positionIdx);
 
     GLuint colorIdx = program->findProgramAttribute("vertex_color");
     glVertexAttribIPointer(colorIdx, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
     glEnableVertexAttribArray(colorIdx);
+
+    GLuint transparentPositionIdx = program->findProgramAttribute("transparent");
+    glVertexAttribIPointer(transparentPositionIdx, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void*)offsetof(struct Vertex, transparent));
+    glEnableVertexAttribArray(transparentPositionIdx);
 
     GLuint texturePositionIdx = program->findProgramAttribute("texture_point");
     glVertexAttribIPointer(texturePositionIdx, 2, GL_SHORT, sizeof(Vertex), (void*)offsetof(struct Vertex, texturePosition));
@@ -102,7 +106,7 @@ void RendererBuffer<Vertex>::enableAttributes() const {
 }
 
 template <>
-void RendererBuffer<Point>::enableAttributes() const {
+void RendererBuffer<Point2D>::enableAttributes() const {
     GLuint positionIdx = program->findProgramAttribute("position");
     glVertexAttribIPointer(positionIdx, 2, GL_SHORT, 0, NULL);
     glEnableVertexAttribArray(positionIdx);
@@ -119,5 +123,5 @@ void RendererBuffer<Pixel>::enableAttributes() const {
 }
 
 template class RendererBuffer<Vertex>;
-template class RendererBuffer<Point>;
+template class RendererBuffer<Point2D>;
 template class RendererBuffer<Pixel>;

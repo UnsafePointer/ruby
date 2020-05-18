@@ -16,6 +16,10 @@ class GPU;
 class Renderer {
     Logger logger;
     GLuint offsetUniform;
+    GLuint drawTransparentTextureBlendUniform;
+
+    std::vector<Vertex> opaqueVertices;
+    std::vector<Vertex> transparentVertices;
 
     std::unique_ptr<Window> &mainWindow;
 
@@ -24,7 +28,7 @@ class Renderer {
 
     std::unique_ptr<Texture> loadImageTexture;
     std::unique_ptr<RendererProgram> textureRendererProgram;
-    std::unique_ptr<RendererBuffer<Point>> textureBuffer;
+    std::unique_ptr<RendererBuffer<Point2D>> textureBuffer;
 
     std::unique_ptr<Texture> screenTexture;
     std::unique_ptr<RendererProgram> screenRendererProgram;
@@ -32,22 +36,23 @@ class Renderer {
 
     GLenum mode;
     bool resizeToFitFramebuffer;
-    Point displayAreaStart;
+    Point2D displayAreaStart;
     Dimensions screenResolution;
-    Point drawingAreaTopLeft;
+    Point2D drawingAreaTopLeft;
     Dimensions drawingAreaSize;
     bool renderPolygonOneByOne;
+    uint32_t orderingIndex;
 
     void checkRenderPolygonOneByOne();
     void checkForceDraw(unsigned int verticesToRender, GLenum newMode);
-    void forceDraw();
     void applyScissor();
+    void insertVertices(std::vector<Vertex> vertices, bool opaque, TextureBlendMode textureBlendMode);
 public:
     Renderer(std::unique_ptr<Window> &mainWindow, GPU *gpu);
     ~Renderer();
 
-    void pushLine(std::vector<Vertex> vertices);
-    void pushPolygon(std::vector<Vertex> vertices);
+    void pushLine(std::vector<Vertex> vertices, bool opaque);
+    void pushPolygon(std::vector<Vertex> vertices, bool opaque, TextureBlendMode textureBlendMode);
     void setDrawingOffset(int16_t x, int16_t y);
     void prepareFrame();
     void renderFrame();
@@ -55,8 +60,8 @@ public:
     void updateWindowTitle(std::string title);
     void loadImage(std::unique_ptr<GPUImageBuffer> &imageBuffer);
     void resetMainWindow();
-    void setDisplayAreaSart(Point point);
+    void setDisplayAreaSart(Point2D point);
     void setScreenResolution(Dimensions dimensions);
-    void setDrawingArea(Point topLeft, Dimensions size);
+    void setDrawingArea(Point2D topLeft, Dimensions size);
     void toggleRenderPolygonOneByOne();
 };

@@ -1,8 +1,10 @@
 #version 450 core
 
 uniform sampler2D frame_buffer_texture;
+uniform uint draw_transparent_texture_blend;
 
 in vec3 color;
+flat in uint fragment_transparent;
 in vec2 fragment_texture_point;
 flat in uint fragment_texture_blend_mode;
 flat in uvec2 fragment_texture_page;
@@ -34,7 +36,7 @@ vec4 get_pixel_from_vram(uint x, uint y) {
 
 void main() {
     if (fragment_texture_blend_mode == BLEND_MODE_NO_TEXTURE) {
-        fragment_color = vec4(color, 1.0);
+        fragment_color = vec4(color, .0);
     } else {
         uint pixel_per_hw = 1U << fragment_texture_depth_shift;
 
@@ -63,6 +65,14 @@ void main() {
         }
 
         if (is_transparent(texel)) {
+            discard;
+        }
+
+        // Bit 15
+        uint transparency_flag = uint(floor(texel.a + 0.5));
+        uint texel_semi_transparent = transparency_flag & fragment_transparent;
+
+        if (texel_semi_transparent != draw_transparent_texture_blend) {
             discard;
         }
 
