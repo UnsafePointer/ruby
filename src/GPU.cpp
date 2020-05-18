@@ -1856,7 +1856,6 @@ void GPU::operationGp0FillRectagleInVRAM() {
 }
 
 void GPU::texturedQuad(Dimensions dimensions, bool opaque, TextureBlendMode textureBlendMode) {
-    (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
     Point3D point1 = Point3D(gp0InstructionBuffer[1]);
     Point2D texturePoint1 = Point2D::forTexturePosition(gp0InstructionBuffer[2] & 0xffff);
@@ -1932,7 +1931,6 @@ void GPU::shadedPolygon(unsigned int numberOfPoints, bool opaque) {
 }
 
 void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
-    (void)textureBlendMode;
     Color color = Color(gp0InstructionBuffer[0]);
     Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
     Point2D texturePage = Point2D::forTexturePage(gp0InstructionBuffer[4] >> 16);
@@ -1950,7 +1948,6 @@ void GPU::texturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlend
 }
 
 void GPU::shadedTexturedPolygon(unsigned int numberOfPoints, bool opaque, TextureBlendMode textureBlendMode) {
-    (void)textureBlendMode;
     Point2D clut = Point2D::forClut(gp0InstructionBuffer[2] >> 16);
     Point2D texturePage = Point2D::forTexturePage(gp0InstructionBuffer[5] >> 16);
     TexturePageColors texturePageColors = texturePageColorsWithValue(((gp0InstructionBuffer[5] >> 16) >> 7) & 0x3);
