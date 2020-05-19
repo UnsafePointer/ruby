@@ -311,14 +311,6 @@ void GPU::executeGp0(uint32_t value) {
                 };
                 break;
             }
-            case 0x4c: {
-                // TODO: validate opcode with documentation
-                gp0WordsRemaining = -1;
-                gp0InstructionMethod = [&]() {
-                    this->operationGp0MonochromePolylineOpaque();
-                };
-                break;
-            }
             case 0x50: {
                 gp0WordsRemaining = 4;
                 gp0InstructionMethod = [&]() {
@@ -364,14 +356,14 @@ void GPU::executeGp0(uint32_t value) {
             case 0x66: {
                 gp0WordsRemaining = 4;
                 gp0InstructionMethod = [&]() {
-                    this->operationGp0TexturedQuadOpaqueRawTexture();
+                    this->operationGp0TexturedSemiTransparentOpaqueTextureBlending();
                 };
                 break;
             }
             case 0x67: {
                 gp0WordsRemaining = 4;
                 gp0InstructionMethod = [&]() {
-                    this->operationGp0TexturedQuadOpaqueRawTexture();
+                    this->operationGp0TexturedSemiTransparentOpaqueRawTexture();
                 };
                 break;
             }
@@ -1229,7 +1221,7 @@ void GPU::operationGp0ShadedThreePointOpaque() {
 }
 
 /*
-GP0(30h) - Shaded three-point polygon, opaque
+ GP0(32h) - Shaded three-point polygon, semi-transparent
   1st  Color1+Command    (CcBbGgRrh)
   2nd  Vertex1           (YyyyXxxxh)
   3rd  Color2            (00BbGgRrh)
@@ -1243,7 +1235,7 @@ void GPU::operationGp0ShadedThreePointSemiTransparent() {
 }
 
 /*
-GP0(30h) - Shaded three-point polygon, opaque
+GP0(38h) - Shaded four-point polygon, opaque
   1st  Color1+Command    (CcBbGgRrh)
   2nd  Vertex1           (YyyyXxxxh)
   3rd  Color2            (00BbGgRrh)
@@ -1260,7 +1252,7 @@ void GPU::operationGp0ShadedFourPointOpaque() {
 }
 
 /*
-GP0(30h) - Shaded three-point polygon, opaque
+GP0(3Ah) - Shaded four-point polygon, semi-transparent
   1st  Color1+Command    (CcBbGgRrh)
   2nd  Vertex1           (YyyyXxxxh)
   3rd  Color2            (00BbGgRrh)
